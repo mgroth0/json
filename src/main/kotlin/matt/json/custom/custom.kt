@@ -19,7 +19,7 @@ import matt.kjlib.delegate.NO_DEFAULT
 import matt.kjlib.delegate.SuperDelegate
 import matt.kjlib.delegate.SuperDelegateBase
 import matt.kjlib.delegate.SuperListDelegate
-import matt.kjlib.err
+import matt.kjlib.log.err
 import matt.klibexport.boild.Builder
 import matt.klibexport.klibexport.Identified
 import matt.reflect.NoArgConstructor
