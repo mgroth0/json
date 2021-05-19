@@ -47,7 +47,7 @@ val AUTOMATIC_TYPEKEY = "AUTOMATIC_TYPEKEY"
 @Suppress("RemoveExplicitTypeArguments")
 /*Hopefully this will help reduce the huge kotlin compiler problem*/
 @ExperimentalContracts
-abstract class SimpleJson<T: SimpleJson<T>>(typekey: String?): Json<T> {
+abstract class SimpleJson<T: SimpleJson<T>>(typekey: String?, efficient: Boolean = false): Json<T> {
 
   private var loaded = false
   final override fun onload() {
@@ -87,7 +87,8 @@ abstract class SimpleJson<T: SimpleJson<T>>(typekey: String?): Json<T> {
   }
 
   override val json = JsonModel<T>(
-	typekey = typekey
+	typekey = typekey,
+	efficient = efficient
   )
 
   open inner class JsonProperty<P: Any>(
@@ -159,7 +160,8 @@ abstract class SimpleJson<T: SimpleJson<T>>(typekey: String?): Json<T> {
 			  is SuperListDelegate -> d.setAll(fromJ(it) as Collection<*>)
 			}
 		  },
-		  optional = optional
+		  optional = optional,
+		  default = default
 		).apply {
 		  this.d = d
 		}
@@ -635,14 +637,18 @@ interface Json<T: Json<T>> {
   fun toJson(): JsonWriter {
 	return when (json) {
 	  is JsonModel<T>      -> {
-		@Suppress("UNCHECKED_CAST")
-		var m = (json as JsonModel<T>).props.associate {
+
+		var props: List<JsonProp<T>> = (json as JsonModel<T>).props
+		if ((json as JsonModel<T>).efficient) {
+		  props = props.filter { !it.optional || it.default == NO_DEFAULT || it.d!!.get() != it.default }
+		}
+
+		var m = props.associate {
 		  val k = it.key.toJsonWriter()
 		  val v = it.toJ.invoke(this as T)
-		  //		  println("K:${k.s}")
-		  //		  println("V:${v.toJsonString()}")
 		  k to v
 		}
+
 		m = if ((json as JsonModel<T>).typekey != null) {
 		  m.toMutableMap().plus(TYPE_KEY.toJsonWriter() to (json as JsonModel<T>).typekey!!.toJsonWriter())
 		} else m
@@ -713,6 +719,7 @@ class JsonProp<T: Json<T>>(
   val toJ: T.()->JsonWriter,
   val fromJ: T.(JsonElement)->Unit,
   val optional: Boolean = false,
+  val default: Any? = NO_DEFAULT
 ) {
   override fun toString() = toStringBuilder(::key, ::optional)
   var d: SuperDelegateBase<*, *>? = null
@@ -943,7 +950,8 @@ class JsonArrayModel<T: Json<T>>(
 class JsonModel<T: Json<T>>(
   var typekey: String?,
   vararg props: JsonProp<T>,
-  val ignoreKeysOnLoad: MutableList<String> = mutableListOf() /*same thing as marking prop as noload*/
+  val ignoreKeysOnLoad: MutableList<String> = mutableListOf(), /*same thing as marking prop as noload*/
+  val efficient: Boolean = false
 ): JsonModelBase<T>() {
   val props = mutableListOf(*props)
 
