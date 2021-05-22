@@ -27,7 +27,6 @@ import matt.reflect.subclasses
 import matt.reflect.testProtoTypeSucceeded
 import matt.reflect.toStringBuilder
 import kotlin.concurrent.thread
-import kotlin.contracts.ExperimentalContracts
 import kotlin.reflect.KClass
 import kotlin.reflect.KProperty
 import kotlin.reflect.full.createInstance
@@ -35,7 +34,6 @@ import kotlin.reflect.full.hasAnnotation
 
 @Suppress("RemoveExplicitTypeArguments")
 /*Hopefully this will help reduce the huge kotlin compiler problem*/
-@ExperimentalContracts
 abstract class SimpleJsonList<T: SimpleJsonList<T>>(prop: JsonArrayProp<T>): Json<T> {
   override val json = JsonArrayModel<T>(prop)
 }
@@ -46,7 +44,6 @@ val AUTOMATIC_TYPEKEY = "AUTOMATIC_TYPEKEY"
 
 @Suppress("RemoveExplicitTypeArguments")
 /*Hopefully this will help reduce the huge kotlin compiler problem*/
-@ExperimentalContracts
 abstract class SimpleJson<T: SimpleJson<T>>(typekey: String?, efficient: Boolean = false): Json<T> {
 
   private var loaded = false
@@ -575,36 +572,30 @@ abstract class SimpleJson<T: SimpleJson<T>>(typekey: String?, efficient: Boolean
 
 
 @JvmName("toJsonWriterInt")
-@ExperimentalContracts
 fun List<Int>.toJsonWriter(): ListJsonWriter<JsonWriter> {
   return ListJsonWriter(map { it.toJsonWriter() })
 }
 
 
-@ExperimentalContracts
 fun List<Long>.toJsonWriter(): ListJsonWriter<JsonWriter> {
   return ListJsonWriter(map { it.toJsonWriter() })
 }
 
 @JvmName("toJsonWriterBoolean")
-@ExperimentalContracts
 fun List<Boolean>.toJsonWriter(): ListJsonWriter<JsonWriter> {
   return ListJsonWriter(map { it.toJsonWriter() })
 }
 
 @JvmName("toJsonWriterDouble")
-@ExperimentalContracts
 fun List<Double>.toJsonWriter(): ListJsonWriter<JsonWriter> {
   return ListJsonWriter(map { it.toJsonWriter() })
 }
 
 @JvmName("toJsonWriterString")
-@ExperimentalContracts
 fun List<String>.toJsonWriter(): ListJsonWriter<JsonWriter> {
   return ListJsonWriter(map { it.toJsonWriter() })
 }
 
-@ExperimentalContracts
 fun List<Json<*>>.toJsonWriter(
   proxyMap: JsonProxyMap<*>? = null
 ): ListJsonWriter<JsonWriter> {
@@ -625,7 +616,6 @@ fun List<Json<*>>.toJsonWriter(
 }
 
 
-@ExperimentalContracts
 interface Json<T: Json<T>> {
   /*
 	//	example when I remove prop from model:
@@ -713,7 +703,6 @@ interface Json<T: Json<T>> {
 }
 
 
-@ExperimentalContracts
 class JsonProp<T: Json<T>>(
   val key: String,
   val toJ: T.()->JsonWriter,
@@ -726,14 +715,12 @@ class JsonProp<T: Json<T>>(
 }
 
 
-@ExperimentalContracts
 class JsonArrayProp<T: Json<T>>(
   val toJ: T.()->JsonWriter,
   val fromJ: T.(com.google.gson.JsonArray)->Unit
 )
 
 
-@ExperimentalContracts
 interface JsonArray<T: Any> {
 
   val json: Triple<
@@ -757,7 +744,6 @@ interface GsonParser<T: Any>: Builder<T> {
 }
 
 
-@ExperimentalContracts
 inline fun <reified T: Json<out T>> JsonElement.deserialize(
   superclass: KClass<T>,
   typekey: String? = null /*for migration*/
@@ -784,7 +770,6 @@ inline fun <reified T: Json<out T>> JsonElement.deserialize(
 }
 
 
-@ExperimentalContracts
 inline fun <reified T: Json<in T>> JsonElement.deserialize(): T {
   require(T::class.hasAnnotation<NoArgConstructor>()) {
 	"${T::class} must be annotated with ${NoArgConstructor::class}"
@@ -795,13 +780,11 @@ inline fun <reified T: Json<in T>> JsonElement.deserialize(): T {
 }
 
 
-@ExperimentalContracts
 fun JsonElement.toJsonWriter(): GsonElementJsonWriter {
   return GsonElementJsonWriter(this)
 }
 
 
-@ExperimentalContracts
 object NullJsonWriter: JsonWriter() {
   override fun toJsonString(): String {
 	return "null"
@@ -814,7 +797,6 @@ interface ToJsonString {
   fun toJsonString(): String
 }
 
-@ExperimentalContracts
 sealed class JsonWriter: ToJsonString {
 
   //  class MJsonWriter(val o: matt.json.custom.Json<*>): JsonWriter() {
@@ -906,32 +888,24 @@ sealed class JsonWriter: ToJsonString {
 
 }
 
-@ExperimentalContracts
 fun <K: JsonWriter, V: JsonWriter> Map<K, V>.toJsonWriter() = MapJsonWriter(this)
 
-@ExperimentalContracts
 fun String.toJsonWriter() = StringJsonWriter(this)
 
-@ExperimentalContracts
 fun Number.toJsonWriter() = NumberJsonWriter(this)
 
-@ExperimentalContracts
 fun Boolean.toJsonWriter() = BooleanJsonWriter(this)
 
-@ExperimentalContracts
 fun <T: Any> JsonArray<T>.toJsonWriter() = ListJsonWriter(this.toJson().toList())
 
 
-@ExperimentalContracts
 interface JsonPropMap<T> {
   fun toJson(): Map<KProperty<Any?>, JsonWriter>
   fun toJsonWriter() = JsonPropMapWriter(this)
 }
 
-@ExperimentalContracts
 sealed class JsonModelBase<T: Json<T>>
 
-@ExperimentalContracts
 object JsonModelBaseShouldBeSealed {
   init {
 	if (KotlinVersion.CURRENT.isAtLeast(1, 5)) {
@@ -940,13 +914,11 @@ object JsonModelBaseShouldBeSealed {
   }
 }
 
-@ExperimentalContracts
 class JsonArrayModel<T: Json<T>>(
   val prop: JsonArrayProp<T>
 ): JsonModelBase<T>()
 
 
-@ExperimentalContracts
 class JsonModel<T: Json<T>>(
   var typekey: String?,
   vararg props: JsonProp<T>,
@@ -1024,7 +996,6 @@ fun convertJsonKey(v: Any?): String {
 }
 
 
-@ExperimentalContracts
 fun <T: JsonWriter> T.toGsonElement(): JsonElement {
   val json = toJsonString()
   return GsonBuilder()
