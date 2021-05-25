@@ -1,6 +1,5 @@
 package matt.json.custom
 
-import com.google.gson.Gson
 import com.google.gson.GsonBuilder
 import com.google.gson.JsonElement
 import com.google.gson.JsonNull
@@ -15,6 +14,7 @@ import matt.json.custom.JsonWriter.StringJsonWriter
 import matt.json.klaxon.Render
 import matt.json.prim.gson
 import matt.json.prim.toGson
+import matt.kjlib.date.tic
 import matt.kjlib.delegate.NO_DEFAULT
 import matt.kjlib.delegate.SuperDelegate
 import matt.kjlib.delegate.SuperDelegateBase
@@ -24,9 +24,7 @@ import matt.klibexport.boild.Builder
 import matt.klibexport.klibexport.Identified
 import matt.reflect.NoArgConstructor
 import matt.reflect.subclasses
-import matt.reflect.testProtoTypeSucceeded
 import matt.reflect.toStringBuilder
-import kotlin.concurrent.thread
 import kotlin.reflect.KClass
 import kotlin.reflect.KProperty
 import kotlin.reflect.full.createInstance
@@ -599,22 +597,40 @@ fun List<String>.toJsonWriter(): ListJsonWriter<JsonWriter> {
 fun List<Json<*>>.toJsonWriter(
   proxyMap: JsonProxyMap<*>? = null
 ): ListJsonWriter<JsonWriter> {
-  return ListJsonWriter(map { tosave ->
-	if (proxyMap != null && tosave::class.simpleName in proxyMap.proxies.keys.map { it.simpleName }) {
+  val t = tic(keyForNestedStuff = "listToJsonWriter", enabled = false)
+  //  t.toc("listToJsonWriter1")
+  val r = ListJsonWriter(map { tosave ->
+	//	t.toc("listToJsonWriter1.${tosave::class.simpleName}.1")
+	val rr = if (proxyMap != null && tosave::class.simpleName in proxyMap.proxies.keys.map { it.simpleName }) {
 	  JsonObject().apply {
 		addProperty("id", (tosave as Identified).id)
 		addProperty(TYPE_KEY, tosave::class.simpleName!!)
-	  }.toJsonWriter() // .toJsonString()
-	  //	  object {
-	  //
-	  //	  }
+	  }.toJsonWriter()
 	} else {
 	  tosave.toJson()
 	}
-	//	tosave.toJson()
+	//	t.toc("listToJsonWriter1.${tosave::class.simpleName}.2")
+	rr
   })
+  //  t.toc("listToJsonWriter2")
+  return r
 }
 
+/*fun jsonEquivalent(a: Any?,b: Any?) {
+  if (a is List && b is List) return List.equals()
+}*/
+
+fun listsEqual(list1: List<*>, list2: List<*>): Boolean {
+
+  if (list1.size != list2.size)
+	return false
+
+  val pairList = list1.zip(list2)
+
+  return pairList.all { (elt1, elt2) ->
+	elt1 == elt2
+  }
+}
 
 interface Json<T: Json<T>> {
   /*
@@ -625,24 +641,31 @@ interface Json<T: Json<T>> {
   val json: JsonModelBase<T>
 
   fun toJson(): JsonWriter {
+	val t = tic(keyForNestedStuff = "toJson", nestLevel = 2)
+	//	t.toc("toJson1")
 	return when (json) {
 	  is JsonModel<T>      -> {
+		//		t.toc("toJson2")
+		var m = (json as JsonModel<T>).propsToSave().associate {
 
-		var props: List<JsonProp<T>> = (json as JsonModel<T>).props
-		if ((json as JsonModel<T>).efficient) {
-		  props = props.filter { !it.optional || it.default == NO_DEFAULT || it.d!!.get() != it.default }
-		}
-
-		var m = props.associate {
-		  val k = it.key.toJsonWriter()
+		  //		  t.toc("toJson2.${it.key}.1")
+		  val k = it.keyJsonWriter
+		  //		  t.toc("toJson2.${it.key}.1.5")
+		  it.keyJsonWriter
+		  //		  t.toc("toJson2.${it.key}.1.5.test")
 		  val v = it.toJ.invoke(this as T)
+		  //		  t.toc("toJson2.${it.key}.2")
 		  k to v
 		}
+		//		t.toc("toJson3")
 
 		m = if ((json as JsonModel<T>).typekey != null) {
-		  m.toMutableMap().plus(TYPE_KEY.toJsonWriter() to (json as JsonModel<T>).typekey!!.toJsonWriter())
+		  m.toMutableMap().plus(TYPE_KEY_JSON_WRITER to (json as JsonModel<T>).typeKeyJsonWriter)
 		} else m
-		MapJsonWriter(m)
+		//		t.toc("toJson4")
+		val mm = MapJsonWriter(m)
+		//		t.toc("toJson5")
+		mm
 	  }
 	  is JsonArrayModel<*> -> {
 		@Suppress("UNCHECKED_CAST")
@@ -712,6 +735,7 @@ class JsonProp<T: Json<T>>(
 ) {
   override fun toString() = toStringBuilder(::key, ::optional)
   var d: SuperDelegateBase<*, *>? = null
+  val keyJsonWriter = key.toJsonWriter()
 }
 
 
@@ -738,6 +762,7 @@ interface JsonArray<T: Any> {
 }
 
 val TYPE_KEY = "type"
+val TYPE_KEY_JSON_WRITER = TYPE_KEY.toJsonWriter()
 
 interface GsonParser<T: Any>: Builder<T> {
   fun fromGson(jv: JsonElement): T
@@ -799,11 +824,6 @@ interface ToJsonString {
 
 sealed class JsonWriter: ToJsonString {
 
-  //  class MJsonWriter(val o: matt.json.custom.Json<*>): JsonWriter() {
-  //	override fun toJsonString(): String {
-  //	  return MapJsonWriter(o.toJson().map { it.key.matt.json.custom.toJsonWriterInt() to it.value }.toMap()).toJsonString()
-  //	}
-  //  }
 
   class MapJsonWriter<K: JsonWriter, V: JsonWriter>(
 	val m: Map<K, V>
@@ -820,15 +840,15 @@ sealed class JsonWriter: ToJsonString {
 
   }
 
-  class StringJsonWriter(val s: String): JsonWriter() {
+  data class StringJsonWriter(val s: String): JsonWriter() {
 	override fun toJsonString() = Render.renderString(s)
   }
 
-  class NumberJsonWriter(val n: Number): JsonWriter() {
+  data class NumberJsonWriter(val n: Number): JsonWriter() {
 	override fun toJsonString() = n.toGson()
   }
 
-  class BooleanJsonWriter(val b: Boolean): JsonWriter() {
+  data class BooleanJsonWriter(val b: Boolean): JsonWriter() {
 	override fun toJsonString() = b.toGson()
   }
 
@@ -921,11 +941,13 @@ class JsonArrayModel<T: Json<T>>(
 
 class JsonModel<T: Json<T>>(
   var typekey: String?,
-  vararg props: JsonProp<T>,
+  vararg propArgs: JsonProp<T>,
   val ignoreKeysOnLoad: MutableList<String> = mutableListOf(), /*same thing as marking prop as noload*/
   val efficient: Boolean = false
 ): JsonModelBase<T>() {
-  val props = mutableListOf(*props)
+  val props = mutableListOf(*propArgs)
+
+  val typeKeyJsonWriter by lazy { typekey!!.toJsonWriter() }
 
   init {
 	require(props.map { it.key }.toSet().size == props.map { it.key }.size)
@@ -937,6 +959,25 @@ class JsonModel<T: Json<T>>(
 	}
 	it
   }
+
+  private val propsToAlwaysSave by lazy {
+	if (!this.efficient) props.toList()
+	else props.toList().filter { !it.optional || it.default == NO_DEFAULT }
+  }
+  private val propsToMaybeSave by lazy {
+	props.toList().filter { it !in propsToAlwaysSave }
+  }
+
+  fun propsToSave(): List<JsonProp<T>> {
+	return propsToAlwaysSave + propsToMaybeSave.filter {
+	  if (it.default is List<*>) !listsEqual(
+		it.default,
+		it.d!!.get() as List<*>
+	  ) else it.d!!.get() != it.default
+	}
+  }
+
+
 }
 
 
