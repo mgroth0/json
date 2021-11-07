@@ -599,7 +599,13 @@ fun List<Json<*>>.toJsonWriter(
 ): ListJsonWriter<JsonWriter> {
   val t = tic(keyForNestedStuff = "listToJsonWriter", enabled = false)
   //  t.toc("listToJsonWriter1")
-  val r = ListJsonWriter(map { tosave ->
+
+//  please prevent concurrent modification error
+//  val immutableVersionToAvoidConcurrency = Collections.unmodifiableList(this)
+  val immutableVersionToAvoidConcurrency = this.toList()
+
+
+  val r = ListJsonWriter(immutableVersionToAvoidConcurrency.map { tosave ->
 	//	t.toc("listToJsonWriter1.${tosave::class.simpleName}.1")
 	val rr = if (proxyMap != null && tosave::class.simpleName in proxyMap.proxies.keys.map { it.simpleName }) {
 	  JsonObject().apply {
