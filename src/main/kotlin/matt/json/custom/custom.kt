@@ -691,13 +691,13 @@ interface Json<T: Json<T>> {
 	usedTypeKey: Boolean = false,
 	pretendAllPropsOptional: Boolean = true
   ) {
-	println("debugpw 1:")
+	Stopwatch.globalInstances["BrainstormMain"]!!.toc("loadProperties 0")
 	when (json) {
 	  is JsonModel<T>      -> {
-		Stopwatch.globalInstances["BrainstormMain"]!!.toc("loadProperties 1")
+//		Stopwatch.globalInstances["BrainstormMain"]!!.toc("loadProperties 1")
 		val loaded = mutableListOf<String>()
 		jo.asJsonObject.entrySet().forEach {
-		  Stopwatch.globalInstances["BrainstormMain"]!!.toc("loadProperties 2: ${it.key}")
+//		  Stopwatch.globalInstances["BrainstormMain"]!!.toc("loadProperties 2: ${it.key}")
 		  if (usedTypeKey && it.key == TYPE_KEY) return@forEach
 		  if (it.key !in (json as JsonModel<T>).ignoreKeysOnLoad) {
 			@Suppress("UNCHECKED_CAST")
@@ -706,10 +706,10 @@ interface Json<T: Json<T>> {
 			  loaded += it.key
 			}
 		  }
-		  Stopwatch.globalInstances["BrainstormMain"]!!.toc("loadProperties 3: ${it.key}")
+//		  Stopwatch.globalInstances["BrainstormMain"]!!.toc("loadProperties 3: ${it.key}")
 		}
 		if (!pretendAllPropsOptional) {
-		  Stopwatch.globalInstances["BrainstormMain"]!!.toc("loadProperties 4")
+//		  Stopwatch.globalInstances["BrainstormMain"]!!.toc("loadProperties 4")
 		  val json4debug = (json as JsonModel<T>)
 		  json4debug.props.filter { it.key !in loaded }.forEach {
 			if (!it.optional) {
@@ -717,7 +717,7 @@ interface Json<T: Json<T>> {
 			}
 		  }
 		}
-		Stopwatch.globalInstances["BrainstormMain"]!!.toc("loadProperties 5")
+//		Stopwatch.globalInstances["BrainstormMain"]!!.toc("loadProperties 5")
 	  }
 	  is JsonArrayModel<*> -> {
 		@Suppress("UNCHECKED_CAST")
