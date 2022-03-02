@@ -534,7 +534,7 @@ abstract class SimpleJson<T: SimpleJson<T>>(typekey: String?, efficient: Boolean
 	},
 	fromJ = {
 	  it.asJsonArray.map {
-		println("fromJson:${it}")
+		/*println("fromJson:${it}")*/
 		builder.fromGson(it)
 	  }.toMutableList().also {
 		if (size != null) require(it.size == size)
