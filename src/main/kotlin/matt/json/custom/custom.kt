@@ -809,7 +809,7 @@ inline fun <reified T: Json<in T>> JsonElement.deserialize(debug: Boolean = fals
 	"${T::class} must be annotated with ${NoArgConstructor::class}"
   }
   val o = T::class.createInstance()
-  o.loadProperties(this,debug=debug)
+  o.loadProperties(jo=this,debug=debug)
   return o
 }
 
