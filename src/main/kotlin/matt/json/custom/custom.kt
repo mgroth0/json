@@ -692,6 +692,7 @@ interface Json<T: Json<T>> {
 	usedTypeKey: Boolean = false,
 	pretendAllPropsOptional: Boolean = true
   ) {
+	println("debugpw 1:${debugpw}")
 	when (json) {
 	  is JsonModel<T>      -> {
 		if (debugpw) Stopwatch.globalInstances["BrainstormMain"]!!.toc("loadProperties 1")
@@ -810,7 +811,9 @@ inline fun <reified T: Json<in T>> JsonElement.deserialize(debug: Boolean = fals
 	"${T::class} must be annotated with ${NoArgConstructor::class}"
   }
   val o = T::class.createInstance()
+  println("debugpw 0:${debugpw}")
   debugpw = debug
+  println("debugpw 0.1:${debugpw}")
   o.loadProperties(jo=this)
   return o
 }
