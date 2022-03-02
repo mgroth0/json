@@ -139,7 +139,9 @@ abstract class SimpleJson<T: SimpleJson<T>>(typekey: String?, efficient: Boolean
 
 	  val toRemove = json.props.filter { it.key == prop.name }
 	  toRemove.forEach {
-		require(!it.d!!.hasAListener()) /*this should mostly work. small risk that the superdelegate would be listening to an fx prop, though with the current implementation those listeners are bidirectional... it'll work for now*/
+		require(
+		  !it.d!!.hasAListener()
+		) /*this should mostly work. small risk that the superdelegate would be listening to an fx prop, though with the current implementation those listeners are bidirectional... it'll work for now*/
 	  }
 	  json.props.removeAll(toRemove)
 
@@ -601,8 +603,8 @@ fun List<Json<*>>.toJsonWriter(
   val t = tic(keyForNestedStuff = "listToJsonWriter", enabled = false)
   //  t.toc("listToJsonWriter1")
 
-//  please prevent concurrent modification error
-//  val immutableVersionToAvoidConcurrency = Collections.unmodifiableList(this)
+  //  please prevent concurrent modification error
+  //  val immutableVersionToAvoidConcurrency = Collections.unmodifiableList(this)
   val immutableVersionToAvoidConcurrency = this.toList()
 
 
@@ -687,15 +689,11 @@ interface Json<T: Json<T>> {
 	usedTypeKey: Boolean = false,
 	pretendAllPropsOptional: Boolean = true
   ) {
-
 	when (json) {
 	  is JsonModel<T>      -> {
-
-
 		val loaded = mutableListOf<String>()
 		jo.asJsonObject.entrySet().forEach {
 		  if (usedTypeKey && it.key == TYPE_KEY) return@forEach
-
 		  if (it.key !in (json as JsonModel<T>).ignoreKeysOnLoad) {
 			@Suppress("UNCHECKED_CAST")
 			(this as T).apply {
@@ -712,10 +710,6 @@ interface Json<T: Json<T>> {
 			}
 		  }
 		}
-
-		//		assert(json4debug.props.filter { it.key !in loaded }.all { it.optional }) {
-		//		  "expected to find key ${}"
-		//		}
 	  }
 	  is JsonArrayModel<*> -> {
 		@Suppress("UNCHECKED_CAST")
@@ -1047,9 +1041,9 @@ fun convertJsonKey(v: Any?): String {
 fun <T: JsonWriter> T.toGsonElement(): JsonElement {
   val json = toJsonString()
   return GsonBuilder()
-	  .serializeNulls()
-	  .create()
-	  .fromJson(json, JsonElement::class.java)
+	.serializeNulls()
+	.create()
+	.fromJson(json, JsonElement::class.java)
 }
 
 
