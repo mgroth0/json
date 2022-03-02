@@ -14,6 +14,7 @@ import matt.json.custom.JsonWriter.StringJsonWriter
 import matt.json.klaxon.Render
 import matt.json.prim.gson
 import matt.json.prim.toGson
+import matt.kjlib.date.ProfiledBlock
 import matt.kjlib.date.Stopwatch
 import matt.kjlib.date.tic
 import matt.kjlib.delegate.NO_DEFAULT
@@ -686,47 +687,50 @@ interface Json<T: Json<T>> {
 
   }
 
+
   fun loadProperties(
 	jo: JsonElement,
 	usedTypeKey: Boolean = false,
 	pretendAllPropsOptional: Boolean = true
   ) {
-	Stopwatch.globalInstances["BrainstormMain"]!!.toc("loadProperties 0")
-	when (json) {
-	  is JsonModel<T>      -> {
-//		Stopwatch.globalInstances["BrainstormMain"]!!.toc("loadProperties 1")
-		val loaded = mutableListOf<String>()
-		jo.asJsonObject.entrySet().forEach {
-//		  Stopwatch.globalInstances["BrainstormMain"]!!.toc("loadProperties 2: ${it.key}")
-		  if (usedTypeKey && it.key == TYPE_KEY) return@forEach
-		  if (it.key !in (json as JsonModel<T>).ignoreKeysOnLoad) {
-			@Suppress("UNCHECKED_CAST")
-			(this as T).apply {
-			  (json as JsonModel<T>)[it.key].fromJ.invoke(this, it.value)
-			  loaded += it.key
+
+	ProfiledBlock["loadProperties"].with {
+	  when (json) {
+		is JsonModel<T>      -> {
+		  val loaded = mutableListOf<String>()
+		  ProfiledBlock["entrySet"].with {
+			jo.asJsonObject.entrySet().forEach {
+			  if (usedTypeKey && it.key == TYPE_KEY) return@forEach
+			  if (it.key !in (json as JsonModel<T>).ignoreKeysOnLoad) {
+				@Suppress("UNCHECKED_CAST")
+				(this@Json as T).apply {
+				  (json as JsonModel<T>)[it.key].fromJ.invoke(this@Json, it.value)
+				  loaded += it.key
+				}
+			  }
 			}
 		  }
-//		  Stopwatch.globalInstances["BrainstormMain"]!!.toc("loadProperties 3: ${it.key}")
-		}
-		if (!pretendAllPropsOptional) {
-//		  Stopwatch.globalInstances["BrainstormMain"]!!.toc("loadProperties 4")
-		  val json4debug = (json as JsonModel<T>)
-		  json4debug.props.filter { it.key !in loaded }.forEach {
-			if (!it.optional) {
-			  err("json property $it is not optional")
+		  if (!pretendAllPropsOptional) {
+			ProfiledBlock["optional"].with {
+			  val json4debug = (json as JsonModel<T>)
+			  json4debug.props.filter { it.key !in loaded }.forEach {
+				if (!it.optional) {
+				  err("json property $it is not optional")
+				}
+			  }
 			}
 		  }
 		}
-//		Stopwatch.globalInstances["BrainstormMain"]!!.toc("loadProperties 5")
+		is JsonArrayModel<*> -> {
+		  @Suppress("UNCHECKED_CAST")
+		  (json as JsonArrayModel<T>).prop.fromJ.invoke(this@Json as T, jo.asJsonArray)
+		}
 	  }
-	  is JsonArrayModel<*> -> {
-		@Suppress("UNCHECKED_CAST")
-		(json as JsonArrayModel<T>).prop.fromJ.invoke(this as T, jo.asJsonArray)
+
+	  ProfiledBlock["onload"].with {
+		onload()
 	  }
 	}
-
-	onload()
-	Stopwatch.globalInstances["BrainstormMain"]!!.toc("loadProperties 6")
 
 
   }
@@ -771,7 +775,7 @@ interface JsonArray<T: Any> {
   }
 }
 
-val TYPE_KEY = "type"
+const val TYPE_KEY = "type"
 val TYPE_KEY_JSON_WRITER = TYPE_KEY.toJsonWriter()
 
 interface GsonParser<T: Any>: Builder<T> {
@@ -783,25 +787,29 @@ inline fun <reified T: Json<out T>> JsonElement.deserialize(
   superclass: KClass<T>,
   typekey: String? = null /*for migration*/
 ): T {
-  //  val r = jv.deserialize()
-  //  val o = jv.asJsonObject
-  val type = typekey ?: asJsonObject[TYPE_KEY].asString
+  val r = ProfiledBlock["deserialize"].with {
+	//  val r = jv.deserialize()
+	//  val o = jv.asJsonObject
+	val type = typekey ?: asJsonObject[TYPE_KEY].asString
 
-  /*1.5*/
-  /*val skcls = Resource::class.sealedSubclasses*/
+	/*1.5*/
+	/*val skcls = Resource::class.sealedSubclasses*/
 
-  val skcls = superclass.subclasses()
+	val skcls = superclass.subclasses()
 
-  val c = skcls.first {
-	it.simpleName == type
+	val c = skcls.first {
+	  it.simpleName == type
+	}
+
+
+	val instance = c.createInstance()
+	//  println("instance is a ${instance::class.qualifiedName}")
+	instance.loadProperties(this, usedTypeKey = true)
+	//  println("nope, did not get here")
+	instance
   }
+  return r
 
-
-  val instance = c.createInstance()
-  //  println("instance is a ${instance::class.qualifiedName}")
-  instance.loadProperties(this, usedTypeKey = true)
-  //  println("nope, did not get here")
-  return instance
 }
 
 
@@ -810,7 +818,7 @@ inline fun <reified T: Json<in T>> JsonElement.deserialize(): T {
 	"${T::class} must be annotated with ${NoArgConstructor::class}"
   }
   val o = T::class.createInstance()
-  o.loadProperties(jo=this)
+  o.loadProperties(jo = this)
   return o
 }
 
