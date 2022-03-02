@@ -41,7 +41,6 @@ interface SimpleGson
 
 val AUTOMATIC_TYPEKEY = "AUTOMATIC_TYPEKEY"
 
-var debugpw = false
 
 @Suppress("RemoveExplicitTypeArguments")
 /*Hopefully this will help reduce the huge kotlin compiler problem*/
@@ -692,13 +691,13 @@ interface Json<T: Json<T>> {
 	usedTypeKey: Boolean = false,
 	pretendAllPropsOptional: Boolean = true
   ) {
-	println("debugpw 1:${debugpw}")
+	println("debugpw 1:")
 	when (json) {
 	  is JsonModel<T>      -> {
-		if (debugpw) Stopwatch.globalInstances["BrainstormMain"]!!.toc("loadProperties 1")
+		Stopwatch.globalInstances["BrainstormMain"]!!.toc("loadProperties 1")
 		val loaded = mutableListOf<String>()
 		jo.asJsonObject.entrySet().forEach {
-		  if (debugpw) Stopwatch.globalInstances["BrainstormMain"]!!.toc("loadProperties 2: ${it.key}")
+		  Stopwatch.globalInstances["BrainstormMain"]!!.toc("loadProperties 2: ${it.key}")
 		  if (usedTypeKey && it.key == TYPE_KEY) return@forEach
 		  if (it.key !in (json as JsonModel<T>).ignoreKeysOnLoad) {
 			@Suppress("UNCHECKED_CAST")
@@ -707,10 +706,10 @@ interface Json<T: Json<T>> {
 			  loaded += it.key
 			}
 		  }
-		  if (debugpw) Stopwatch.globalInstances["BrainstormMain"]!!.toc("loadProperties 3: ${it.key}")
+		  Stopwatch.globalInstances["BrainstormMain"]!!.toc("loadProperties 3: ${it.key}")
 		}
 		if (!pretendAllPropsOptional) {
-		  if (debugpw) Stopwatch.globalInstances["BrainstormMain"]!!.toc("loadProperties 4")
+		  Stopwatch.globalInstances["BrainstormMain"]!!.toc("loadProperties 4")
 		  val json4debug = (json as JsonModel<T>)
 		  json4debug.props.filter { it.key !in loaded }.forEach {
 			if (!it.optional) {
@@ -718,7 +717,7 @@ interface Json<T: Json<T>> {
 			}
 		  }
 		}
-		if (debugpw) Stopwatch.globalInstances["BrainstormMain"]!!.toc("loadProperties 5")
+		Stopwatch.globalInstances["BrainstormMain"]!!.toc("loadProperties 5")
 	  }
 	  is JsonArrayModel<*> -> {
 		@Suppress("UNCHECKED_CAST")
@@ -727,7 +726,7 @@ interface Json<T: Json<T>> {
 	}
 
 	onload()
-	if (debugpw) Stopwatch.globalInstances["BrainstormMain"]!!.toc("loadProperties 6")
+	Stopwatch.globalInstances["BrainstormMain"]!!.toc("loadProperties 6")
 
 
   }
@@ -806,14 +805,11 @@ inline fun <reified T: Json<out T>> JsonElement.deserialize(
 }
 
 
-inline fun <reified T: Json<in T>> JsonElement.deserialize(debug: Boolean = false): T {
+inline fun <reified T: Json<in T>> JsonElement.deserialize(): T {
   require(T::class.hasAnnotation<NoArgConstructor>()) {
 	"${T::class} must be annotated with ${NoArgConstructor::class}"
   }
   val o = T::class.createInstance()
-  println("debugpw 0:${debugpw}")
-  debugpw = debug
-  println("debugpw 0.1:${debugpw}")
   o.loadProperties(jo=this)
   return o
 }
