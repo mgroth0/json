@@ -750,29 +750,18 @@ interface Json<T: Json<T>> {
 
   fun toJson(): JsonWriter {
 	val t = tic(keyForNestedStuff = "toJson", nestLevel = 2)
-	//	t.toc("toJson1")
 	return when (json) {
 	  is JsonModel<T>      -> {
-		//		t.toc("toJson2")
 		var m = (json as JsonModel<T>).propsToSave().associate {
-
-		  //		  t.toc("toJson2.${it.key}.1")
 		  val k = it.keyJsonWriter
-		  //		  t.toc("toJson2.${it.key}.1.5")
 		  it.keyJsonWriter
-		  //		  t.toc("toJson2.${it.key}.1.5.test")
 		  val v = it.toJ.invoke(this as T)
-		  //		  t.toc("toJson2.${it.key}.2")
 		  k to v
 		}
-		//		t.toc("toJson3")
-
 		m = if ((json as JsonModel<T>).typekey != null) {
 		  m.toMutableMap().plus(TYPE_KEY_JSON_WRITER to (json as JsonModel<T>).typeKeyJsonWriter)
 		} else m
-		//		t.toc("toJson4")
 		val mm = MapJsonWriter(m)
-		//		t.toc("toJson5")
 		mm
 	  }
 	  is JsonArrayModel<*> -> {
