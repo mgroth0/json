@@ -7,19 +7,11 @@ import com.google.gson.JsonElement
 import com.google.gson.JsonObject
 import com.google.gson.JsonParser
 import com.google.gson.JsonSyntaxException
+import matt.kbuild.gson
+import matt.kbuild.parseJson
 import java.io.File
 import kotlin.reflect.KClass
 import kotlin.system.exitProcess
-
-val gson by lazy { GsonBuilder()
-	.serializeNulls()
-	.create() }
-
-fun String.parseJson(): JsonElement = gson.fromJson(
-  this, JsonElement::class.java
-)
-
-fun File.parseJson() = readText().parseJson()
 
 fun String.parseJsonObj(): JsonObject = gson.fromJson(
   this, JsonObject::class.java
@@ -37,6 +29,9 @@ fun File.parseJsonObjs() = readText().parseJsonObjs()
 
 fun String.toPrettyJson(): String = try {
   val json = JsonParser.parseString(this)
+
+
+
   val gson = GsonBuilder()
 	  .setPrettyPrinting()
 	  .serializeNulls() /*TODO: dont do this, its slower*/
@@ -65,6 +60,9 @@ fun File.isValidJson() = readText().isValidJson()
 
 fun File.save(je: JsonElement) {
   parentFile.mkdirs()
+//  MatchGroupCollection
+//  JsonObject().
+
   writeText(je.toString())
 }
 

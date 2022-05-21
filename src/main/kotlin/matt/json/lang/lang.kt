@@ -1,7 +1,7 @@
 package matt.json.lang
 
 import com.google.gson.JsonElement
-import matt.json.prim.gson
+import matt.kbuild.gson
 
 inline fun <reified T> JsonElement.getOrNull(s: String): T? {
   return try {

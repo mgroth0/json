@@ -12,8 +12,8 @@ import matt.json.custom.JsonWriter.MapJsonWriter
 import matt.json.custom.JsonWriter.NumberJsonWriter
 import matt.json.custom.JsonWriter.StringJsonWriter
 import matt.json.klaxon.Render
-import matt.json.prim.gson
 import matt.json.prim.toGson
+import matt.kbuild.gson
 import matt.kjlib.date.ProfiledBlock
 import matt.kjlib.date.tic
 import matt.kjlib.delegate.NO_DEFAULT
