@@ -1,3 +1,5 @@
+@file:Suppress("unused")
+
 package matt.json.custom
 
 import com.google.gson.GsonBuilder
@@ -16,7 +18,7 @@ import matt.json.prim.toGson
 import matt.kbuild.gson
 import matt.kjlib.date.ProfiledBlock
 import matt.kjlib.date.tic
-import matt.kjlib.delegate.NO_DEFAULT
+import matt.kjlib.delegate.NoDefault
 import matt.kjlib.delegate.SuperDelegate
 import matt.kjlib.delegate.SuperDelegateBase
 import matt.kjlib.delegate.SuperListDelegate
@@ -40,7 +42,7 @@ abstract class SimpleJsonList<T: SimpleJsonList<T>>(prop: JsonArrayProp<T>): Jso
 
 interface SimpleGson
 
-val AUTOMATIC_TYPEKEY = "AUTOMATIC_TYPEKEY"
+const val AUTOMATIC_TYPEKEY = "AUTOMATIC_TYPEKEY"
 
 enum class CollectionType {
   ELEMENT, LIST, SET
@@ -54,9 +56,9 @@ abstract class SimpleJson<T: SimpleJson<T>>(typekey: String?, efficient: Boolean
 
   private var loaded = false
   final override fun onload() {
-	val wasfalse = !loaded
+	val wasFalse = !loaded
 	loaded = true
-	if (wasfalse) {
+	if (wasFalse) {
 	  toRunAfterFirstLoad.forEach {
 		it.invoke()
 	  }
@@ -100,7 +102,7 @@ abstract class SimpleJson<T: SimpleJson<T>>(typekey: String?, efficient: Boolean
 	val optional: Boolean = false,
 	val noload: Boolean = false, /*implied optional*/
 	val list: CollectionType = CollectionType.ELEMENT,
-	val default: Any? = NO_DEFAULT,
+	val default: Any? = NoDefault,
 	val set: ((P)->P)? = null,
 	val get: ((P)->P)? = null
   ) {
@@ -115,10 +117,10 @@ abstract class SimpleJson<T: SimpleJson<T>>(typekey: String?, efficient: Boolean
 		  //                    do nothing
 		}
 	  }
-	  assert(!optional || default != NO_DEFAULT) {
+	  assert(!optional || default != NoDefault) {
 		"optional without default doesnt really make sense and will cause issues"
 	  }
-	  require(!noload || default != NO_DEFAULT) {
+	  require(!noload || default != NoDefault) {
 		"noload without default doesnt make any sense"
 	  }
 	}
@@ -130,7 +132,7 @@ abstract class SimpleJson<T: SimpleJson<T>>(typekey: String?, efficient: Boolean
 	  //            println("providing delegate prop=${prop.name}")
 	  val d = when (list) {
 		CollectionType.LIST    -> {
-		  if (default != NO_DEFAULT) {
+		  if (default != NoDefault) {
 			require(default is Collection<*>)
 		  }
 		  SuperListDelegate<SimpleJson<T>, P>(
@@ -140,7 +142,7 @@ abstract class SimpleJson<T: SimpleJson<T>>(typekey: String?, efficient: Boolean
 		  )
 		}
 		CollectionType.SET     -> {
-		  if (default != NO_DEFAULT) {
+		  if (default != NoDefault) {
 			require(default is Collection<*>)
 		  }
 		  SuperSetDelegate<SimpleJson<T>, P>(
@@ -216,7 +218,7 @@ abstract class SimpleJson<T: SimpleJson<T>>(typekey: String?, efficient: Boolean
 
   inner class JsonEnumProp<E: Enum<E>>(
 	eCls: KClass<E>,
-	default: Any? = NO_DEFAULT,
+	default: Any? = NoDefault,
 	optional: Boolean = false,
 	noload: Boolean = false,
 	set: ((E)->E)? = null,
@@ -232,7 +234,7 @@ abstract class SimpleJson<T: SimpleJson<T>>(typekey: String?, efficient: Boolean
   )
 
   inner class JsonIntProp(
-	default: Any? = NO_DEFAULT,
+	default: Any? = NoDefault,
 	optional: Boolean = false,
 	noload: Boolean = false,
 	set: ((Int)->Int)? = null,
@@ -248,7 +250,7 @@ abstract class SimpleJson<T: SimpleJson<T>>(typekey: String?, efficient: Boolean
   )
 
   inner class JsonLongProp(
-	default: Any? = NO_DEFAULT,
+	default: Any? = NoDefault,
 	optional: Boolean = false,
 	noload: Boolean = false,
 	set: ((Long)->Long)? = null,
@@ -264,7 +266,7 @@ abstract class SimpleJson<T: SimpleJson<T>>(typekey: String?, efficient: Boolean
   )
 
   inner class JsonStringProp(
-	default: Any? = NO_DEFAULT,
+	default: Any? = NoDefault,
 	optional: Boolean = false,
 	noload: Boolean = false,
 	set: ((String)->String)? = null,
@@ -280,7 +282,7 @@ abstract class SimpleJson<T: SimpleJson<T>>(typekey: String?, efficient: Boolean
   )
 
   inner class JsonDoubleProp(
-	default: Any? = NO_DEFAULT,
+	default: Any? = NoDefault,
 	optional: Boolean = false,
 	noload: Boolean = false,
 	set: ((Double)->Double)? = null,
@@ -296,7 +298,7 @@ abstract class SimpleJson<T: SimpleJson<T>>(typekey: String?, efficient: Boolean
   )
 
   inner class JsonBoolProp(
-	default: Any? = NO_DEFAULT,
+	default: Any? = NoDefault,
 	optional: Boolean = false,
 	noload: Boolean = false,
 	set: ((Boolean)->Boolean)? = null,
@@ -312,7 +314,7 @@ abstract class SimpleJson<T: SimpleJson<T>>(typekey: String?, efficient: Boolean
   )
 
   inner class JsonJsonProp<J: Json<*>>(
-	default: Any? = NO_DEFAULT,
+	default: Any? = NoDefault,
 	optional: Boolean = false,
 	noload: Boolean = false,
 	builder: GsonParser<J>,
@@ -333,7 +335,7 @@ abstract class SimpleJson<T: SimpleJson<T>>(typekey: String?, efficient: Boolean
 
   inner class JsonEnumPropN<E: Enum<E>>(
 	eCls: KClass<E>,
-	default: Any? = NO_DEFAULT,
+	default: Any? = NoDefault,
 	optional: Boolean = false,
 	noload: Boolean = false,
 	set: ((E?)->E?)? = null,
@@ -349,7 +351,7 @@ abstract class SimpleJson<T: SimpleJson<T>>(typekey: String?, efficient: Boolean
   )
 
   inner class JsonIntPropN(
-	default: Any? = NO_DEFAULT,
+	default: Any? = NoDefault,
 	optional: Boolean = false,
 	noload: Boolean = false,
 	set: ((Int?)->Int?)? = null,
@@ -365,7 +367,7 @@ abstract class SimpleJson<T: SimpleJson<T>>(typekey: String?, efficient: Boolean
   )
 
   inner class JsonLongPropN(
-	default: Any? = NO_DEFAULT,
+	default: Any? = NoDefault,
 	optional: Boolean = false,
 	noload: Boolean = false,
 	set: ((Long?)->Long?)? = null,
@@ -381,7 +383,7 @@ abstract class SimpleJson<T: SimpleJson<T>>(typekey: String?, efficient: Boolean
   )
 
   inner class JsonStringPropN(
-	default: Any? = NO_DEFAULT,
+	default: Any? = NoDefault,
 	optional: Boolean = false,
 	noload: Boolean = false,
 	set: ((String?)->String?)? = null,
@@ -397,7 +399,7 @@ abstract class SimpleJson<T: SimpleJson<T>>(typekey: String?, efficient: Boolean
   )
 
   inner class JsonDoublePropN(
-	default: Any? = NO_DEFAULT,
+	default: Any? = NoDefault,
 	optional: Boolean = false,
 	noload: Boolean = false,
 	set: ((Double?)->Double?)? = null,
@@ -413,7 +415,7 @@ abstract class SimpleJson<T: SimpleJson<T>>(typekey: String?, efficient: Boolean
   )
 
   inner class JsonBoolPropN(
-	default: Any? = NO_DEFAULT,
+	default: Any? = NoDefault,
 	optional: Boolean = false,
 	noload: Boolean = false,
 	set: ((Boolean?)->Boolean?)? = null,
@@ -429,7 +431,7 @@ abstract class SimpleJson<T: SimpleJson<T>>(typekey: String?, efficient: Boolean
   )
 
   inner class JsonJsonPropN<J: Json<*>>(
-	default: Any? = NO_DEFAULT,
+	default: Any? = NoDefault,
 	optional: Boolean = false,
 	noload: Boolean = false,
 	builder: GsonParser<J>,
@@ -461,8 +463,8 @@ abstract class SimpleJson<T: SimpleJson<T>>(typekey: String?, efficient: Boolean
 
 	  it.toJsonWriter()
 	},
-	fromJ = {
-	  it.asJsonArray.map { it.asInt }.toMutableList().also {
+	fromJ = { frm ->
+	  frm.asJsonArray.map { it.asInt }.toMutableList().also {
 		if (size != null) require(it.size == size)
 	  }
 	},
@@ -485,8 +487,8 @@ abstract class SimpleJson<T: SimpleJson<T>>(typekey: String?, efficient: Boolean
 
 	  it.toJsonWriter()
 	},
-	fromJ = {
-	  it.asJsonArray.map { it.asLong }.toMutableList().also {
+	fromJ = { frm ->
+	  frm.asJsonArray.map { it.asLong }.toMutableList().also {
 		if (size != null) require(it.size == size)
 	  }
 	},
@@ -508,8 +510,8 @@ abstract class SimpleJson<T: SimpleJson<T>>(typekey: String?, efficient: Boolean
 	  }
 	  it.toJsonWriter()
 	},
-	fromJ = {
-	  it.asJsonArray.map { it.asString }.toMutableList().also {
+	fromJ = { frm ->
+	  frm.asJsonArray.map { it.asString }.toMutableList().also {
 		if (size != null) require(it.size == size)
 	  }
 	},
@@ -532,8 +534,8 @@ abstract class SimpleJson<T: SimpleJson<T>>(typekey: String?, efficient: Boolean
 	  }
 	  it.toJsonWriter()
 	},
-	fromJ = {
-	  it.asJsonArray.map {
+	fromJ = { frm ->
+	  frm.asJsonArray.map {
 		/*val thing = */it.asString
 		//                println("json element in fromJ: ${thing}")
 	  }.toMutableSet().also {
@@ -558,8 +560,8 @@ abstract class SimpleJson<T: SimpleJson<T>>(typekey: String?, efficient: Boolean
 	  }
 	  it.toJsonWriter()
 	},
-	fromJ = {
-	  it.asJsonArray.map { it.asDouble }.toMutableList().also {
+	fromJ = { frm ->
+	  frm.asJsonArray.map { it.asDouble }.toMutableList().also {
 		if (size != null) require(it.size == size)
 	  }
 	},
@@ -581,8 +583,8 @@ abstract class SimpleJson<T: SimpleJson<T>>(typekey: String?, efficient: Boolean
 	  }
 	  it.toJsonWriter()
 	},
-	fromJ = {
-	  it.asJsonArray.map { it.asBoolean }.toMutableList().also {
+	fromJ = { frm ->
+	  frm.asJsonArray.map { it.asBoolean }.toMutableList().also {
 		if (size != null) require(it.size == size)
 	  }
 	},
@@ -628,8 +630,8 @@ abstract class SimpleJson<T: SimpleJson<T>>(typekey: String?, efficient: Boolean
 	  }
 	  it.toJsonWriter(builder as? JsonProxyMap<*>)
 	},
-	fromJ = {
-	  it.asJsonArray.map {
+	fromJ = { frm ->
+	  frm.asJsonArray.map {
 		/*println("fromJson:${it}")*/
 		builder.fromGson(it)
 	  }.toMutableList().also {
@@ -699,7 +701,7 @@ fun Collection<String>.toJsonWriter(): ListJsonWriter<JsonWriter> {
 fun Collection<Json<*>>.toJsonWriter(
   proxyMap: JsonProxyMap<*>? = null
 ): ListJsonWriter<JsonWriter> {
-  val t = tic(keyForNestedStuff = "listToJsonWriter", enabled = false)
+  tic(keyForNestedStuff = "listToJsonWriter", enabled = false)
   //  t.toc("listToJsonWriter1")
 
   //  please prevent concurrent modification error
@@ -707,17 +709,17 @@ fun Collection<Json<*>>.toJsonWriter(
   val immutableVersionToAvoidConcurrency = this.toList()
 
 
-  val r = ListJsonWriter(immutableVersionToAvoidConcurrency.map { tosave ->
-	//	t.toc("listToJsonWriter1.${tosave::class.simpleName}.1")
-	val rr = if (proxyMap != null && tosave::class.simpleName in proxyMap.proxies.keys.map { it.simpleName }) {
+  val r = ListJsonWriter(immutableVersionToAvoidConcurrency.map { toSave ->
+	//	t.toc("listToJsonWriter1.${toSave::class.simpleName}.1")
+	val rr = if (proxyMap != null && toSave::class.simpleName in proxyMap.proxies.keys.map { it.simpleName }) {
 	  JsonObject().apply {
-		addProperty("id", (tosave as Identified).id)
-		addProperty(TYPE_KEY, tosave::class.simpleName!!)
+		addProperty("id", (toSave as Identified).id)
+		addProperty(TYPE_KEY, toSave::class.simpleName!!)
 	  }.toJsonWriter()
 	} else {
-	  tosave.toJson()
+	  toSave.toJson()
 	}
-	//	t.toc("listToJsonWriter1.${tosave::class.simpleName}.2")
+	//	t.toc("listToJsonWriter1.${toSave::class.simpleName}.2")
 	rr
   })
   //  t.toc("listToJsonWriter2")
@@ -749,10 +751,10 @@ interface Json<T: Json<T>> {
   val json: JsonModelBase<T>
 
   fun toJson(): JsonWriter {
-	val t = tic(keyForNestedStuff = "toJson", nestLevel = 2)
+	tic(keyForNestedStuff = "toJson", nestLevel = 2)
 	return when (json) {
 	  is JsonModel<T>      -> {
-		var m = (json as JsonModel<T>).propsToSave().associate {
+		@Suppress("UNCHECKED_CAST") var m = (json as JsonModel<T>).propsToSave().associate {
 		  val k = it.keyJsonWriter
 		  it.keyJsonWriter
 		  val v = it.toJ.invoke(this as T)
@@ -829,7 +831,7 @@ class JsonProp<T: Json<T>>(
   val toJ: T.()->JsonWriter,
   val fromJ: T.(JsonElement)->Unit,
   val optional: Boolean = false,
-  val default: Any? = NO_DEFAULT
+  val default: Any? = NoDefault
 ) {
   override fun toString() = toStringBuilder(::key, ::optional)
   var d: SuperDelegateBase<*, *>? = null
@@ -843,6 +845,7 @@ class JsonArrayProp<T: Json<T>>(
 )
 
 
+@Suppress("unused")
 interface JsonArray<T: Any> {
 
   val json: Triple<
@@ -965,6 +968,7 @@ sealed class JsonWriter: ToJsonString {
 
   }
 
+  @Suppress("unused")
   class ArrayJsonWriter<T: JsonWriter>(
 	val l: Array<T>
   ): JsonWriter() {
@@ -987,7 +991,7 @@ sealed class JsonWriter: ToJsonString {
   }
 
   class GsonArrayWriter<T: JsonWriter>(
-	val jarray: com.google.gson.JsonArray
+	private val jarray: com.google.gson.JsonArray
   ): JsonWriter() {
 
 
@@ -1064,7 +1068,7 @@ class JsonModel<T: Json<T>>(
 
   private val propsToAlwaysSave by lazy {
 	if (!this.efficient) props.toList()
-	else props.toList().filter { !it.optional || it.default == NO_DEFAULT }
+	else props.toList().filter { !it.optional || it.default == NoDefault }
   }
   private val propsToMaybeSave by lazy {
 	props.toList().filter { it !in propsToAlwaysSave }
