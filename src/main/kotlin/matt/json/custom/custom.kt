@@ -23,7 +23,7 @@ import matt.kjlib.delegate.SuperDelegate
 import matt.kjlib.delegate.SuperDelegateBase
 import matt.kjlib.delegate.SuperListDelegate
 import matt.kjlib.delegate.SuperSetDelegate
-import matt.kjlib.log.err
+import matt.kjlib.lang.err
 import matt.klibexport.boild.Builder
 import matt.klibexport.klibexport.Identified
 import matt.reflect.NoArgConstructor
