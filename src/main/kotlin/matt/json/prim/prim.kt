@@ -7,8 +7,8 @@ import com.google.gson.JsonElement
 import com.google.gson.JsonObject
 import com.google.gson.JsonParser
 import com.google.gson.JsonSyntaxException
-import matt.kbuild.gson
-import matt.kbuild.parseJson
+import matt.json.gson
+import matt.json.parseJson
 import java.io.File
 import kotlin.reflect.KClass
 import kotlin.system.exitProcess
