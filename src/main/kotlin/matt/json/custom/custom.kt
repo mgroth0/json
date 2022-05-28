@@ -25,6 +25,7 @@ import matt.kjlib.delegate.SuperListDelegate
 import matt.kjlib.delegate.SuperSetDelegate
 import matt.klib.boild.Builder
 import matt.klib.lang.err
+import matt.klib.lang.listsEqual
 import matt.klib.obj.Identified
 import matt.reflect.NoArgConstructor
 import matt.reflect.subclasses
@@ -730,17 +731,7 @@ fun Collection<Json<*>>.toJsonWriter(
   if (a is List && b is List) return List.equals()
 }*/
 
-fun listsEqual(list1: List<*>, list2: List<*>): Boolean {
 
-  if (list1.size != list2.size)
-	return false
-
-  val pairList = list1.zip(list2)
-
-  return pairList.all { (elt1, elt2) ->
-	elt1 == elt2
-  }
-}
 
 interface Json<T: Json<T>> {
   /*
