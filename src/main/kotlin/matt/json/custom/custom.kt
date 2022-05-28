@@ -24,8 +24,8 @@ import matt.kjlib.delegate.SuperDelegateBase
 import matt.kjlib.delegate.SuperListDelegate
 import matt.kjlib.delegate.SuperSetDelegate
 import matt.kjlib.lang.err
-import matt.klibexport.boild.Builder
-import matt.klibexport.klibexport.Identified
+import matt.klib.boild.Builder
+import matt.klib.obj.Identified
 import matt.reflect.NoArgConstructor
 import matt.reflect.subclasses
 import matt.reflect.toStringBuilder
