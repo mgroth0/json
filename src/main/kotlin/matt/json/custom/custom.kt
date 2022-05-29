@@ -15,6 +15,7 @@ import kotlinx.serialization.json.buildJsonObject
 import kotlinx.serialization.json.decodeFromJsonElement
 import kotlinx.serialization.json.double
 import kotlinx.serialization.json.doubleOrNull
+import kotlinx.serialization.json.encodeToJsonElement
 import kotlinx.serialization.json.int
 import kotlinx.serialization.json.jsonArray
 import kotlinx.serialization.json.jsonObject
@@ -480,7 +481,7 @@ abstract class SimpleJson<T: SimpleJson<T>>(typekey: String?, efficient: Boolean
   //	default = default
   //  )
 
-  inner class JsonJsonListProp<J: matt.json.custom.Json<*>>(
+  inner class JsonJsonListProp<J: Any/*: matt.json.custom.Json<*>*/>(
 	builder: JsonParser<J>,
 	optional: Boolean = false,
 	noload: Boolean = false,
@@ -490,6 +491,8 @@ abstract class SimpleJson<T: SimpleJson<T>>(typekey: String?, efficient: Boolean
 	if (size != null) {
 	  require(it.size == size)
 	}
+
+
 	it.toJsonWriter(builder as? JsonProxyMap<*>)
   }, fromJ = { frm ->
 	frm.jsonArray.map {        /*println("fromJson:${it}")*/
@@ -545,9 +548,9 @@ fun Map<String, String>.toJsonWriter(): MapJsonWriter<StringJsonWriter, StringJs
   return ListJsonWriter(map { it.toJsonWriter() })
 }
 
-fun Collection<matt.json.custom.Json<*>>.toJsonWriter(
+fun Collection</*matt.json.custom.Json<*>*/Any>.toJsonWriter(
   proxyMap: JsonProxyMap<*>? = null
-): ListJsonWriter<JsonWriter> {
+): ListJsonWriter<out JsonWriter> {
   tic(keyForNestedStuff = "listToJsonWriter", enabled = false) //  t.toc("listToJsonWriter1")
 
   //  please prevent concurrent modification error
@@ -562,7 +565,8 @@ fun Collection<matt.json.custom.Json<*>>.toJsonWriter(
 		  "id" to (toSave as Identified).id, TYPE_KEY to toSave::class.simpleName!!
 		).toJsonWriter()
 	  } else {
-		toSave.toJson()
+		Json.encodeToJsonElement(toSave).toJsonWriter()
+		/*toSave.toJson()*/
 	  }    //	t.toc("listToJsonWriter1.${toSave::class.simpleName}.2")
 	  rr
 	}) //  t.toc("listToJsonWriter2")
