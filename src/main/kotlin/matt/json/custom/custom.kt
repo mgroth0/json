@@ -4,6 +4,7 @@
 package matt.json.custom
 
 import kotlinx.serialization.InternalSerializationApi
+import kotlinx.serialization.KSerializer
 import kotlinx.serialization.decodeFromString
 import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
@@ -43,6 +44,7 @@ import matt.klib.boild.Builder
 import matt.klib.lang.err
 import matt.klib.lang.listsEqual
 import matt.klib.obj.Identified
+import matt.klib.obj.MaybeIdentified
 import matt.reflect.toStringBuilder
 import kotlin.reflect.KClass
 import kotlin.reflect.KProperty
@@ -484,6 +486,7 @@ abstract class SimpleJson<T: SimpleJson<T>>(typekey: String?, efficient: Boolean
 
   inner class JsonJsonListProp<J: Any/*: matt.json.custom.Json<*>*/>(
 	builder: JsonParser<J>,
+	ser: KSerializer<J>,
 	optional: Boolean = false,
 	noload: Boolean = false,
 	default: Any? = listOf<J>(),
@@ -492,9 +495,7 @@ abstract class SimpleJson<T: SimpleJson<T>>(typekey: String?, efficient: Boolean
 	if (size != null) {
 	  require(it.size == size)
 	}
-
-
-	it.toJsonWriter(builder as? JsonProxyMap<*>)
+	it.toJsonWriter(builder as? JsonProxyMap<J>, ser)
   }, fromJ = { frm ->
 	frm.jsonArray.map {        /*println("fromJson:${it}")*/
 	  builder.fromJson(it)
@@ -504,8 +505,10 @@ abstract class SimpleJson<T: SimpleJson<T>>(typekey: String?, efficient: Boolean
   }, optional = optional, noload = noload, list = CollectionType.LIST, default = default
   )
 
-  inline fun <reified J: matt.json.custom.Json<in J>> jjLiProp(
+  /*matt.json.custom.Json<in J>*/
+  inline fun <reified J: Any> jjLiProp(
 	builder: JsonParser<J>? = null,
+	ser: KSerializer<J>,
 	optional: Boolean = false,
 	noload: Boolean = false,
 	default: Any? = listOf<J>(),
@@ -513,12 +516,12 @@ abstract class SimpleJson<T: SimpleJson<T>>(typekey: String?, efficient: Boolean
   ): JsonJsonListProp<J> {
 	val defBuild = object: JsonParser<J> {
 	  override fun fromJson(jv: JsonElement): J {
-		return Json.decodeFromJsonElement(J::class.serializer(),jv)
+		return Json.decodeFromJsonElement(J::class.serializer(), jv)
 		/*return jv.deserialize()*/
 	  }
 	}    //	(JsonElement) -> J = { it.deserialize<J>() }
 	return JsonJsonListProp<J>(
-	  builder = builder ?: defBuild, optional = optional, noload = noload, default = default, size = size
+	  builder = builder ?: defBuild, ser = ser, optional = optional, noload = noload, default = default, size = size
 	)
   }
 }
@@ -550,8 +553,9 @@ fun Map<String, String>.toJsonWriter(): MapJsonWriter<StringJsonWriter, StringJs
   return ListJsonWriter(map { it.toJsonWriter() })
 }
 
-fun Collection</*matt.json.custom.Json<*>*/Any>.toJsonWriter(
-  proxyMap: JsonProxyMap<*>? = null
+fun <J: Any> List</*matt.json.custom.Json<*>*/J>.toJsonWriter(
+  proxyMap: JsonProxyMap<*>? = null,
+  ser: KSerializer<J>
 ): ListJsonWriter<out JsonWriter> {
   tic(keyForNestedStuff = "listToJsonWriter", enabled = false) //  t.toc("listToJsonWriter1")
 
@@ -561,13 +565,13 @@ fun Collection</*matt.json.custom.Json<*>*/Any>.toJsonWriter(
 
 
   val r = ListJsonWriter(
-	immutableVersionToAvoidConcurrency.map { toSave ->    //	t.toc("listToJsonWriter1.${toSave::class.simpleName}.1")
+	immutableVersionToAvoidConcurrency.map { toSave: J ->    //	t.toc("listToJsonWriter1.${toSave::class.simpleName}.1")
 	  val rr = if (proxyMap != null && toSave::class.simpleName in proxyMap.proxies.keys.map { it.simpleName }) {
 		jsonObj(
-		  "id" to (toSave as Identified).id, TYPE_KEY to toSave::class.simpleName!!
+		  "id" to (toSave as MaybeIdentified).id!!, TYPE_KEY to toSave::class.simpleName!!
 		).toJsonWriter()
 	  } else {
-		Json.encodeToJsonElement(toSave).toJsonWriter()
+		Json.encodeToJsonElement(ser, toSave).toJsonWriter()
 		/*toSave.toJson()*/
 	  }    //	t.toc("listToJsonWriter1.${toSave::class.simpleName}.2")
 	  rr
@@ -992,6 +996,8 @@ interface JsonProxyMap<T: Any>: JsonParser<T> {
   val proxies: Map<KClass<out T>, List<T>>
 }
 
+
+
 val JsonElement.intOrNull get() = (this as? JsonPrimitive)?.intOrNull
 val JsonPrimitive.intOrNull
   get() = try {
@@ -1019,15 +1025,19 @@ fun jsonObj(map: Map<String, Any?>) = jsonObj(*map.map { it.key to it.value }.to
 fun jsonObj(vararg entries: Pair<String, Any?>) = buildJsonObject {
   entries.forEach {
 	val sec = it.second
-	require(sec is String || sec is Number || sec is Boolean)
+	/*	require(sec is String || sec is Number || sec is Boolean || sec is JsonElement) {
+		  "sec is ${sec}"
+		}*/
 	put(
 	  it.first, when (sec) {
-		is String  -> JsonPrimitive(sec)
-		is Number  -> JsonPrimitive(sec)
-		is Boolean -> JsonPrimitive(sec)
-		is Enum<*> -> JsonPrimitive(sec.name)
-		null       -> JsonNull
-		else       -> err("making json object value with ${sec::class} is not yet implemented")
+		is String      -> JsonPrimitive(sec)
+		is Number      -> JsonPrimitive(sec)
+		is Boolean     -> JsonPrimitive(sec)
+		is Enum<*>     -> JsonPrimitive(sec.name)
+		is JsonElement -> sec
+		null           -> JsonNull
+		is JsonWriter  -> sec.toJsonElement()
+		else           -> err("making json object value with ${sec::class} is not yet implemented")
 	  }
 	)
   }

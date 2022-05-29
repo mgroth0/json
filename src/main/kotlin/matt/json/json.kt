@@ -18,6 +18,7 @@ import kotlinx.serialization.json.encodeToJsonElement
 import matt.klib.lang.NEVER
 import java.io.File
 import kotlin.reflect.full.memberProperties
+import kotlin.reflect.KClass
 
 fun String.parseJson() = Json.decodeFromString<JsonElement>(this)
 fun File.parseJson() = readText().parseJson()
@@ -54,6 +55,25 @@ fun <T> SerializationStrategy<T>.withDeserializationStrategy(d: Decoder.()->T) =
 	}
   })
 
+fun <T> SerializationStrategy<T>.withDeserializationStrategyHack(d: Decoder.()->Any) =
+  withDeserializationStrategy(object: DeserializationStrategy<T> {
+	override val descriptor get() = NEVER
+	override fun deserialize(decoder: Decoder): T {
+	  return decoder.d() as T
+	}
+  })
+
+inline fun <reified T: Any> SerializationStrategy<T>.withDeserializationStrategyInline(
+  cls: KClass<T>,
+  crossinline d: Decoder.()->T
+) =
+  withDeserializationStrategy(object: DeserializationStrategy<T> {
+	override val descriptor get() = NEVER
+	override fun deserialize(decoder: Decoder): T {
+	  return decoder.d()
+	}
+  })
+
 fun <T> DeserializationStrategy<T>.withSerializationStrategy(s: Encoder.(T)->Unit) =
   withSerializationStrategy(object: SerializationStrategy<T> {
 	override val descriptor get() = NEVER
@@ -67,11 +87,12 @@ fun Any.toJson() = Json.encodeToJsonElement(this)
 fun Any.toJsonString() = Json.encodeToString(this)
 
 
-
 fun Any.loadProperties(obj: JsonElement) {
   require(obj is JsonObject)
   val a = this
-  println("it is actually ambiguous what to do here. like if a default is set in the Any but absent from the json, does the prop here get reset or ignored?")
+  println(
+	"it is actually ambiguous what to do here. like if a default is set in the Any but absent from the json, does the prop here get reset or ignored?"
+  )
   obj.forEach { key, v ->
 	require(v is JsonPrimitive)
 	if (key != "type") {
