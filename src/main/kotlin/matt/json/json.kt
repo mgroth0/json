@@ -11,6 +11,7 @@ import kotlinx.serialization.encodeToString
 import kotlinx.serialization.encoding.Decoder
 import kotlinx.serialization.encoding.Encoder
 import kotlinx.serialization.json.Json
+import kotlinx.serialization.json.JsonDecoder
 import kotlinx.serialization.json.JsonElement
 import kotlinx.serialization.json.JsonObject
 import kotlinx.serialization.json.JsonPrimitive
@@ -52,6 +53,14 @@ fun <T> SerializationStrategy<T>.withDeserializationStrategy(d: Decoder.()->T) =
 	override val descriptor get() = NEVER
 	override fun deserialize(decoder: Decoder): T {
 	  return decoder.d()
+	}
+  })
+
+fun <T> SerializationStrategy<T>.withJsonDeserializationStrategy(d: (JsonElement)->T) =
+  withDeserializationStrategy(object: DeserializationStrategy<T> {
+	override val descriptor get() = NEVER
+	override fun deserialize(decoder: Decoder): T {
+	  return d((decoder as JsonDecoder).decodeJsonElement())
 	}
   })
 
