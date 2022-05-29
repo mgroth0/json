@@ -1,15 +1,9 @@
 package matt.json
 
-import com.google.gson.GsonBuilder
-import com.google.gson.JsonElement
+import kotlinx.serialization.decodeFromString
+import kotlinx.serialization.json.Json
+import kotlinx.serialization.json.JsonElement
 import java.io.File
 
-val gson by lazy {
-  GsonBuilder().serializeNulls().create()
-}
-
-fun String.parseJson(): JsonElement = gson.fromJson(
-  this, JsonElement::class.java
-) as JsonElement
-
+fun String.parseJson() = Json.decodeFromString<JsonElement>(this)
 fun File.parseJson() = readText().parseJson()

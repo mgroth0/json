@@ -1,7 +1,12 @@
 package matt.json.lang
 
-import com.google.gson.JsonElement
-import matt.json.gson
+import kotlinx.serialization.decodeFromString
+import kotlinx.serialization.json.Json
+import kotlinx.serialization.json.JsonElement
+import kotlinx.serialization.json.JsonNull
+import kotlinx.serialization.json.JsonObject
+import kotlinx.serialization.json.jsonObject
+
 
 inline fun <reified T> JsonElement.getOrNull(s: String): T? {
   return try {
@@ -21,19 +26,17 @@ class JsonObjectDoesNotContainKey(val key: String): JsonException() {
 
 
 inline operator fun <reified T> JsonElement.get(s: String): T? {
-  if (!this.isJsonObject) {
+  if (this !is JsonObject) {
 	throw IsNotJsonObjectException()
   }
-  val o = this.asJsonObject
-  if (!o.has(s)) {
+  val o = this.jsonObject
+  if (s !in o) {
 	throw JsonObjectDoesNotContainKey(s)
   }
   val thing = o[s]
-  return if (thing.isJsonNull) {
+  return if (thing is JsonNull) {
 	null
   } else {
-	gson.fromJson(
-	  thing.toString(), T::class.java
-	)
+	Json.decodeFromString<T>(thing.toString())
   }
 }
