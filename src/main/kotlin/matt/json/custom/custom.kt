@@ -4,6 +4,7 @@ package matt.json.custom
 
 import kotlinx.serialization.decodeFromString
 import kotlinx.serialization.encodeToString
+import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.JsonArray
 import kotlinx.serialization.json.JsonElement
 import kotlinx.serialization.json.JsonNull
@@ -11,6 +12,7 @@ import kotlinx.serialization.json.JsonPrimitive
 import kotlinx.serialization.json.boolean
 import kotlinx.serialization.json.booleanOrNull
 import kotlinx.serialization.json.buildJsonObject
+import kotlinx.serialization.json.decodeFromJsonElement
 import kotlinx.serialization.json.double
 import kotlinx.serialization.json.doubleOrNull
 import kotlinx.serialization.json.int
@@ -39,15 +41,15 @@ import matt.klib.lang.err
 import matt.klib.lang.listsEqual
 import matt.klib.obj.Identified
 import matt.reflect.NoArgConstructor
-import matt.reflect.subclasses
 import matt.reflect.toStringBuilder
 import kotlin.reflect.KClass
 import kotlin.reflect.KProperty
 import kotlin.reflect.full.createInstance
 import kotlin.reflect.full.hasAnnotation
 
+
 @Suppress("RemoveExplicitTypeArguments")/*Hopefully this will help reduce the huge kotlin compiler problem*/
-abstract class SimpleJsonList<T: SimpleJsonList<T>>(prop: JsonArrayProp<T>): Json<T> {
+abstract class SimpleJsonList<T: SimpleJsonList<T>>(prop: JsonArrayProp<T>): matt.json.custom.Json<T> {
   override val json = JsonArrayModel<T>(prop)
 }
 
@@ -61,7 +63,7 @@ enum class CollectionType {
 
 
 @Suppress("RemoveExplicitTypeArguments")/*Hopefully this will help reduce the huge kotlin compiler problem*/
-abstract class SimpleJson<T: SimpleJson<T>>(typekey: String?, efficient: Boolean = false): Json<T> {
+abstract class SimpleJson<T: SimpleJson<T>>(typekey: String?, efficient: Boolean = false): matt.json.custom.Json<T> {
 
   private var loaded = false
   final override fun onload() {
@@ -271,7 +273,7 @@ abstract class SimpleJson<T: SimpleJson<T>>(typekey: String?, efficient: Boolean
 	default = default, set = set, get = get
   )
 
-  inner class JsonJsonProp<J: Json<*>>(
+  inner class JsonJsonProp<J: matt.json.custom.Json<*>>(
 	default: Any? = NoDefault,
 	optional: Boolean = false,
 	noload: Boolean = false,
@@ -293,7 +295,8 @@ abstract class SimpleJson<T: SimpleJson<T>>(typekey: String?, efficient: Boolean
 	get: ((E?)->E?)? = null
   ): JsonProperty<E?>(
 	toJ = { it?.name?.toJsonWriter() ?: NullJsonWriter },
-	fromJ = { j -> if (j is JsonNull) null else eCls.java.enumConstants.first { it.name == j.string } }, optional = optional,
+	fromJ = { j -> if (j is JsonNull) null else eCls.java.enumConstants.first { it.name == j.string } },
+	optional = optional,
 	noload = noload, default = default, set = set, get = get
   )
 
@@ -353,7 +356,7 @@ abstract class SimpleJson<T: SimpleJson<T>>(typekey: String?, efficient: Boolean
 	get = get
   )
 
-  inner class JsonJsonPropN<J: Json<*>>(
+  inner class JsonJsonPropN<J: matt.json.custom.Json<*>>(
 	default: Any? = NoDefault,
 	optional: Boolean = false,
 	noload: Boolean = false,
@@ -477,7 +480,7 @@ abstract class SimpleJson<T: SimpleJson<T>>(typekey: String?, efficient: Boolean
   //	default = default
   //  )
 
-  inner class JsonJsonListProp<J: Json<*>>(
+  inner class JsonJsonListProp<J: matt.json.custom.Json<*>>(
 	builder: JsonParser<J>,
 	optional: Boolean = false,
 	noload: Boolean = false,
@@ -497,7 +500,7 @@ abstract class SimpleJson<T: SimpleJson<T>>(typekey: String?, efficient: Boolean
   }, optional = optional, noload = noload, list = CollectionType.LIST, default = default
   )
 
-  inline fun <reified J: Json<in J>> jjLiProp(
+  inline fun <reified J: matt.json.custom.Json<in J>> jjLiProp(
 	builder: JsonParser<J>? = null,
 	optional: Boolean = false,
 	noload: Boolean = false,
@@ -542,7 +545,7 @@ fun Map<String, String>.toJsonWriter(): MapJsonWriter<StringJsonWriter, StringJs
   return ListJsonWriter(map { it.toJsonWriter() })
 }
 
-fun Collection<Json<*>>.toJsonWriter(
+fun Collection<matt.json.custom.Json<*>>.toJsonWriter(
   proxyMap: JsonProxyMap<*>? = null
 ): ListJsonWriter<JsonWriter> {
   tic(keyForNestedStuff = "listToJsonWriter", enabled = false) //  t.toc("listToJsonWriter1")
@@ -572,7 +575,7 @@ fun Collection<Json<*>>.toJsonWriter(
 
 
 
-interface Json<T: Json<T>> {
+interface Json<T: matt.json.custom.Json<T>> {
   /*
 	//	example when I remove prop from model:
 	init {
@@ -651,7 +654,7 @@ interface Json<T: Json<T>> {
 }
 
 
-class JsonProp<T: Json<T>>(
+class JsonProp<T: matt.json.custom.Json<T>>(
   val key: String,
   val toJ: T.()->JsonWriter,
   val fromJ: T.(JsonElement)->Unit,
@@ -664,7 +667,7 @@ class JsonProp<T: Json<T>>(
 }
 
 
-class JsonArrayProp<T: Json<T>>(
+class JsonArrayProp<T: matt.json.custom.Json<T>>(
   val toJ: T.()->JsonWriter, val fromJ: T.(JsonArray)->Unit
 )
 
@@ -689,32 +692,43 @@ interface JsonParser<T: Any>: Builder<T> {
 }
 
 
-inline fun <reified T: Json<out T>> JsonElement.deserialize(
+/*Json<out T>*/
+inline fun <reified T: Any> JsonElement.deserialize(
   superclass: KClass<T>, typekey: String? = null /*for migration*/
 ): T {
   val r = ProfiledBlock["deserialize"].with {    //  val r = jv.deserialize()
 	//  val o = jv.asJsonObject
-	val type = typekey ?: jsonObject[TYPE_KEY]!!.string
+
+	(typekey?.let {
+	  kotlinx.serialization.json.Json {
+		this.classDiscriminator = it
+	  }
+	} ?: kotlinx.serialization.json.Json).decodeFromJsonElement<T>(this)
+
+
+	/*kotlinx.serialization.json.Json.decodeFromJsonElement<T>(this)*/
+
+	/*val type = typekey ?: jsonObject[TYPE_KEY]!!.string*/
 
 	/*1.5*/    /*val skcls = Resource::class.sealedSubclasses*/
 
-	val skcls = superclass.subclasses()
+	/*val skcls = superclass.subclasses()*/
 
-	val c = skcls.first {
+	/*val c = skcls.first {
 	  it.simpleName == type
 	}
 
 
 	val instance = c.createInstance()    //  println("instance is a ${instance::class.qualifiedName}")
 	instance.loadProperties(this, usedTypeKey = true)    //  println("nope, did not get here")
-	instance
+	instance*/
   }
   return r
 
 }
 
 
-inline fun <reified T: Json<in T>> JsonElement.deserialize(): T {
+inline fun <reified T: matt.json.custom.Json<in T>> JsonElement.deserialize(): T {
   require(T::class.hasAnnotation<NoArgConstructor>()) {
 	"${T::class} must be annotated with ${NoArgConstructor::class}"
   }
@@ -812,7 +826,7 @@ sealed class JsonWriter: ToJsonString {
 
 	  return kotlinx.serialization.json.Json.encodeToString(jarray)
 
-//	  return "[${jarray.toList().joinToString(",") { it.toGson() }}]"
+	  //	  return "[${jarray.toList().joinToString(",") { it.toGson() }}]"
 	}
 
   }
@@ -846,7 +860,7 @@ interface JsonPropMap<T> {
   fun toJsonWriter() = JsonPropMapWriter(this)
 }
 
-sealed class JsonModelBase<T: Json<T>>
+sealed class JsonModelBase<T: matt.json.custom.Json<T>>
 
 object JsonModelBaseShouldBeSealed {
   init {
@@ -856,12 +870,12 @@ object JsonModelBaseShouldBeSealed {
   }
 }
 
-class JsonArrayModel<T: Json<T>>(
+class JsonArrayModel<T: matt.json.custom.Json<T>>(
   val prop: JsonArrayProp<T>
 ): JsonModelBase<T>()
 
 
-class JsonModel<T: Json<T>>(
+class JsonModel<T: matt.json.custom.Json<T>>(
   var typekey: String?,
   vararg propArgs: JsonProp<T>,
   val ignoreKeysOnLoad: MutableList<String> = mutableListOf(), /*same thing as marking prop as noload*/
@@ -966,7 +980,12 @@ interface JsonProxyMap<T: Any>: JsonParser<T> {
 }
 
 val JsonElement.intOrNull get() = (this as? JsonPrimitive)?.intOrNull
-val JsonPrimitive.intOrNull get() = try { int } catch (e: NumberFormatException) { null }
+val JsonPrimitive.intOrNull
+  get() = try {
+	int
+  } catch (e: NumberFormatException) {
+	null
+  }
 val JsonElement.int get() = jsonPrimitive.int
 
 val JsonElement.doubleOrNull get() = (this as? JsonPrimitive)?.doubleOrNull
@@ -983,7 +1002,7 @@ val JsonElement.boolOrNull get() = (this as? JsonPrimitive)?.booleanOrNull
 val JsonElement.bool get() = jsonPrimitive.boolean
 
 
-fun jsonObj(map: Map<String,Any?>) = jsonObj(*map.map { it.key to it.value }.toTypedArray())
+fun jsonObj(map: Map<String, Any?>) = jsonObj(*map.map { it.key to it.value }.toTypedArray())
 fun jsonObj(vararg entries: Pair<String, Any?>) = buildJsonObject {
   entries.forEach {
 	val sec = it.second
