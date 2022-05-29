@@ -15,21 +15,19 @@ fun String.parseJson() = Json.decodeFromString<JsonElement>(this)
 fun File.parseJson() = readText().parseJson()
 
 
-inline fun <reified T> SerializationStrategy<T>.withDeserializationStrategy(d: DeserializationStrategy<T>) =
-  object: KSerializer<T> {
-	override val descriptor = this@withDeserializationStrategy.descriptor
-	override fun deserialize(decoder: Decoder) = d.deserialize(decoder)
-	override fun serialize(encoder: Encoder, value: T) = this@withDeserializationStrategy.serialize(encoder, value)
-  }
+fun <T> SerializationStrategy<T>.withDeserializationStrategy(d: DeserializationStrategy<T>) = object: KSerializer<T> {
+  override val descriptor = this@withDeserializationStrategy.descriptor
+  override fun deserialize(decoder: Decoder) = d.deserialize(decoder)
+  override fun serialize(encoder: Encoder, value: T) = this@withDeserializationStrategy.serialize(encoder, value)
+}
 
-inline fun <reified T> DeserializationStrategy<T>.withSerializationStrategy(s: SerializationStrategy<T>) =
-  object: KSerializer<T> {
-	override val descriptor = this@withSerializationStrategy.descriptor
-	override fun deserialize(decoder: Decoder) = this@withSerializationStrategy.deserialize(decoder)
-	override fun serialize(encoder: Encoder, value: T) = s.serialize(encoder, value)
-  }
+fun <T> DeserializationStrategy<T>.withSerializationStrategy(s: SerializationStrategy<T>) = object: KSerializer<T> {
+  override val descriptor = this@withSerializationStrategy.descriptor
+  override fun deserialize(decoder: Decoder) = this@withSerializationStrategy.deserialize(decoder)
+  override fun serialize(encoder: Encoder, value: T) = s.serialize(encoder, value)
+}
 
-inline fun <reified T> SerializationStrategy<T>.withDeserializationStrategy(crossinline d: Decoder.()->T) =
+fun <T> SerializationStrategy<T>.withDeserializationStrategy(d: Decoder.()->T) =
   withDeserializationStrategy(object: DeserializationStrategy<T> {
 	override val descriptor get() = NEVER
 	override fun deserialize(decoder: Decoder): T {
@@ -37,7 +35,7 @@ inline fun <reified T> SerializationStrategy<T>.withDeserializationStrategy(cros
 	}
   })
 
-inline fun <reified T> DeserializationStrategy<T>.withSerializationStrategy(crossinline s: Encoder.(T)->Unit) =
+fun <T> DeserializationStrategy<T>.withSerializationStrategy(s: Encoder.(T)->Unit) =
   withSerializationStrategy(object: SerializationStrategy<T> {
 	override val descriptor get() = NEVER
 	override fun serialize(encoder: Encoder, value: T) {
