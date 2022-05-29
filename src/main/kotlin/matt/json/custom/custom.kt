@@ -279,7 +279,7 @@ abstract class SimpleJson<T: SimpleJson<T>>(typekey: String?, efficient: Boolean
 	set: ((J)->J)? = null,
 	get: ((J)->J)? = null
   ): JsonProperty<J>(toJ = { it.toJson() }, fromJ = {
-	builder.fromGson(it)
+	builder.fromJson(it)
   }, optional = optional, noload = noload, default = default, set = set, get = get
   )
 
@@ -361,7 +361,7 @@ abstract class SimpleJson<T: SimpleJson<T>>(typekey: String?, efficient: Boolean
 	set: ((J?)->J?)? = null,
 	get: ((J?)->J?)? = null
   ): JsonProperty<J?>(toJ = { it?.toJson() ?: NullJsonWriter }, fromJ = {
-	if (it is JsonNull) null else builder.fromGson(it)
+	if (it is JsonNull) null else builder.fromJson(it)
   }, optional = optional, noload = noload, default = default, set = set, get = get
   )
 
@@ -490,7 +490,7 @@ abstract class SimpleJson<T: SimpleJson<T>>(typekey: String?, efficient: Boolean
 	it.toJsonWriter(builder as? JsonProxyMap<*>)
   }, fromJ = { frm ->
 	frm.jsonArray.map {        /*println("fromJson:${it}")*/
-	  builder.fromGson(it)
+	  builder.fromJson(it)
 	}.toMutableList().also {
 	  if (size != null) require(it.size == size)
 	}
@@ -505,7 +505,7 @@ abstract class SimpleJson<T: SimpleJson<T>>(typekey: String?, efficient: Boolean
 	size: Int? = null
   ): JsonJsonListProp<J> {
 	val defBuild = object: JsonParser<J> {
-	  override fun fromGson(jv: JsonElement): J {
+	  override fun fromJson(jv: JsonElement): J {
 		return jv.deserialize()
 	  }
 	}    //	(JsonElement) -> J = { it.deserialize<J>() }
@@ -685,7 +685,7 @@ const val TYPE_KEY = "type"
 val TYPE_KEY_JSON_WRITER = TYPE_KEY.toJsonWriter()
 
 interface JsonParser<T: Any>: Builder<T> {
-  fun fromGson(jv: JsonElement): T
+  fun fromJson(jv: JsonElement): T
 }
 
 
