@@ -983,6 +983,7 @@ val JsonElement.boolOrNull get() = (this as? JsonPrimitive)?.booleanOrNull
 val JsonElement.bool get() = jsonPrimitive.boolean
 
 
+fun jsonObj(map: Map<String,Any?>) = jsonObj(*map.map { it.key to it.value }.toTypedArray())
 fun jsonObj(vararg entries: Pair<String, Any?>) = buildJsonObject {
   entries.forEach {
 	val sec = it.second

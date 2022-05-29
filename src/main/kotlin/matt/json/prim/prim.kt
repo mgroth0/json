@@ -15,6 +15,9 @@ import kotlin.reflect.KClass
 fun String.parseJsonObj(): JsonObject = Json.decodeFromString<JsonObject>(this)
 
 fun File.parseJsonObj() = readText().parseJsonObj()
+fun File.writeJson(jsonElement: JsonElement) = writeText(Json.encodeToString(jsonElement))
+inline fun <reified T: Any?> File.writeJson(t: T) = writeText(Json.encodeToString(t))
+inline fun <reified T: Any?> File.readJson(): T = Json.decodeFromString(readText())
 
 fun String.parseJsonObjs(): JsonArray = Json.decodeFromString<JsonArray>(this)
 
