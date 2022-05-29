@@ -958,7 +958,7 @@ fun convertJsonKey(v: Any?): String {
 }
 
 
-fun <T: JsonWriter> T.toGsonElement() = kotlinx.serialization.json.Json.decodeFromString<JsonElement>(toJsonString())
+fun <T: JsonWriter> T.toJsonElement() = kotlinx.serialization.json.Json.decodeFromString<JsonElement>(toJsonString())
 
 
 interface JsonProxyMap<T: Any>: GsonParser<T> {
