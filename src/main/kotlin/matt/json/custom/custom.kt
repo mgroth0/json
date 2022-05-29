@@ -275,7 +275,7 @@ abstract class SimpleJson<T: SimpleJson<T>>(typekey: String?, efficient: Boolean
 	default: Any? = NoDefault,
 	optional: Boolean = false,
 	noload: Boolean = false,
-	builder: GsonParser<J>,
+	builder: JsonParser<J>,
 	set: ((J)->J)? = null,
 	get: ((J)->J)? = null
   ): JsonProperty<J>(toJ = { it.toJson() }, fromJ = {
@@ -357,7 +357,7 @@ abstract class SimpleJson<T: SimpleJson<T>>(typekey: String?, efficient: Boolean
 	default: Any? = NoDefault,
 	optional: Boolean = false,
 	noload: Boolean = false,
-	builder: GsonParser<J>,
+	builder: JsonParser<J>,
 	set: ((J?)->J?)? = null,
 	get: ((J?)->J?)? = null
   ): JsonProperty<J?>(toJ = { it?.toJson() ?: NullJsonWriter }, fromJ = {
@@ -478,7 +478,7 @@ abstract class SimpleJson<T: SimpleJson<T>>(typekey: String?, efficient: Boolean
   //  )
 
   inner class JsonJsonListProp<J: Json<*>>(
-	builder: GsonParser<J>,
+	builder: JsonParser<J>,
 	optional: Boolean = false,
 	noload: Boolean = false,
 	default: Any? = listOf<J>(),
@@ -498,13 +498,13 @@ abstract class SimpleJson<T: SimpleJson<T>>(typekey: String?, efficient: Boolean
   )
 
   inline fun <reified J: Json<in J>> jjLiProp(
-	builder: GsonParser<J>? = null,
+	builder: JsonParser<J>? = null,
 	optional: Boolean = false,
 	noload: Boolean = false,
 	default: Any? = listOf<J>(),
 	size: Int? = null
   ): JsonJsonListProp<J> {
-	val defBuild = object: GsonParser<J> {
+	val defBuild = object: JsonParser<J> {
 	  override fun fromGson(jv: JsonElement): J {
 		return jv.deserialize()
 	  }
@@ -684,7 +684,7 @@ class JsonArrayProp<T: Json<T>>(
 const val TYPE_KEY = "type"
 val TYPE_KEY_JSON_WRITER = TYPE_KEY.toJsonWriter()
 
-interface GsonParser<T: Any>: Builder<T> {
+interface JsonParser<T: Any>: Builder<T> {
   fun fromGson(jv: JsonElement): T
 }
 
@@ -961,7 +961,7 @@ fun convertJsonKey(v: Any?): String {
 fun <T: JsonWriter> T.toJsonElement() = kotlinx.serialization.json.Json.decodeFromString<JsonElement>(toJsonString())
 
 
-interface JsonProxyMap<T: Any>: GsonParser<T> {
+interface JsonProxyMap<T: Any>: JsonParser<T> {
   val proxies: Map<KClass<out T>, List<T>>
 }
 
