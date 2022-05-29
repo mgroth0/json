@@ -4,10 +4,12 @@ import kotlinx.serialization.DeserializationStrategy
 import kotlinx.serialization.KSerializer
 import kotlinx.serialization.SerializationStrategy
 import kotlinx.serialization.decodeFromString
+import kotlinx.serialization.encodeToString
 import kotlinx.serialization.encoding.Decoder
 import kotlinx.serialization.encoding.Encoder
 import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.JsonElement
+import kotlinx.serialization.json.encodeToJsonElement
 import matt.klib.lang.NEVER
 import java.io.File
 
@@ -43,3 +45,6 @@ fun <T> DeserializationStrategy<T>.withSerializationStrategy(s: Encoder.(T)->Uni
 	}
   })
 
+
+fun Any.toJson() = Json.encodeToJsonElement(this)
+fun Any.toJsonString() = Json.encodeToString(this)
