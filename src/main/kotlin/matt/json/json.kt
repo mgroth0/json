@@ -1,6 +1,9 @@
+@file:OptIn(InternalSerializationApi::class)
+
 package matt.json
 
 import kotlinx.serialization.DeserializationStrategy
+import kotlinx.serialization.InternalSerializationApi
 import kotlinx.serialization.KSerializer
 import kotlinx.serialization.SerializationStrategy
 import kotlinx.serialization.decodeFromString
@@ -18,6 +21,17 @@ import kotlin.reflect.full.memberProperties
 
 fun String.parseJson() = Json.decodeFromString<JsonElement>(this)
 fun File.parseJson() = readText().parseJson()
+
+
+/*class JITSerializer<T>(baseDescriptor: SerialDescriptor): SerializationStrategy<T> {
+  override val descriptor = baseDescriptor
+  override fun serialize(encoder: Encoder, value: T)  {
+	require(value != null)
+	val fixed = value as Any
+	fixed::class.serializer().serialize(encoder,value)
+//	Class.forName(T::class.qualifiedName)
+  }
+}*/
 
 
 fun <T> SerializationStrategy<T>.withDeserializationStrategy(d: DeserializationStrategy<T>) = object: KSerializer<T> {

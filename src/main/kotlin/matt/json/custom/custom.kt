@@ -1,7 +1,9 @@
 @file:Suppress("unused")
+@file:OptIn(InternalSerializationApi::class)
 
 package matt.json.custom
 
+import kotlinx.serialization.InternalSerializationApi
 import kotlinx.serialization.decodeFromString
 import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
@@ -12,7 +14,6 @@ import kotlinx.serialization.json.JsonPrimitive
 import kotlinx.serialization.json.boolean
 import kotlinx.serialization.json.booleanOrNull
 import kotlinx.serialization.json.buildJsonObject
-import kotlinx.serialization.json.decodeFromJsonElement
 import kotlinx.serialization.json.double
 import kotlinx.serialization.json.doubleOrNull
 import kotlinx.serialization.json.encodeToJsonElement
@@ -22,6 +23,7 @@ import kotlinx.serialization.json.jsonObject
 import kotlinx.serialization.json.jsonPrimitive
 import kotlinx.serialization.json.long
 import kotlinx.serialization.json.longOrNull
+import kotlinx.serialization.serializer
 import matt.async.date.ProfiledBlock
 import matt.async.date.tic
 import matt.json.custom.JsonWriter.BooleanJsonWriter
@@ -41,7 +43,6 @@ import matt.klib.boild.Builder
 import matt.klib.lang.err
 import matt.klib.lang.listsEqual
 import matt.klib.obj.Identified
-import matt.reflect.NoArgConstructor
 import matt.reflect.toStringBuilder
 import kotlin.reflect.KClass
 import kotlin.reflect.KProperty
@@ -512,7 +513,8 @@ abstract class SimpleJson<T: SimpleJson<T>>(typekey: String?, efficient: Boolean
   ): JsonJsonListProp<J> {
 	val defBuild = object: JsonParser<J> {
 	  override fun fromJson(jv: JsonElement): J {
-		return jv.deserialize()
+		return Json.decodeFromJsonElement(J::class.serializer(),jv)
+		/*return jv.deserialize()*/
 	  }
 	}    //	(JsonElement) -> J = { it.deserialize<J>() }
 	return JsonJsonListProp<J>(
@@ -696,42 +698,48 @@ interface JsonParser<T: Any>: Builder<T> {
 }
 
 
-/*Json<out T>*/
+/*Json<out T>*//*
 inline fun <reified T: Any> JsonElement.deserialize(
-  superclass: KClass<T>, typekey: String? = null /*for migration*/
+  superclass: KClass<T>, typekey: String? = null *//*for migration*//*
 ): T {
   val r = ProfiledBlock["deserialize"].with {    //  val r = jv.deserialize()
 	//  val o = jv.asJsonObject
 
-	(typekey?.let {
-	  kotlinx.serialization.json.Json {
-		this.classDiscriminator = it
+
+	Json {
+	  classDiscriminator = typekey ?: classDiscriminator
+	}.decodeFromJsonElement<T>(object: JsonContentPolymorphicSerializer<T>(superclass) {
+	  override fun selectDeserializer(element: JsonElement): DeserializationStrategy<out T> {
+		return superclass.subclasses().first {
+		  it.simpleName == element.jsonObject["type"]!!.string
+		}.serializer()
 	  }
-	} ?: kotlinx.serialization.json.Json).decodeFromJsonElement<T>(this)
+	}, this)
 
 
-	/*kotlinx.serialization.json.Json.decodeFromJsonElement<T>(this)*/
+	*//*kotlinx.serialization.json.Json.decodeFromJsonElement<T>(this)*//*
 
-	/*val type = typekey ?: jsonObject[TYPE_KEY]!!.string*/
+	*//*val type = typekey ?: jsonObject[TYPE_KEY]!!.string*//*
 
-	/*1.5*/    /*val skcls = Resource::class.sealedSubclasses*/
+	*//*1.5*//*    *//*val skcls = Resource::class.sealedSubclasses*//*
 
-	/*val skcls = superclass.subclasses()*/
+	*//*val skcls = superclass.subclasses()*//*
 
-	/*val c = skcls.first {
+	*//*val c = skcls.first {
 	  it.simpleName == type
 	}
 
 
 	val instance = c.createInstance()    //  println("instance is a ${instance::class.qualifiedName}")
 	instance.loadProperties(this, usedTypeKey = true)    //  println("nope, did not get here")
-	instance*/
+	instance*//*
   }
   return r
 
-}
+}*/
 
 
+/*
 inline fun <reified T: matt.json.custom.Json<in T>> JsonElement.deserialize(): T {
   require(T::class.hasAnnotation<NoArgConstructor>()) {
 	"${T::class} must be annotated with ${NoArgConstructor::class}"
@@ -740,6 +748,7 @@ inline fun <reified T: matt.json.custom.Json<in T>> JsonElement.deserialize(): T
   o.loadProperties(jo = this)
   return o
 }
+*/
 
 
 fun JsonElement.toJsonWriter(): GsonElementJsonWriter {
@@ -782,11 +791,11 @@ sealed class JsonWriter: ToJsonString {
   }
 
   data class NumberJsonWriter(val n: Number): JsonWriter() {
-	override fun toJsonString() = kotlinx.serialization.json.Json.encodeToString(n)
+	override fun toJsonString() = Json.encodeToString(n)
   }
 
   data class BooleanJsonWriter(val b: Boolean): JsonWriter() {
-	override fun toJsonString() = kotlinx.serialization.json.Json.encodeToString(b)
+	override fun toJsonString() = Json.encodeToString(b)
   }
 
   class ListJsonWriter<T: JsonWriter>(
@@ -816,7 +825,7 @@ sealed class JsonWriter: ToJsonString {
   ): JsonWriter() {
 
 	override fun toJsonString(): String {
-	  return kotlinx.serialization.json.Json.encodeToString(e)
+	  return Json.encodeToString(e)
 	}
 
   }
@@ -828,7 +837,7 @@ sealed class JsonWriter: ToJsonString {
 
 	override fun toJsonString(): String {
 
-	  return kotlinx.serialization.json.Json.encodeToString(jarray)
+	  return Json.encodeToString(jarray)
 
 	  //	  return "[${jarray.toList().joinToString(",") { it.toGson() }}]"
 	}
@@ -976,7 +985,7 @@ fun convertJsonKey(v: Any?): String {
 }
 
 
-fun <T: JsonWriter> T.toJsonElement() = kotlinx.serialization.json.Json.decodeFromString<JsonElement>(toJsonString())
+fun <T: JsonWriter> T.toJsonElement() = Json.decodeFromString<JsonElement>(toJsonString())
 
 
 interface JsonProxyMap<T: Any>: JsonParser<T> {
