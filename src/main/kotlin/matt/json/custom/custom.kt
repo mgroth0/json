@@ -3,6 +3,10 @@
 
 package matt.json.custom
 
+import javafx.beans.property.BooleanProperty
+import javafx.beans.property.DoubleProperty
+import javafx.beans.property.LongProperty
+import javafx.beans.property.StringProperty
 import kotlinx.serialization.InternalSerializationApi
 import kotlinx.serialization.KSerializer
 import kotlinx.serialization.decodeFromString
@@ -11,6 +15,7 @@ import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.JsonArray
 import kotlinx.serialization.json.JsonElement
 import kotlinx.serialization.json.JsonNull
+import kotlinx.serialization.json.JsonObject
 import kotlinx.serialization.json.JsonPrimitive
 import kotlinx.serialization.json.boolean
 import kotlinx.serialization.json.booleanOrNull
@@ -997,7 +1002,6 @@ interface JsonProxyMap<T: Any>: JsonParser<T> {
 }
 
 
-
 val JsonElement.intOrNull get() = (this as? JsonPrimitive)?.intOrNull
 val JsonPrimitive.intOrNull
   get() = try {
@@ -1021,23 +1025,31 @@ val JsonElement.boolOrNull get() = (this as? JsonPrimitive)?.booleanOrNull
 val JsonElement.bool get() = jsonPrimitive.boolean
 
 
-fun jsonObj(map: Map<String, Any?>) = jsonObj(*map.map { it.key to it.value }.toTypedArray())
-fun jsonObj(vararg entries: Pair<String, Any?>) = buildJsonObject {
+fun jsonObj(map: Map<*, *>): JsonObject = jsonObj(*map.map { it.key to it.value }.toTypedArray())
+fun jsonObj(vararg entries: Pair<*, *>): JsonObject = buildJsonObject {
   entries.forEach {
 	val sec = it.second
 	/*	require(sec is String || sec is Number || sec is Boolean || sec is JsonElement) {
 		  "sec is ${sec}"
 		}*/
+
+	val key = it.first
+	require(key is String)
 	put(
-	  it.first, when (sec) {
-		is String      -> JsonPrimitive(sec)
-		is Number      -> JsonPrimitive(sec)
-		is Boolean     -> JsonPrimitive(sec)
-		is Enum<*>     -> JsonPrimitive(sec.name)
-		is JsonElement -> sec
-		null           -> JsonNull
-		is JsonWriter  -> sec.toJsonElement()
-		else           -> err("making json object value with ${sec::class} is not yet implemented")
+	  key, when (sec) {
+		is String          -> JsonPrimitive(sec)
+		is Number          -> JsonPrimitive(sec)
+		is Boolean         -> JsonPrimitive(sec)
+		is Enum<*>         -> JsonPrimitive(sec.name)
+		is JsonElement     -> sec
+		null               -> JsonNull
+		is JsonWriter      -> sec.toJsonElement()
+		is Map<*, *>       -> jsonObj(sec)
+		is BooleanProperty -> JsonPrimitive(sec.value)
+		is StringProperty  -> JsonPrimitive(sec.value)
+		is LongProperty    -> JsonPrimitive(sec.value)
+		is DoubleProperty  -> JsonPrimitive(sec.value)
+		else               -> err("making json object value with ${sec::class} is not yet implemented")
 	  }
 	)
   }

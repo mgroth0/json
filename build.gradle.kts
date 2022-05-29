@@ -5,6 +5,7 @@ dependencies {
   api(projects.kj.async)
 //  api(libs.gson)
   api(libs.kotlinx.serialization.json)
+  implementation(libs.fx.base)
 }
 
 plugins {
