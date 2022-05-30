@@ -74,6 +74,10 @@ enum class CollectionType {
 @Suppress("RemoveExplicitTypeArguments")/*Hopefully this will help reduce the huge kotlin compiler problem*/
 abstract class SimpleJson<T: SimpleJson<T>>(typekey: String?, efficient: Boolean = false): matt.json.custom.Json<T> {
 
+  init {
+	err("no")
+  }
+
   private var loaded = false
   final override fun onload() {
 	val wasFalse = !loaded
