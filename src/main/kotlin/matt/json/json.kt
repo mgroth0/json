@@ -64,7 +64,7 @@ fun <T> SerializationStrategy<T>.withJsonDeserializationStrategy(d: (JsonElement
 	}
   })
 
-fun <T> SerializationStrategy<T>.withDeserializationStrategyHack(d: Decoder.()->Any) =
+@Suppress("UNCHECKED_CAST") fun <T> SerializationStrategy<T>.withDeserializationStrategyHack(d: Decoder.()->Any) =
   withDeserializationStrategy(object: DeserializationStrategy<T> {
 	override val descriptor get() = NEVER
 	override fun deserialize(decoder: Decoder): T {
@@ -73,7 +73,7 @@ fun <T> SerializationStrategy<T>.withDeserializationStrategyHack(d: Decoder.()->
   })
 
 inline fun <reified T: Any> SerializationStrategy<T>.withDeserializationStrategyInline(
-  cls: KClass<T>,
+  @Suppress("UNUSED_PARAMETER") cls: KClass<T>,
   crossinline d: Decoder.()->T
 ) =
   withDeserializationStrategy(object: DeserializationStrategy<T> {

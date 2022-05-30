@@ -89,7 +89,7 @@ fun String.loadAndFormatJson() = toPrettyJson()
 
 fun File.loadAndFormatJson() = readText().loadAndFormatJson()
 
-inline fun <reified T: Any> String.loadJson(type: KClass<T>): T = Json.decodeFromString<T>(this)
+inline fun <reified T: Any> String.loadJson(@Suppress("UNUSED_PARAMETER") type: KClass<T>): T = Json.decodeFromString<T>(this)
 
 //  gson.fromJson(
 //  this, type.java

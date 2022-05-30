@@ -68,470 +68,470 @@ enum class CollectionType {
   ELEMENT, LIST, SET
 }
 
-
-@Suppress("RemoveExplicitTypeArguments")/*Hopefully this will help reduce the huge kotlin compiler problem*/
-abstract class SimpleJson<T: SimpleJson<T>>(typekey: String?, efficient: Boolean = false): matt.json.custom.Json<T> {
-
-  init {
-	err("no")
-  }
-
-  private var loaded = false
-  final override fun onload() {
-	val wasFalse = !loaded
-	loaded = true
-	if (wasFalse) {
-	  toRunAfterFirstLoad.forEach {
-		it.invoke()
-	  }
-	}
-	toRunAfterEachLoad.forEach {
-	  it.invoke()
-	}
-  }
-
-  private val toRunAfterFirstLoad = mutableListOf<()->Unit>()
-  private val toRunAfterEachLoad = mutableListOf<()->Unit>()
-  fun afterFirstLoad(op: ()->Unit) {
-	if (loaded) op()
-	else {
-	  toRunAfterFirstLoad += op
-	}
-  }
-
-  fun afterEachLoad(op: ()->Unit) {
-	if (loaded) op()
-	else {
-	  toRunAfterEachLoad += op
-	}
-  }
-
-  private val registry = mutableMapOf<String, SuperDelegate<*, *>>()
-  val nonListRegistry get() = registry.toMap()
-
-  override fun toString(): String {
-	return super.toJson().toJsonString()
-  }
-
-  override val json = JsonModel<T>(
-	typekey = typekey, efficient = efficient
-  )
-
-  open inner class JsonProperty<P: Any>(
-	val toJ: T.(P)->JsonWriter,
-	val fromJ: T.(JsonElement)->P,
-	val optional: Boolean = false,
-	val noload: Boolean = false, /*implied optional*/
-	val list: CollectionType = CollectionType.ELEMENT,
-	val default: Any? = NoDefault,
-	val set: ((P)->P)? = null,
-	val get: ((P)->P)? = null
-  ) {
-
-	init {
-	  when (list) {
-		CollectionType.LIST, CollectionType.SET -> {
-		  require(set == null)
-		  require(get == null)
-		}
-		CollectionType.ELEMENT                  -> {        //                    do nothing
-		}
-	  }
-	  assert(!optional || default != NoDefault) {
-		"optional without default doesnt really make sense and will cause issues"
-	  }
-	  require(!noload || default != NoDefault) {
-		"noload without default doesnt make any sense"
-	  }
-	}
-
-	operator fun provideDelegate(
-	  thisRef: SimpleJson<T>, prop: KProperty<*>
-	): SuperDelegateBase<SimpleJson<T>, P> {    //            println("providing delegate prop=${prop.name}")
-	  val d = when (list) {
-		CollectionType.LIST    -> {
-		  if (default != NoDefault) {
-			require(default is Collection<*>)
-		  }
-		  SuperListDelegate<SimpleJson<T>, P>(
-			thisRef = thisRef,
-			name = prop.name,
-			default = default,
-		  )
-		}
-		CollectionType.SET     -> {
-		  if (default != NoDefault) {
-			require(default is Collection<*>)
-		  }
-		  SuperSetDelegate<SimpleJson<T>, P>(
-			thisRef = thisRef,
-			name = prop.name,
-			default = default,
-		  )
-		}        //		CollectionType.MAP     -> {
-		//		  if (default != NO_DEFAULT) {
-		//			require(default is Map<*,*>)
-		//		  }
-		//		  SuperSetDelegate<SimpleJson<T>, P>(
-		//			thisRef = thisRef,
-		//			name = prop.name,
-		//			default = default,
-		//		  )
-		//		}
-		CollectionType.ELEMENT -> {
-		  val dd = SuperDelegate<SimpleJson<T>, P>(
-			thisRef = thisRef, name = prop.name, default = default, setfun = set, getfun = get
-		  )
-		  registry[prop.name] = dd
-		  dd
-		}
-	  }
-
-	  /*here I remove any json props with the same name. this should allow overriding json props to work. */
-
-	  val toRemove = json.props.filter { it.key == prop.name }
-	  toRemove.forEach {
-		require(
-		  !it.d!!.hasAListener()
-		) /*this should mostly work. small risk that the superdelegate would be listening to an fx prop, though with the current implementation those listeners are bidirectional... it'll work for now*/
-	  }
-	  json.props.removeAll(toRemove)
-
-	  json.props.add(JsonProp<T>(key = prop.name, toJ = {
-		d.get()?.let { toJ(it) } ?: JsonNull.toJsonWriter()
-	  }, fromJ = {
-
-		//                        println("top of fromJ")
-
-		when (d) {
-		  is SuperDelegate     -> d.set(fromJ(it))
-		  is SuperListDelegate -> d.setAll(fromJ(it) as Collection<*>)
-		  is SuperSetDelegate  -> {                //                                println("running d.setAll(${it.toJsonWriter().toJsonString()})")
-			d.setAll(fromJ(it) as Collection<*>)
-		  }
-		}
-	  }, optional = optional, default = default
-	  ).apply {
-		this.d = d
-	  })
-	  if (noload) {
-		json.ignoreKeysOnLoad.add(prop.name)
-	  }
-	  return d
-	}
-  }
-
-  inner class JsonEnumProp<E: Enum<E>>(
-	eCls: KClass<E>,
-	default: Any? = NoDefault,
-	optional: Boolean = false,
-	noload: Boolean = false,
-	set: ((E)->E)? = null,
-	get: ((E)->E)? = null,
-  ): JsonProperty<E>(
-	toJ = { it.name.toJsonWriter() },
-	fromJ = { j -> eCls.java.enumConstants.first { it.name == j.string } }, optional = optional, noload = noload,
-	default = default, set = set, get = get
-  )
-
-  inner class JsonIntProp(
-	default: Any? = NoDefault,
-	optional: Boolean = false,
-	noload: Boolean = false,
-	set: ((Int)->Int)? = null,
-	get: ((Int)->Int)? = null
-  ): JsonProperty<Int>(toJ = { it.toJsonWriter() }, fromJ = { it.int }, optional = optional, noload = noload,
-	default = default, set = set, get = get
-  )
-
-  inner class JsonLongProp(
-	default: Any? = NoDefault,
-	optional: Boolean = false,
-	noload: Boolean = false,
-	set: ((Long)->Long)? = null,
-	get: ((Long)->Long)? = null
-  ): JsonProperty<Long>(toJ = { it.toJsonWriter() }, fromJ = { it.jsonPrimitive.long }, optional = optional,
-	noload = noload, default = default, set = set, get = get
-  )
-
-  inner class JsonStringProp(
-	default: Any? = NoDefault,
-	optional: Boolean = false,
-	noload: Boolean = false,
-	set: ((String)->String)? = null,
-	get: ((String)->String)? = null
-  ): JsonProperty<String>(toJ = { it.toJsonWriter() }, fromJ = { it.jsonPrimitive.content }, optional = optional,
-	noload = noload, default = default, set = set, get = get
-  )
-
-  inner class JsonDoubleProp(
-	default: Any? = NoDefault,
-	optional: Boolean = false,
-	noload: Boolean = false,
-	set: ((Double)->Double)? = null,
-	get: ((Double)->Double)? = null
-  ): JsonProperty<Double>(toJ = { it.toJsonWriter() }, fromJ = { it.double }, optional = optional, noload = noload,
-	default = default, set = set, get = get
-  )
-
-  inner class JsonBoolProp(
-	default: Any? = NoDefault,
-	optional: Boolean = false,
-	noload: Boolean = false,
-	set: ((Boolean)->Boolean)? = null,
-	get: ((Boolean)->Boolean)? = null
-  ): JsonProperty<Boolean>(toJ = { it.toJsonWriter() }, fromJ = { it.bool }, optional = optional, noload = noload,
-	default = default, set = set, get = get
-  )
-
-  inner class JsonJsonProp<J: matt.json.custom.Json<*>>(
-	default: Any? = NoDefault,
-	optional: Boolean = false,
-	noload: Boolean = false,
-	builder: JsonParser<J>,
-	set: ((J)->J)? = null,
-	get: ((J)->J)? = null
-  ): JsonProperty<J>(toJ = { it.toJson() }, fromJ = {
-	builder.fromJson(it)
-  }, optional = optional, noload = noload, default = default, set = set, get = get
-  )
-
-
-  inner class JsonEnumPropN<E: Enum<E>>(
-	eCls: KClass<E>,
-	default: Any? = NoDefault,
-	optional: Boolean = false,
-	noload: Boolean = false,
-	set: ((E?)->E?)? = null,
-	get: ((E?)->E?)? = null
-  ): JsonProperty<E?>(
-	toJ = { it?.name?.toJsonWriter() ?: NullJsonWriter },
-	fromJ = { j -> if (j is JsonNull) null else eCls.java.enumConstants.first { it.name == j.string } },
-	optional = optional,
-	noload = noload, default = default, set = set, get = get
-  )
-
-  inner class JsonIntPropN(
-	default: Any? = NoDefault,
-	optional: Boolean = false,
-	noload: Boolean = false,
-	set: ((Int?)->Int?)? = null,
-	get: ((Int?)->Int?)? = null
-  ): JsonProperty<Int?>(toJ = { it?.toJsonWriter() ?: NullJsonWriter }, fromJ = { it.intOrNull },
-	optional = optional, noload = noload, default = default, set = set, get = get
-  )
-
-  inner class JsonLongPropN(
-	default: Any? = NoDefault,
-	optional: Boolean = false,
-	noload: Boolean = false,
-	set: ((Long?)->Long?)? = null,
-	get: ((Long?)->Long?)? = null
-  ): JsonProperty<Long?>(toJ = { it?.toJsonWriter() ?: NullJsonWriter }, fromJ = { it.longOrNull },
-	optional = optional, noload = noload, default = default, set = set, get = get
-  )
-
-  inner class JsonStringPropN(
-	default: Any? = NoDefault,
-	optional: Boolean = false,
-	noload: Boolean = false,
-	set: ((String?)->String?)? = null,
-	get: ((String?)->String?)? = null
-  ): JsonProperty<String?>(
-	toJ = { it?.toJsonWriter() ?: NullJsonWriter },
-	fromJ = { it.stringOrNull }, optional = optional, noload = noload, default = default, set = set,
-	get = get
-  )
-
-  inner class JsonDoublePropN(
-	default: Any? = NoDefault,
-	optional: Boolean = false,
-	noload: Boolean = false,
-	set: ((Double?)->Double?)? = null,
-	get: ((Double?)->Double?)? = null
-  ): JsonProperty<Double?>(
-	toJ = { it?.toJsonWriter() ?: NullJsonWriter },
-	fromJ = { it.doubleOrNull }, optional = optional, noload = noload, default = default, set = set,
-	get = get
-  )
-
-  inner class JsonBoolPropN(
-	default: Any? = NoDefault,
-	optional: Boolean = false,
-	noload: Boolean = false,
-	set: ((Boolean?)->Boolean?)? = null,
-	get: ((Boolean?)->Boolean?)? = null
-  ): JsonProperty<Boolean?>(
-	toJ = { it?.toJsonWriter() ?: NullJsonWriter },
-	fromJ = { it.boolOrNull }, optional = optional, noload = noload, default = default, set = set,
-	get = get
-  )
-
-  inner class JsonJsonPropN<J: matt.json.custom.Json<*>>(
-	default: Any? = NoDefault,
-	optional: Boolean = false,
-	noload: Boolean = false,
-	builder: JsonParser<J>,
-	set: ((J?)->J?)? = null,
-	get: ((J?)->J?)? = null
-  ): JsonProperty<J?>(toJ = { it?.toJson() ?: NullJsonWriter }, fromJ = {
-	if (it is JsonNull) null else builder.fromJson(it)
-  }, optional = optional, noload = noload, default = default, set = set, get = get
-  )
-
-
-  inner class JsonIntListProp(
-	optional: Boolean = false, noload: Boolean = false, default: Any? = listOf<Int>(), size: Int? = null
-  ): JsonProperty<List<Int>>(toJ = {
-	if (size != null) {
-	  require(it.size == size)
-	}
-
-	it.toJsonWriter()
-  }, fromJ = { frm ->
-	frm.jsonArray.map { it.int }.toMutableList().also {
-	  if (size != null) require(it.size == size)
-	}
-  }, optional = optional, noload = noload, list = CollectionType.LIST, default = default
-  )
-
-  inner class JsonLongListProp(
-	optional: Boolean = false, noload: Boolean = false, default: Any? = listOf<Long>(), size: Int? = null
-  ): JsonProperty<List<Long>>(toJ = {
-	if (size != null) {
-	  require(it.size == size)
-	}
-
-	it.toJsonWriter()
-  }, fromJ = { frm ->
-	frm.jsonArray.map { it.long }.toMutableList().also {
-	  if (size != null) require(it.size == size)
-	}
-  }, optional = optional, noload = noload, list = CollectionType.LIST, default = default
-  )
-
-  inner class JsonStringListProp(
-	optional: Boolean = false, noload: Boolean = false, default: Any? = listOf<String>(), size: Int? = null
-  ): JsonProperty<List<String>>(toJ = {
-	if (size != null) {
-	  require(it.size == size)
-	}
-	it.toJsonWriter()
-  }, fromJ = { frm ->
-	frm.jsonArray.map { it.string }.toMutableList().also {
-	  if (size != null) require(it.size == size)
-	}
-  }, optional = optional, noload = noload, list = CollectionType.LIST, default = default
-  )
-
-
-  inner class JsonStringSetProp(
-	optional: Boolean = false, noload: Boolean = false, default: Any? = setOf<String>(), size: Int? = null
-  ): JsonProperty<Set<String>>(toJ = {
-	if (size != null) {
-	  require(it.size == size)
-	}
-	it.toJsonWriter()
-  }, fromJ = { frm ->
-	frm.jsonArray.map {        /*val thing = */it.string        //                println("json element in fromJ: ${thing}")
-	}.toMutableSet().also {
-	  if (size != null) require(it.size == size)
-	}
-  }, optional = optional, noload = noload, list = CollectionType.SET, default = default
-  )
-
-  inner class JsonDoubleListProp(
-	optional: Boolean = false, noload: Boolean = false, default: Any? = listOf<Double>(), size: Int? = null
-  ): JsonProperty<List<Double>>(toJ = {
-	if (size != null) {
-	  require(it.size == size)
-	}
-	it.toJsonWriter()
-  }, fromJ = { frm ->
-	frm.jsonArray.map { it.double }.toMutableList().also {
-	  if (size != null) require(it.size == size)
-	}
-  }, optional = optional, noload = noload, list = CollectionType.LIST, default = default
-  )
-
-  inner class JsonBoolListProp(
-	optional: Boolean = false, noload: Boolean = false, default: Any? = listOf<Boolean>(), size: Int? = null
-  ): JsonProperty<List<Boolean>>(toJ = {
-	if (size != null) {
-	  require(it.size == size)
-	}
-	it.toJsonWriter()
-  }, fromJ = { frm ->
-	frm.jsonArray.map { it.bool }.toMutableList().also {
-	  if (size != null) require(it.size == size)
-	}
-  }, optional = optional, noload = noload, list = CollectionType.LIST, default = default
-  )
-
-  //  inner class JsonStringMapProp(
-  //	optional: Boolean = false,
-  //	noload: Boolean = false,
-  //	default: Any? = mapOf<String, String>(),
-  //	size: Int? = null
-  //  ): JsonProperty<Map<String, String>>(
-  //	toJ = {
-  //	  if (size != null) {
-  //		require(it.size == size)
-  //	  }
-  //	  it.toJsonWriter()
-  //	},
-  //	fromJ = {
-  //	  mutableMapOf(*it.asJsonObject.entrySet().map { it.key to it.value.asString }.toTypedArray()).also {
-  //		if (size != null) require(it.size == size)
-  //	  }
-  //	},
-  //	optional = optional,
-  //	noload = noload,
-  //	list = CollectionType.MAP,
-  //	default = default
-  //  )
-
-  //  inner class JsonJsonListProp<J: Any/*: matt.json.custom.Json<*>*/>(
-  //	builder: JsonParser<J>,
-  //	ser: KSerializer<J>,
-  //	optional: Boolean = false,
-  //	noload: Boolean = false,
-  //	default: Any? = listOf<J>(),
-  //	size: Int? = null
-  //  ): JsonProperty<List<J>>(toJ = {
-  //	if (size != null) {
-  //	  require(it.size == size)
-  //	}
-  //	it.toJsonWriter(builder as? JsonProxyMap<J>, ser)
-  //  }, fromJ = { frm ->
-  //	frm.jsonArray.map {        /*println("fromJson:${it}")*/
-  //	  builder.fromJson(it)
-  //	}.toMutableList().also {
-  //	  if (size != null) require(it.size == size)
-  //	}
-  //  }, optional = optional, noload = noload, list = CollectionType.LIST, default = default
-  //  )
-
-  //  /*matt.json.custom.Json<in J>*/
-  //  inline fun <reified J: Any> jjLiProp(
-  //	builder: JsonParser<J>? = null,
-  //	ser: KSerializer<J>,
-  //	optional: Boolean = false,
-  //	noload: Boolean = false,
-  //	default: Any? = listOf<J>(),
-  //	size: Int? = null
-  //  ): JsonJsonListProp<J> {
-  //	val defBuild = object: JsonParser<J> {
-  //	  override fun fromJson(jv: JsonElement): J {
-  //		return Json.decodeFromJsonElement(J::class.serializer(), jv)
-  //		/*return jv.deserialize()*/
-  //	  }
-  //	}    //	(JsonElement) -> J = { it.deserialize<J>() }
-  //	return JsonJsonListProp<J>(
-  //	  builder = builder ?: defBuild, ser = ser, optional = optional, noload = noload, default = default, size = size
-  //	)
-  //  }
-}
+//
+//@Suppress("RemoveExplicitTypeArguments")/*Hopefully this will help reduce the huge kotlin compiler problem*/
+//abstract class SimpleJson<T: SimpleJson<T>>(typekey: String?, efficient: Boolean = false): matt.json.custom.Json<T> {
+//
+//  init {
+//	err("no")
+//  }
+//
+//  private var loaded = false
+//  final override fun onload() {
+//	val wasFalse = !loaded
+//	loaded = true
+//	if (wasFalse) {
+//	  toRunAfterFirstLoad.forEach {
+//		it.invoke()
+//	  }
+//	}
+//	toRunAfterEachLoad.forEach {
+//	  it.invoke()
+//	}
+//  }
+//
+//  private val toRunAfterFirstLoad = mutableListOf<()->Unit>()
+//  private val toRunAfterEachLoad = mutableListOf<()->Unit>()
+//  fun afterFirstLoad(op: ()->Unit) {
+//	if (loaded) op()
+//	else {
+//	  toRunAfterFirstLoad += op
+//	}
+//  }
+//
+//  fun afterEachLoad(op: ()->Unit) {
+//	if (loaded) op()
+//	else {
+//	  toRunAfterEachLoad += op
+//	}
+//  }
+//
+//  private val registry = mutableMapOf<String, SuperDelegate<*, *>>()
+//  val nonListRegistry get() = registry.toMap()
+//
+//  override fun toString(): String {
+//	return super.toJson().toJsonString()
+//  }
+//
+//  override val json = JsonModel<T>(
+//	typekey = typekey, efficient = efficient
+//  )
+//
+//  open inner class JsonProperty<P: Any>(
+//	val toJ: T.(P)->JsonWriter,
+//	val fromJ: T.(JsonElement)->P,
+//	val optional: Boolean = false,
+//	val noload: Boolean = false, /*implied optional*/
+//	val list: CollectionType = CollectionType.ELEMENT,
+//	val default: Any? = NoDefault,
+//	val set: ((P)->P)? = null,
+//	val get: ((P)->P)? = null
+//  ) {
+//
+//	init {
+//	  when (list) {
+//		CollectionType.LIST, CollectionType.SET -> {
+//		  require(set == null)
+//		  require(get == null)
+//		}
+//		CollectionType.ELEMENT                  -> {        //                    do nothing
+//		}
+//	  }
+//	  assert(!optional || default != NoDefault) {
+//		"optional without default doesnt really make sense and will cause issues"
+//	  }
+//	  require(!noload || default != NoDefault) {
+//		"noload without default doesnt make any sense"
+//	  }
+//	}
+//
+//	operator fun provideDelegate(
+//	  thisRef: SimpleJson<T>, prop: KProperty<*>
+//	): SuperDelegateBase<SimpleJson<T>, P> {    //            println("providing delegate prop=${prop.name}")
+//	  val d = when (list) {
+//		CollectionType.LIST    -> {
+//		  if (default != NoDefault) {
+//			require(default is Collection<*>)
+//		  }
+//		  SuperListDelegate<SimpleJson<T>, P>(
+//			thisRef = thisRef,
+//			name = prop.name,
+//			default = default,
+//		  )
+//		}
+//		CollectionType.SET     -> {
+//		  if (default != NoDefault) {
+//			require(default is Collection<*>)
+//		  }
+//		  SuperSetDelegate<SimpleJson<T>, P>(
+//			thisRef = thisRef,
+//			name = prop.name,
+//			default = default,
+//		  )
+//		}        //		CollectionType.MAP     -> {
+//		//		  if (default != NO_DEFAULT) {
+//		//			require(default is Map<*,*>)
+//		//		  }
+//		//		  SuperSetDelegate<SimpleJson<T>, P>(
+//		//			thisRef = thisRef,
+//		//			name = prop.name,
+//		//			default = default,
+//		//		  )
+//		//		}
+//		CollectionType.ELEMENT -> {
+//		  val dd = SuperDelegate<SimpleJson<T>, P>(
+//			thisRef = thisRef, name = prop.name, default = default, setfun = set, getfun = get
+//		  )
+//		  registry[prop.name] = dd
+//		  dd
+//		}
+//	  }
+//
+//	  /*here I remove any json props with the same name. this should allow overriding json props to work. */
+//
+//	  val toRemove = json.props.filter { it.key == prop.name }
+//	  toRemove.forEach {
+//		require(
+//		  !it.d!!.hasAListener()
+//		) /*this should mostly work. small risk that the superdelegate would be listening to an fx prop, though with the current implementation those listeners are bidirectional... it'll work for now*/
+//	  }
+//	  json.props.removeAll(toRemove)
+//
+//	  json.props.add(JsonProp<T>(key = prop.name, toJ = {
+//		d.get()?.let { toJ(it) } ?: JsonNull.toJsonWriter()
+//	  }, fromJ = {
+//
+//		//                        println("top of fromJ")
+//
+//		when (d) {
+//		  is SuperDelegate     -> d.set(fromJ(it))
+//		  is SuperListDelegate -> d.setAll(fromJ(it) as Collection<*>)
+//		  is SuperSetDelegate  -> {                //                                println("running d.setAll(${it.toJsonWriter().toJsonString()})")
+//			d.setAll(fromJ(it) as Collection<*>)
+//		  }
+//		}
+//	  }, optional = optional, default = default
+//	  ).apply {
+//		this.d = d
+//	  })
+//	  if (noload) {
+//		json.ignoreKeysOnLoad.add(prop.name)
+//	  }
+//	  return d
+//	}
+//  }
+//
+//  inner class JsonEnumProp<E: Enum<E>>(
+//	eCls: KClass<E>,
+//	default: Any? = NoDefault,
+//	optional: Boolean = false,
+//	noload: Boolean = false,
+//	set: ((E)->E)? = null,
+//	get: ((E)->E)? = null,
+//  ): JsonProperty<E>(
+//	toJ = { it.name.toJsonWriter() },
+//	fromJ = { j -> eCls.java.enumConstants.first { it.name == j.string } }, optional = optional, noload = noload,
+//	default = default, set = set, get = get
+//  )
+//
+//  inner class JsonIntProp(
+//	default: Any? = NoDefault,
+//	optional: Boolean = false,
+//	noload: Boolean = false,
+//	set: ((Int)->Int)? = null,
+//	get: ((Int)->Int)? = null
+//  ): JsonProperty<Int>(toJ = { it.toJsonWriter() }, fromJ = { it.int }, optional = optional, noload = noload,
+//	default = default, set = set, get = get
+//  )
+//
+//  inner class JsonLongProp(
+//	default: Any? = NoDefault,
+//	optional: Boolean = false,
+//	noload: Boolean = false,
+//	set: ((Long)->Long)? = null,
+//	get: ((Long)->Long)? = null
+//  ): JsonProperty<Long>(toJ = { it.toJsonWriter() }, fromJ = { it.jsonPrimitive.long }, optional = optional,
+//	noload = noload, default = default, set = set, get = get
+//  )
+//
+//  inner class JsonStringProp(
+//	default: Any? = NoDefault,
+//	optional: Boolean = false,
+//	noload: Boolean = false,
+//	set: ((String)->String)? = null,
+//	get: ((String)->String)? = null
+//  ): JsonProperty<String>(toJ = { it.toJsonWriter() }, fromJ = { it.jsonPrimitive.content }, optional = optional,
+//	noload = noload, default = default, set = set, get = get
+//  )
+//
+//  inner class JsonDoubleProp(
+//	default: Any? = NoDefault,
+//	optional: Boolean = false,
+//	noload: Boolean = false,
+//	set: ((Double)->Double)? = null,
+//	get: ((Double)->Double)? = null
+//  ): JsonProperty<Double>(toJ = { it.toJsonWriter() }, fromJ = { it.double }, optional = optional, noload = noload,
+//	default = default, set = set, get = get
+//  )
+//
+//  inner class JsonBoolProp(
+//	default: Any? = NoDefault,
+//	optional: Boolean = false,
+//	noload: Boolean = false,
+//	set: ((Boolean)->Boolean)? = null,
+//	get: ((Boolean)->Boolean)? = null
+//  ): JsonProperty<Boolean>(toJ = { it.toJsonWriter() }, fromJ = { it.bool }, optional = optional, noload = noload,
+//	default = default, set = set, get = get
+//  )
+//
+//  inner class JsonJsonProp<J: matt.json.custom.Json<*>>(
+//	default: Any? = NoDefault,
+//	optional: Boolean = false,
+//	noload: Boolean = false,
+//	builder: JsonParser<J>,
+//	set: ((J)->J)? = null,
+//	get: ((J)->J)? = null
+//  ): JsonProperty<J>(toJ = { it.toJson() }, fromJ = {
+//	builder.fromJson(it)
+//  }, optional = optional, noload = noload, default = default, set = set, get = get
+//  )
+//
+//
+//  inner class JsonEnumPropN<E: Enum<E>>(
+//	eCls: KClass<E>,
+//	default: Any? = NoDefault,
+//	optional: Boolean = false,
+//	noload: Boolean = false,
+//	set: ((E?)->E?)? = null,
+//	get: ((E?)->E?)? = null
+//  ): JsonProperty<E?>(
+//	toJ = { it?.name?.toJsonWriter() ?: NullJsonWriter },
+//	fromJ = { j -> if (j is JsonNull) null else eCls.java.enumConstants.first { it.name == j.string } },
+//	optional = optional,
+//	noload = noload, default = default, set = set, get = get
+//  )
+//
+//  inner class JsonIntPropN(
+//	default: Any? = NoDefault,
+//	optional: Boolean = false,
+//	noload: Boolean = false,
+//	set: ((Int?)->Int?)? = null,
+//	get: ((Int?)->Int?)? = null
+//  ): JsonProperty<Int?>(toJ = { it?.toJsonWriter() ?: NullJsonWriter }, fromJ = { it.intOrNull },
+//	optional = optional, noload = noload, default = default, set = set, get = get
+//  )
+//
+//  inner class JsonLongPropN(
+//	default: Any? = NoDefault,
+//	optional: Boolean = false,
+//	noload: Boolean = false,
+//	set: ((Long?)->Long?)? = null,
+//	get: ((Long?)->Long?)? = null
+//  ): JsonProperty<Long?>(toJ = { it?.toJsonWriter() ?: NullJsonWriter }, fromJ = { it.longOrNull },
+//	optional = optional, noload = noload, default = default, set = set, get = get
+//  )
+//
+//  inner class JsonStringPropN(
+//	default: Any? = NoDefault,
+//	optional: Boolean = false,
+//	noload: Boolean = false,
+//	set: ((String?)->String?)? = null,
+//	get: ((String?)->String?)? = null
+//  ): JsonProperty<String?>(
+//	toJ = { it?.toJsonWriter() ?: NullJsonWriter },
+//	fromJ = { it.stringOrNull }, optional = optional, noload = noload, default = default, set = set,
+//	get = get
+//  )
+//
+//  inner class JsonDoublePropN(
+//	default: Any? = NoDefault,
+//	optional: Boolean = false,
+//	noload: Boolean = false,
+//	set: ((Double?)->Double?)? = null,
+//	get: ((Double?)->Double?)? = null
+//  ): JsonProperty<Double?>(
+//	toJ = { it?.toJsonWriter() ?: NullJsonWriter },
+//	fromJ = { it.doubleOrNull }, optional = optional, noload = noload, default = default, set = set,
+//	get = get
+//  )
+//
+//  inner class JsonBoolPropN(
+//	default: Any? = NoDefault,
+//	optional: Boolean = false,
+//	noload: Boolean = false,
+//	set: ((Boolean?)->Boolean?)? = null,
+//	get: ((Boolean?)->Boolean?)? = null
+//  ): JsonProperty<Boolean?>(
+//	toJ = { it?.toJsonWriter() ?: NullJsonWriter },
+//	fromJ = { it.boolOrNull }, optional = optional, noload = noload, default = default, set = set,
+//	get = get
+//  )
+//
+//  inner class JsonJsonPropN<J: matt.json.custom.Json<*>>(
+//	default: Any? = NoDefault,
+//	optional: Boolean = false,
+//	noload: Boolean = false,
+//	builder: JsonParser<J>,
+//	set: ((J?)->J?)? = null,
+//	get: ((J?)->J?)? = null
+//  ): JsonProperty<J?>(toJ = { it?.toJson() ?: NullJsonWriter }, fromJ = {
+//	if (it is JsonNull) null else builder.fromJson(it)
+//  }, optional = optional, noload = noload, default = default, set = set, get = get
+//  )
+//
+//
+//  inner class JsonIntListProp(
+//	optional: Boolean = false, noload: Boolean = false, default: Any? = listOf<Int>(), size: Int? = null
+//  ): JsonProperty<List<Int>>(toJ = {
+//	if (size != null) {
+//	  require(it.size == size)
+//	}
+//
+//	it.toJsonWriter()
+//  }, fromJ = { frm ->
+//	frm.jsonArray.map { it.int }.toMutableList().also {
+//	  if (size != null) require(it.size == size)
+//	}
+//  }, optional = optional, noload = noload, list = CollectionType.LIST, default = default
+//  )
+//
+//  inner class JsonLongListProp(
+//	optional: Boolean = false, noload: Boolean = false, default: Any? = listOf<Long>(), size: Int? = null
+//  ): JsonProperty<List<Long>>(toJ = {
+//	if (size != null) {
+//	  require(it.size == size)
+//	}
+//
+//	it.toJsonWriter()
+//  }, fromJ = { frm ->
+//	frm.jsonArray.map { it.long }.toMutableList().also {
+//	  if (size != null) require(it.size == size)
+//	}
+//  }, optional = optional, noload = noload, list = CollectionType.LIST, default = default
+//  )
+//
+//  inner class JsonStringListProp(
+//	optional: Boolean = false, noload: Boolean = false, default: Any? = listOf<String>(), size: Int? = null
+//  ): JsonProperty<List<String>>(toJ = {
+//	if (size != null) {
+//	  require(it.size == size)
+//	}
+//	it.toJsonWriter()
+//  }, fromJ = { frm ->
+//	frm.jsonArray.map { it.string }.toMutableList().also {
+//	  if (size != null) require(it.size == size)
+//	}
+//  }, optional = optional, noload = noload, list = CollectionType.LIST, default = default
+//  )
+//
+//
+//  inner class JsonStringSetProp(
+//	optional: Boolean = false, noload: Boolean = false, default: Any? = setOf<String>(), size: Int? = null
+//  ): JsonProperty<Set<String>>(toJ = {
+//	if (size != null) {
+//	  require(it.size == size)
+//	}
+//	it.toJsonWriter()
+//  }, fromJ = { frm ->
+//	frm.jsonArray.map {        /*val thing = */it.string        //                println("json element in fromJ: ${thing}")
+//	}.toMutableSet().also {
+//	  if (size != null) require(it.size == size)
+//	}
+//  }, optional = optional, noload = noload, list = CollectionType.SET, default = default
+//  )
+//
+//  inner class JsonDoubleListProp(
+//	optional: Boolean = false, noload: Boolean = false, default: Any? = listOf<Double>(), size: Int? = null
+//  ): JsonProperty<List<Double>>(toJ = {
+//	if (size != null) {
+//	  require(it.size == size)
+//	}
+//	it.toJsonWriter()
+//  }, fromJ = { frm ->
+//	frm.jsonArray.map { it.double }.toMutableList().also {
+//	  if (size != null) require(it.size == size)
+//	}
+//  }, optional = optional, noload = noload, list = CollectionType.LIST, default = default
+//  )
+//
+//  inner class JsonBoolListProp(
+//	optional: Boolean = false, noload: Boolean = false, default: Any? = listOf<Boolean>(), size: Int? = null
+//  ): JsonProperty<List<Boolean>>(toJ = {
+//	if (size != null) {
+//	  require(it.size == size)
+//	}
+//	it.toJsonWriter()
+//  }, fromJ = { frm ->
+//	frm.jsonArray.map { it.bool }.toMutableList().also {
+//	  if (size != null) require(it.size == size)
+//	}
+//  }, optional = optional, noload = noload, list = CollectionType.LIST, default = default
+//  )
+//
+//  //  inner class JsonStringMapProp(
+//  //	optional: Boolean = false,
+//  //	noload: Boolean = false,
+//  //	default: Any? = mapOf<String, String>(),
+//  //	size: Int? = null
+//  //  ): JsonProperty<Map<String, String>>(
+//  //	toJ = {
+//  //	  if (size != null) {
+//  //		require(it.size == size)
+//  //	  }
+//  //	  it.toJsonWriter()
+//  //	},
+//  //	fromJ = {
+//  //	  mutableMapOf(*it.asJsonObject.entrySet().map { it.key to it.value.asString }.toTypedArray()).also {
+//  //		if (size != null) require(it.size == size)
+//  //	  }
+//  //	},
+//  //	optional = optional,
+//  //	noload = noload,
+//  //	list = CollectionType.MAP,
+//  //	default = default
+//  //  )
+//
+//  //  inner class JsonJsonListProp<J: Any/*: matt.json.custom.Json<*>*/>(
+//  //	builder: JsonParser<J>,
+//  //	ser: KSerializer<J>,
+//  //	optional: Boolean = false,
+//  //	noload: Boolean = false,
+//  //	default: Any? = listOf<J>(),
+//  //	size: Int? = null
+//  //  ): JsonProperty<List<J>>(toJ = {
+//  //	if (size != null) {
+//  //	  require(it.size == size)
+//  //	}
+//  //	it.toJsonWriter(builder as? JsonProxyMap<J>, ser)
+//  //  }, fromJ = { frm ->
+//  //	frm.jsonArray.map {        /*println("fromJson:${it}")*/
+//  //	  builder.fromJson(it)
+//  //	}.toMutableList().also {
+//  //	  if (size != null) require(it.size == size)
+//  //	}
+//  //  }, optional = optional, noload = noload, list = CollectionType.LIST, default = default
+//  //  )
+//
+//  //  /*matt.json.custom.Json<in J>*/
+//  //  inline fun <reified J: Any> jjLiProp(
+//  //	builder: JsonParser<J>? = null,
+//  //	ser: KSerializer<J>,
+//  //	optional: Boolean = false,
+//  //	noload: Boolean = false,
+//  //	default: Any? = listOf<J>(),
+//  //	size: Int? = null
+//  //  ): JsonJsonListProp<J> {
+//  //	val defBuild = object: JsonParser<J> {
+//  //	  override fun fromJson(jv: JsonElement): J {
+//  //		return Json.decodeFromJsonElement(J::class.serializer(), jv)
+//  //		/*return jv.deserialize()*/
+//  //	  }
+//  //	}    //	(JsonElement) -> J = { it.deserialize<J>() }
+//  //	return JsonJsonListProp<J>(
+//  //	  builder = builder ?: defBuild, ser = ser, optional = optional, noload = noload, default = default, size = size
+//  //	)
+//  //  }
+//}
 
 
 @JvmName("toJsonWriterInt") fun Collection<Int>.toJsonWriter(): ListJsonWriter<JsonWriter> {
