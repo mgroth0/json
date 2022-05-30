@@ -6,6 +6,7 @@ package matt.json.custom
 import javafx.beans.property.BooleanProperty
 import javafx.beans.property.DoubleProperty
 import javafx.beans.property.LongProperty
+import javafx.beans.property.ObjectProperty
 import javafx.beans.property.StringProperty
 import kotlinx.serialization.InternalSerializationApi
 import kotlinx.serialization.KSerializer
@@ -1055,18 +1056,19 @@ fun jsonObj(vararg entries: Pair<*, *>, serializeNulls: Boolean = false): JsonOb
 	}
 }
 
-fun Any.toJsonElement() = when (this) {
-  is String          -> JsonPrimitive(this)
-  is Number          -> JsonPrimitive(this)
-  is Boolean         -> JsonPrimitive(this)
-  is Enum<*>         -> JsonPrimitive(this.name)
-  is JsonElement     -> this
-  is JsonWriter      -> this.toJsonElement()
-  is Map<*, *>       -> jsonObj(this)
-  is BooleanProperty -> JsonPrimitive(this.value)
-  is StringProperty  -> JsonPrimitive(this.value)
-  is LongProperty    -> JsonPrimitive(this.value)
-  is DoubleProperty  -> JsonPrimitive(this.value)
-  is List<*>         -> jsonArray(this)
-  else               -> err("making json object value with ${this::class} is not yet implemented")
+fun Any.toJsonElement(): JsonElement = when (this) {
+  is String            -> JsonPrimitive(this)
+  is Number            -> JsonPrimitive(this)
+  is Boolean           -> JsonPrimitive(this)
+  is Enum<*>           -> JsonPrimitive(this.name)
+  is JsonElement       -> this
+  is JsonWriter        -> this.toJsonElement()
+  is Map<*, *>         -> jsonObj(this)
+  is BooleanProperty   -> JsonPrimitive(this.value)
+  is StringProperty    -> JsonPrimitive(this.value)
+  is LongProperty      -> JsonPrimitive(this.value)
+  is DoubleProperty    -> JsonPrimitive(this.value)
+  is ObjectProperty<*> -> this.value.toJsonElement()
+  is List<*>           -> jsonArray(this)
+  else                 -> err("making json object value with ${this::class} is not yet implemented")
 }
