@@ -19,10 +19,11 @@ import kotlinx.serialization.json.JsonObject
 import kotlinx.serialization.json.JsonPrimitive
 import kotlinx.serialization.json.boolean
 import kotlinx.serialization.json.booleanOrNull
+import kotlinx.serialization.json.buildJsonArray
 import kotlinx.serialization.json.buildJsonObject
+import kotlinx.serialization.json.decodeFromJsonElement
 import kotlinx.serialization.json.double
 import kotlinx.serialization.json.doubleOrNull
-import kotlinx.serialization.json.encodeToJsonElement
 import kotlinx.serialization.json.int
 import kotlinx.serialization.json.jsonArray
 import kotlinx.serialization.json.jsonObject
@@ -48,13 +49,10 @@ import matt.kjlib.delegate.SuperSetDelegate
 import matt.klib.boild.Builder
 import matt.klib.lang.err
 import matt.klib.lang.listsEqual
-import matt.klib.obj.Identified
 import matt.klib.obj.MaybeIdentified
 import matt.reflect.toStringBuilder
 import kotlin.reflect.KClass
 import kotlin.reflect.KProperty
-import kotlin.reflect.full.createInstance
-import kotlin.reflect.full.hasAnnotation
 
 
 @Suppress("RemoveExplicitTypeArguments")/*Hopefully this will help reduce the huge kotlin compiler problem*/
@@ -493,46 +491,46 @@ abstract class SimpleJson<T: SimpleJson<T>>(typekey: String?, efficient: Boolean
   //	default = default
   //  )
 
-  inner class JsonJsonListProp<J: Any/*: matt.json.custom.Json<*>*/>(
-	builder: JsonParser<J>,
-	ser: KSerializer<J>,
-	optional: Boolean = false,
-	noload: Boolean = false,
-	default: Any? = listOf<J>(),
-	size: Int? = null
-  ): JsonProperty<List<J>>(toJ = {
-	if (size != null) {
-	  require(it.size == size)
-	}
-	it.toJsonWriter(builder as? JsonProxyMap<J>, ser)
-  }, fromJ = { frm ->
-	frm.jsonArray.map {        /*println("fromJson:${it}")*/
-	  builder.fromJson(it)
-	}.toMutableList().also {
-	  if (size != null) require(it.size == size)
-	}
-  }, optional = optional, noload = noload, list = CollectionType.LIST, default = default
-  )
+  //  inner class JsonJsonListProp<J: Any/*: matt.json.custom.Json<*>*/>(
+  //	builder: JsonParser<J>,
+  //	ser: KSerializer<J>,
+  //	optional: Boolean = false,
+  //	noload: Boolean = false,
+  //	default: Any? = listOf<J>(),
+  //	size: Int? = null
+  //  ): JsonProperty<List<J>>(toJ = {
+  //	if (size != null) {
+  //	  require(it.size == size)
+  //	}
+  //	it.toJsonWriter(builder as? JsonProxyMap<J>, ser)
+  //  }, fromJ = { frm ->
+  //	frm.jsonArray.map {        /*println("fromJson:${it}")*/
+  //	  builder.fromJson(it)
+  //	}.toMutableList().also {
+  //	  if (size != null) require(it.size == size)
+  //	}
+  //  }, optional = optional, noload = noload, list = CollectionType.LIST, default = default
+  //  )
 
-  /*matt.json.custom.Json<in J>*/
-  inline fun <reified J: Any> jjLiProp(
-	builder: JsonParser<J>? = null,
-	ser: KSerializer<J>,
-	optional: Boolean = false,
-	noload: Boolean = false,
-	default: Any? = listOf<J>(),
-	size: Int? = null
-  ): JsonJsonListProp<J> {
-	val defBuild = object: JsonParser<J> {
-	  override fun fromJson(jv: JsonElement): J {
-		return Json.decodeFromJsonElement(J::class.serializer(), jv)
-		/*return jv.deserialize()*/
-	  }
-	}    //	(JsonElement) -> J = { it.deserialize<J>() }
-	return JsonJsonListProp<J>(
-	  builder = builder ?: defBuild, ser = ser, optional = optional, noload = noload, default = default, size = size
-	)
-  }
+  //  /*matt.json.custom.Json<in J>*/
+  //  inline fun <reified J: Any> jjLiProp(
+  //	builder: JsonParser<J>? = null,
+  //	ser: KSerializer<J>,
+  //	optional: Boolean = false,
+  //	noload: Boolean = false,
+  //	default: Any? = listOf<J>(),
+  //	size: Int? = null
+  //  ): JsonJsonListProp<J> {
+  //	val defBuild = object: JsonParser<J> {
+  //	  override fun fromJson(jv: JsonElement): J {
+  //		return Json.decodeFromJsonElement(J::class.serializer(), jv)
+  //		/*return jv.deserialize()*/
+  //	  }
+  //	}    //	(JsonElement) -> J = { it.deserialize<J>() }
+  //	return JsonJsonListProp<J>(
+  //	  builder = builder ?: defBuild, ser = ser, optional = optional, noload = noload, default = default, size = size
+  //	)
+  //  }
 }
 
 
@@ -562,31 +560,39 @@ fun Map<String, String>.toJsonWriter(): MapJsonWriter<StringJsonWriter, StringJs
   return ListJsonWriter(map { it.toJsonWriter() })
 }
 
-fun <J: Any> List</*matt.json.custom.Json<*>*/J>.toJsonWriter(
-  proxyMap: JsonProxyMap<*>? = null,
-  ser: KSerializer<J>
-): ListJsonWriter<out JsonWriter> {
-  tic(keyForNestedStuff = "listToJsonWriter", enabled = false) //  t.toc("listToJsonWriter1")
-
-  //  please prevent concurrent modification error
-  //  val immutableVersionToAvoidConcurrency = Collections.unmodifiableList(this)
-  val immutableVersionToAvoidConcurrency = this.toList()
-
-
-  val r = ListJsonWriter(
-	immutableVersionToAvoidConcurrency.map { toSave: J ->    //	t.toc("listToJsonWriter1.${toSave::class.simpleName}.1")
-	  val rr = if (proxyMap != null && toSave::class.simpleName in proxyMap.proxies.keys.map { it.simpleName }) {
-		jsonObj(
-		  "id" to (toSave as MaybeIdentified).id!!, TYPE_KEY to toSave::class.simpleName!!
-		).toJsonWriter()
-	  } else {
-		Json.encodeToJsonElement(ser, toSave).toJsonWriter()
-		/*toSave.toJson()*/
-	  }    //	t.toc("listToJsonWriter1.${toSave::class.simpleName}.2")
-	  rr
-	}) //  t.toc("listToJsonWriter2")
-  return r
-}
+//fun <J: Any> List</*matt.json.custom.Json<*>*/J>.toJsonWriter(
+//  proxyMap: JsonProxyMap<*>? = null,
+//  ser: KSerializer<J>
+//): ListJsonWriter<out JsonWriter> {
+//  tic(keyForNestedStuff = "listToJsonWriter", enabled = false) //  t.toc("listToJsonWriter1")
+//
+//  //  please prevent concurrent modification error
+//  //  val immutableVersionToAvoidConcurrency = Collections.unmodifiableList(this)
+//  val immutableVersionToAvoidConcurrency = this.toList()
+//
+//
+//  Json {
+//	this.useArrayPolymorphism
+//  }
+//
+//  val r = ListJsonWriter(
+//	immutableVersionToAvoidConcurrency.map { toSave: J ->
+//	  if (proxyMap != null && toSave::class.simpleName in proxyMap.proxies.keys.map { it.simpleName }) {
+//		jsonObj(
+//		  "id" to (toSave as MaybeIdentified).id!!,
+//		  TYPE_KEY to toSave::class.simpleName!!
+//		).toJsonWriter()
+//	  } else Json.encodeToJsonElement(ser, toSave).apply{
+//		println("just encoded json resource here: ${this}")
+////		val decoded = Json.decodeFromJsonElement<Resource>(this)
+//		println("guess it did decode")
+//	  }.toJsonWriter()
+//
+//
+//
+//	})
+//  return r
+//}
 
 /*fun jsonEquivalent(a: Any?,b: Any?) {
   if (a is List && b is List) return List.equals()
@@ -764,9 +770,7 @@ inline fun <reified T: matt.json.custom.Json<in T>> JsonElement.deserialize(): T
 */
 
 
-fun JsonElement.toJsonWriter(): GsonElementJsonWriter {
-  return GsonElementJsonWriter(this)
-}
+fun JsonElement.toJsonWriter() = GsonElementJsonWriter(this)
 
 
 object NullJsonWriter: JsonWriter() {
@@ -836,11 +840,7 @@ sealed class JsonWriter: ToJsonString {
   class GsonElementJsonWriter(
 	val e: JsonElement
   ): JsonWriter() {
-
-	override fun toJsonString(): String {
-	  return Json.encodeToString(e)
-	}
-
+	override fun toJsonString() = Json.encodeToString(e)
   }
 
   class GsonArrayWriter<T: JsonWriter>(
@@ -1001,9 +1001,9 @@ fun convertJsonKey(v: Any?): String {
 fun <T: JsonWriter> T.toJsonElement() = Json.decodeFromString<JsonElement>(toJsonString())
 
 
-interface JsonProxyMap<T: Any>: JsonParser<T> {
-  val proxies: Map<KClass<out T>, List<T>>
-}
+//interface JsonProxyMap<T: Any>: JsonParser<T> {
+//
+//}
 
 
 val JsonElement.intOrNull get() = (this as? JsonPrimitive)?.intOrNull
@@ -1028,33 +1028,45 @@ val JsonElement.string get() = jsonPrimitive.also { require(it.isString) }.conte
 val JsonElement.boolOrNull get() = (this as? JsonPrimitive)?.booleanOrNull
 val JsonElement.bool get() = jsonPrimitive.boolean
 
+//fun jsonArray(elements: Array<Any?>, serializeNulls: Boolean = false) = jsonArray(*elements, serializeNulls = serializeNulls)
+
+fun jsonArray(elements: Iterable<Any?>, serializeNulls: Boolean = false) =
+  jsonArray(*elements.toList().toTypedArray(), serializeNulls = serializeNulls)
+
+fun jsonArray(vararg elements: Any?, serializeNulls: Boolean = false): kotlinx.serialization.json.JsonArray =
+  buildJsonArray {
+	elements
+	  .filter { serializeNulls || it != null }
+	  .forEach {
+		this.add(it?.toJsonElement() ?: JsonNull)
+	  }
+  }
 
 fun jsonObj(map: Map<*, *>): JsonObject = jsonObj(*map.map { it.key to it.value }.toTypedArray())
-fun jsonObj(vararg entries: Pair<*, *>): JsonObject = buildJsonObject {
-  entries.forEach {
-	val sec = it.second
-	/*	require(sec is String || sec is Number || sec is Boolean || sec is JsonElement) {
-		  "sec is ${sec}"
-		}*/
 
-	val key = it.first
-	require(key is String)
-	put(
-	  key, when (sec) {
-		is String          -> JsonPrimitive(sec)
-		is Number          -> JsonPrimitive(sec)
-		is Boolean         -> JsonPrimitive(sec)
-		is Enum<*>         -> JsonPrimitive(sec.name)
-		is JsonElement     -> sec
-		null               -> JsonNull
-		is JsonWriter      -> sec.toJsonElement()
-		is Map<*, *>       -> jsonObj(sec)
-		is BooleanProperty -> JsonPrimitive(sec.value)
-		is StringProperty  -> JsonPrimitive(sec.value)
-		is LongProperty    -> JsonPrimitive(sec.value)
-		is DoubleProperty  -> JsonPrimitive(sec.value)
-		else               -> err("making json object value with ${sec::class} is not yet implemented")
-	  }
-	)
-  }
+fun jsonObj(vararg entries: Pair<*, *>, serializeNulls: Boolean = false): JsonObject = buildJsonObject {
+  entries
+	.filter { serializeNulls || it.second != null }
+	.forEach {
+	  val sec = it.second
+	  val key = it.first
+	  require(key is String)
+	  put(key, sec?.toJsonElement() ?: JsonNull)
+	}
+}
+
+fun Any.toJsonElement() = when (this) {
+  is String          -> JsonPrimitive(this)
+  is Number          -> JsonPrimitive(this)
+  is Boolean         -> JsonPrimitive(this)
+  is Enum<*>         -> JsonPrimitive(this.name)
+  is JsonElement     -> this
+  is JsonWriter      -> this.toJsonElement()
+  is Map<*, *>       -> jsonObj(this)
+  is BooleanProperty -> JsonPrimitive(this.value)
+  is StringProperty  -> JsonPrimitive(this.value)
+  is LongProperty    -> JsonPrimitive(this.value)
+  is DoubleProperty  -> JsonPrimitive(this.value)
+  is List<*>         -> jsonArray(this)
+  else               -> err("making json object value with ${this::class} is not yet implemented")
 }
