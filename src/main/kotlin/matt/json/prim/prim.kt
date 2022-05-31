@@ -74,7 +74,7 @@ fun String.isValidJson(): Boolean = try {
 fun MFile.isValidJson() = readText().isValidJson()
 
 fun MFile.save(je: JsonElement) {
-  parentFile.mkdirs() //  MatchGroupCollection
+  parentFile!!.mkdirs() //  MatchGroupCollection
   //  JsonObject().
 
   writeText(je.toString())
