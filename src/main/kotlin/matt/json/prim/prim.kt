@@ -9,20 +9,21 @@ import kotlinx.serialization.json.JsonObject
 import kotlinx.serialization.json.decodeFromJsonElement
 import kotlinx.serialization.json.jsonObject
 import matt.json.parseJson
-import java.io.File
+import matt.klib.file.MFile
+
 import kotlin.reflect.KClass
 
 fun String.parseJsonObj(): JsonObject = Json.decodeFromString<JsonObject>(this)
 
-fun File.parseJsonObj() = readText().parseJsonObj()
-fun File.writeJson(jsonElement: JsonElement) = writeText(Json.encodeToString(jsonElement))
-inline fun <reified T: Any?> File.writeJson(t: T) = writeText(Json.encodeToString(t))
-inline fun <reified T: Any?> File.readJson(): T = Json.decodeFromString(readText())
+fun MFile.parseJsonObj() = readText().parseJsonObj()
+fun MFile.writeJson(jsonElement: JsonElement) = writeText(Json.encodeToString(jsonElement))
+inline fun <reified T: Any?> MFile.writeJson(t: T) = writeText(Json.encodeToString(t))
+inline fun <reified T: Any?> MFile.readJson(): T = Json.decodeFromString(readText())
 
 fun String.parseJsonObjs(): JsonArray = Json.decodeFromString<JsonArray>(this)
 
 
-fun File.parseJsonObjs() = readText().parseJsonObjs()
+fun MFile.parseJsonObjs() = readText().parseJsonObjs()
 
 
 val PrettyJson = Json {
@@ -50,7 +51,7 @@ fun String.toPrettyJson() = PrettyJson.encodeToString(parseJson())
 //  exitProcess(1)
 //}
 
-fun File.toPrettyJson() = readText().toPrettyJson()
+fun MFile.toPrettyJson() = readText().toPrettyJson()
 
 
 fun String.isValidJson(): Boolean = try {
@@ -70,9 +71,9 @@ fun String.isValidJson(): Boolean = try {
 //  false
 //}
 
-fun File.isValidJson() = readText().isValidJson()
+fun MFile.isValidJson() = readText().isValidJson()
 
-fun File.save(je: JsonElement) {
+fun MFile.save(je: JsonElement) {
   parentFile.mkdirs() //  MatchGroupCollection
   //  JsonObject().
 
@@ -87,7 +88,7 @@ fun String.loadAndFormatJson() = toPrettyJson()
 //  GsonBuilder().setPrettyPrinting().serializeNulls().create().toJson(it)
 //}
 
-fun File.loadAndFormatJson() = readText().loadAndFormatJson()
+fun MFile.loadAndFormatJson() = readText().loadAndFormatJson()
 
 inline fun <reified T: Any> String.loadJson(@Suppress("UNUSED_PARAMETER") type: KClass<T>): T = Json.decodeFromString<T>(this)
 
@@ -95,7 +96,7 @@ inline fun <reified T: Any> String.loadJson(@Suppress("UNUSED_PARAMETER") type: 
 //  this, type.java
 //)
 
-inline fun <reified T: Any> File.loadJson(type: KClass<T>): T = readText().loadJson(type)
+inline fun <reified T: Any> MFile.loadJson(type: KClass<T>): T = readText().loadJson(type)
 
 inline fun <reified T: Any> String.loadJsonList(): List<T> {
 
@@ -111,7 +112,7 @@ inline fun <reified T: Any> String.loadJsonList(): List<T> {
 //  return gson.fromJson(this, arrayOf<T>()::class.java).toList()
 //}
 
-inline fun <reified T: Any> File.loadJsonList(): List<T> = readText().loadJsonList<T>()
+inline fun <reified T: Any> MFile.loadJsonList(): List<T> = readText().loadJsonList<T>()
 
 
 operator fun JsonElement.set(s: String, v: Any) {
@@ -120,4 +121,4 @@ operator fun JsonElement.set(s: String, v: Any) {
 }
 
 
-//inline fun <reified T> File.loadJsonList(): List<T> = readText().loadJsonList()
+//inline fun <reified T> matt.klib.file.File.loadJsonList(): List<T> = readText().loadJsonList()

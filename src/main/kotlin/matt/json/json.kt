@@ -16,13 +16,14 @@ import kotlinx.serialization.json.JsonElement
 import kotlinx.serialization.json.JsonObject
 import kotlinx.serialization.json.JsonPrimitive
 import kotlinx.serialization.json.encodeToJsonElement
+import matt.klib.file.MFile
 import matt.klib.lang.NEVER
-import java.io.File
+
 import kotlin.reflect.full.memberProperties
 import kotlin.reflect.KClass
 
 fun String.parseJson() = Json.decodeFromString<JsonElement>(this)
-fun File.parseJson() = readText().parseJson()
+fun MFile.parseJson() = readText().parseJson()
 
 
 /*class JITSerializer<T>(baseDescriptor: SerialDescriptor): SerializationStrategy<T> {
