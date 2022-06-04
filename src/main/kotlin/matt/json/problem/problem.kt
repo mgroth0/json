@@ -17,23 +17,23 @@ import kotlin.collections.set
 abstract class SuperClass
 
 @Serializable
-@SerialName("matt.json.problem.SubA")
+@SerialName("SubA")
 data class SubA(val data: Double): SuperClass()
 
 @Serializable
-@SerialName("matt.json.problem.SubB")
+@SerialName("SubB")
 data class SubB(val data: Double): SuperClass()
 
 @Serializable
-@SerialName("matt.json.problem.MapContainer")
+@SerialName("MapContainer")
 data class MapContainer<K: SuperClass, V>(val map: Map<K, V>): Map<K, V> by map
 
 @Serializable
-@SerialName("matt.json.problem.StringWrapper")
+@SerialName("StringWrapper")
 data class StringWrapper(val s: String)
 
 @Serializable
-@SerialName("matt.json.problem.DoubleWrapper")
+@SerialName("DoubleWrapper")
 data class DoubleWrapper(val d: Double)
 
 object StringClassSerializer: KSerializer<String> {
@@ -86,6 +86,7 @@ fun main() {
 		subclass(FakeNull::class)
 	  }
 
+	  @Suppress("UNCHECKED_CAST")
 	  polymorphic(
 		MapContainer::class, MapContainer::class, actualSerializer = MapContainer.serializer(
 		  PolymorphicSerializer(SuperClass::class),
