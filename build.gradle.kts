@@ -1,5 +1,7 @@
-@file:Suppress("UnstableApiUsage")
 
+
+@file:Suppress("UnstableApiUsage")
+modtype = LIB
 dependencies {
   api(projects.kj.kjlib)
   api(projects.kj.async)
