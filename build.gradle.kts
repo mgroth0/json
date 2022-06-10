@@ -10,6 +10,7 @@ dependencies {
   implementation(libs.fx.base)
 //  implementation(projects.kj.reflect)
   projectOrLocalMavenJVM("api", ":k:klib")
+  implementation(kotlin("reflect"))
 }
 
 plugins {
