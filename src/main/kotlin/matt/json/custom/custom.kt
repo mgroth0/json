@@ -629,9 +629,7 @@ interface Json<T: matt.json.custom.Json<T>> {
 		@Suppress("UNCHECKED_CAST") (json as JsonArrayModel<T>).prop.toJ.invoke(this as T)
 	  }
 	}
-
   }
-
 
   fun loadProperties(
 	jo: JsonElement, usedTypeKey: Boolean = false, pretendAllPropsOptional: Boolean = true
