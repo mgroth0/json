@@ -22,13 +22,9 @@ import kotlinx.serialization.json.buildJsonObject
 import kotlinx.serialization.json.double
 import kotlinx.serialization.json.doubleOrNull
 import kotlinx.serialization.json.int
-import kotlinx.serialization.json.jsonArray
-import kotlinx.serialization.json.jsonObject
 import kotlinx.serialization.json.jsonPrimitive
 import kotlinx.serialization.json.long
 import kotlinx.serialization.json.longOrNull
-import matt.async.date.ProfiledBlock
-import matt.async.date.tic
 import matt.json.custom.JsonWriter.BooleanJsonWriter
 import matt.json.custom.JsonWriter.GsonElementJsonWriter
 import matt.json.custom.JsonWriter.JsonPropMapWriter
@@ -37,19 +33,10 @@ import matt.json.custom.JsonWriter.MapJsonWriter
 import matt.json.custom.JsonWriter.NumberJsonWriter
 import matt.json.custom.JsonWriter.StringJsonWriter
 import matt.json.klaxon.Render
-import matt.kjlib.delegate.NoDefault
-import matt.kjlib.delegate.SuperDelegateBase
 import matt.klib.boild.Builder
 import matt.klib.lang.err
-import matt.klib.lang.listsEqual
-import matt.reflect.toStringBuilder
 import kotlin.reflect.KProperty
 
-
-@Suppress("RemoveExplicitTypeArguments")/*Hopefully this will help reduce the huge kotlin compiler problem*/
-abstract class SimpleJsonList<T: SimpleJsonList<T>>(prop: JsonArrayProp<T>): matt.json.custom.Json<T> {
-  override val json = JsonArrayModel<T>(prop)
-}
 
 interface SimpleGson
 
@@ -591,101 +578,6 @@ fun Map<String, String>.toJsonWriter(): MapJsonWriter<StringJsonWriter, StringJs
 
 
 
-interface Json<T: matt.json.custom.Json<T>> {
-  /*
-	//	example when I remove prop from model:
-	init {
-	  json.ignoreKeysOnLoad.add("index")
-	}*/
-  val json: JsonModelBase<T>
-
-  fun toJson(): JsonWriter {
-	tic(keyForNestedStuff = "toJson", nestLevel = 2)
-	return when (json) {
-	  is JsonModel<T>      -> {
-		@Suppress("UNCHECKED_CAST") var m = (json as JsonModel<T>).propsToSave().associate {
-		  val k = it.keyJsonWriter
-		  it.keyJsonWriter
-		  val v = it.toJ.invoke(this as T)
-		  k to v
-		}
-		m = if ((json as JsonModel<T>).typekey != null) {
-		  m.toMutableMap().plus(TYPE_KEY_JSON_WRITER to (json as JsonModel<T>).typeKeyJsonWriter)
-		} else m
-		val mm = MapJsonWriter(m)
-		mm
-	  }
-	  is JsonArrayModel<*> -> {
-		@Suppress("UNCHECKED_CAST") (json as JsonArrayModel<T>).prop.toJ.invoke(this as T)
-	  }
-	}
-  }
-
-  fun loadProperties(
-	jo: JsonElement, usedTypeKey: Boolean = false, pretendAllPropsOptional: Boolean = true
-  ) {
-	ProfiledBlock["loadProperties"].with {
-	  when (json) {
-		is JsonModel<T>      -> {
-		  val loaded = mutableListOf<String>()
-		  ProfiledBlock["entrySet"].with {
-			jo.jsonObject.entries.forEach {
-			  if (usedTypeKey && it.key == TYPE_KEY) return@forEach
-			  if (it.key !in (json as JsonModel<T>).ignoreKeysOnLoad) {
-				@Suppress("UNCHECKED_CAST") (this@Json as T).apply {
-				  (json as JsonModel<T>)[it.key].fromJ.invoke(this@Json, it.value)
-				  loaded += it.key
-				}
-			  }
-			}
-		  }
-		  if (!pretendAllPropsOptional) {
-			ProfiledBlock["optional"].with {
-			  val json4debug = (json as JsonModel<T>)
-			  json4debug.props.filter { it.key !in loaded }.forEach {
-				if (!it.optional) {
-				  err("json property $it is not optional")
-				}
-			  }
-			}
-		  }
-		}
-		is JsonArrayModel<*> -> {
-		  @Suppress("UNCHECKED_CAST") (json as JsonArrayModel<T>).prop.fromJ.invoke(this@Json as T, jo.jsonArray)
-		}
-	  }
-
-	  ProfiledBlock["onload"].with {
-		onload()
-	  }
-	}
-
-
-  }
-
-  fun onload() = Unit
-
-}
-
-
-class JsonProp<T: matt.json.custom.Json<T>>(
-  val key: String,
-  val toJ: T.()->JsonWriter,
-  val fromJ: T.(JsonElement)->Unit,
-  val optional: Boolean = false,
-  val default: Any? = NoDefault
-) {
-  override fun toString() = toStringBuilder(::key, ::optional)
-  var d: SuperDelegateBase<*, *>? = null
-  val keyJsonWriter = key.toJsonWriter()
-}
-
-
-class JsonArrayProp<T: matt.json.custom.Json<T>>(
-  val toJ: T.()->JsonWriter, val fromJ: T.(JsonArray)->Unit
-)
-
-
 @Suppress("unused") interface JsonArray<T: Any> {
 
   val json: Triple<(JsonElement)->Unit, (T)->JsonWriter, ()->Sequence<T>>
@@ -875,60 +767,8 @@ interface JsonPropMap<T> {
   fun toJsonWriter() = JsonPropMapWriter(this)
 }
 
-sealed class JsonModelBase<T: matt.json.custom.Json<T>>
-
-object JsonModelBaseShouldBeSealed {
-  init {
-	if (KotlinVersion.CURRENT.isAtLeast(1, 5)) {
-	  err("OK NOW I CAN MAKE ${JsonModelBase::class} A SEALED INTERFACE")
-	}
-  }
-}
-
-class JsonArrayModel<T: matt.json.custom.Json<T>>(
-  val prop: JsonArrayProp<T>
-): JsonModelBase<T>()
 
 
-class JsonModel<T: matt.json.custom.Json<T>>(
-  var typekey: String?,
-  vararg propArgs: JsonProp<T>,
-  val ignoreKeysOnLoad: MutableList<String> = mutableListOf(), /*same thing as marking prop as noload*/
-  val efficient: Boolean = false
-): JsonModelBase<T>() {
-  val props = mutableListOf(*propArgs)
-
-  val typeKeyJsonWriter by lazy { typekey!!.toJsonWriter() }
-
-  init {
-	require(props.map { it.key }.toSet().size == props.map { it.key }.size)
-  }
-
-  operator fun get(key: String?) = props.firstOrNull { it.key == key }.let {
-	require(it != null) {
-	  "$this is missing a JsonProp for \"$key\""
-	}
-	it
-  }
-
-  private val propsToAlwaysSave by lazy {
-	if (!this.efficient) props.toList()
-	else props.toList().filter { !it.optional || it.default == NoDefault }
-  }
-  private val propsToMaybeSave by lazy {
-	props.toList().filter { it !in propsToAlwaysSave }
-  }
-
-  fun propsToSave(): List<JsonProp<T>> {
-	return propsToAlwaysSave + propsToMaybeSave.filter {
-	  if (it.default is List<*>) !listsEqual(
-		it.default, it.d!!.get() as List<*>
-	  ) else it.d!!.get() != it.default
-	}
-  }
-
-
-}
 
 
 interface LinkedProp<T> {
