@@ -8,6 +8,7 @@ dependencies {
 //  api(libs.gson)
   api(libs.kotlinx.serialization.json)
   implementation(libs.fx.base)
+  implementation(projects.kj.reflect)
 }
 
 plugins {
