@@ -9,6 +9,7 @@ dependencies {
   api(libs.kotlinx.serialization.json)
   implementation(libs.fx.base)
 //  implementation(projects.kj.reflect)
+  projectOrLocalMavenJVM("api", ":k:klib")
 }
 
 plugins {
