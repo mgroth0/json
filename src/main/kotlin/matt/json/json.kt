@@ -93,7 +93,7 @@ fun <T> DeserializationStrategy<T>.withSerializationStrategy(s: Encoder.(T)->Uni
   })
 
 
-fun Any.toJson() = Json.encodeToJsonElement(this)
+inline fun <reified T> T.toJson() = Json.encodeToJsonElement(this)
 fun Any.toJsonString() = Json.encodeToString(this)
 
 
