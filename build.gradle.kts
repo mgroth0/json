@@ -7,12 +7,12 @@ apis(
 )
 
 dependencies {
-  //  api(projects.kj.kjlib)
+  //  api(projects.k.kjlib)
   //  api(projects.k.async)
   //  api(libs.gson)
   api(libs.kotlinx.serialization.json)
   implementation(libs.fx.base)
-  //  implementation(projects.kj.reflect)
+  //  implementation(projects.k.reflect)
   //  projectOrLocalMavenJVM("api", ":k:klib")
   implementation(kotlin("reflect"))
 }
