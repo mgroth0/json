@@ -9,7 +9,7 @@ import kotlinx.serialization.json.JsonObject
 import kotlinx.serialization.json.decodeFromJsonElement
 import kotlinx.serialization.json.jsonObject
 import matt.json.parseJson
-import matt.klib.file.MFile
+import matt.file.MFile
 
 import kotlin.reflect.KClass
 

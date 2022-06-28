@@ -16,7 +16,7 @@ import kotlinx.serialization.json.JsonElement
 import kotlinx.serialization.json.JsonObject
 import kotlinx.serialization.json.JsonPrimitive
 import kotlinx.serialization.json.encodeToJsonElement
-import matt.klib.file.MFile
+import matt.file.MFile
 import matt.klib.lang.NEVER
 
 import kotlin.reflect.full.memberProperties
