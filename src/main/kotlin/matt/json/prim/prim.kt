@@ -80,6 +80,12 @@ fun MFile.save(je: JsonElement) {
   writeText(je.toString())
 }
 
+inline fun <reified T> MFile.save(t: T, pretty: Boolean = true) {
+  parentFile!!.mkdirs()
+  val j = if (pretty) PrettyJson else Json
+  writeText(j.encodeToString(t))
+}
+
 
 //fun <T: Any> T.toGson(): String = gson.toJson(this)
 
@@ -90,13 +96,14 @@ fun String.loadAndFormatJson() = toPrettyJson()
 
 fun MFile.loadAndFormatJson() = readText().loadAndFormatJson()
 
-inline fun <reified T: Any> String.loadJson(@Suppress("UNUSED_PARAMETER") type: KClass<T>): T = Json.decodeFromString<T>(this)
+inline fun <reified T: Any> String.loadJson(): T = Json.decodeFromString(this)
 
 //  gson.fromJson(
 //  this, type.java
 //)
 
-inline fun <reified T: Any> MFile.loadJson(type: KClass<T>): T = readText().loadJson(type)
+
+inline fun <reified T: Any> MFile.loadJson(): T = readText().loadJson()
 
 inline fun <reified T: Any> String.loadJsonList(): List<T> {
 
