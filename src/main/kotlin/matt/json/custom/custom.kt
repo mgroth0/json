@@ -882,11 +882,6 @@ fun jsonObj(vararg entries: Pair<*, *>, serializeNulls: Boolean = false): JsonOb
 	}
 }
 
-@JvmInline
-value class tThingg(val a: String) {
-  var b: String = ""
-}
-
 fun Any?.toJsonElement(): JsonElement = when (this) {
   null                 -> JsonNull
   is String            -> JsonPrimitive(this)
