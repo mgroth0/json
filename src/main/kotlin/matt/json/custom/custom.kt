@@ -36,6 +36,7 @@ import matt.json.klaxon.Render
 import matt.klib.boild.Builder
 import matt.klib.lang.err
 import kotlin.reflect.KProperty
+import kotlin.reflect.full.memberProperties
 
 
 interface SimpleGson
@@ -768,9 +769,6 @@ interface JsonPropMap<T> {
 }
 
 
-
-
-
 interface LinkedProp<T> {
   fun update(value: T)
 }
@@ -884,7 +882,13 @@ fun jsonObj(vararg entries: Pair<*, *>, serializeNulls: Boolean = false): JsonOb
 	}
 }
 
-fun Any.toJsonElement(): JsonElement = when (this) {
+@JvmInline
+value class tThingg(val a: String) {
+  var b: String = ""
+}
+
+fun Any?.toJsonElement(): JsonElement = when (this) {
+  null                 -> JsonNull
   is String            -> JsonPrimitive(this)
   is Number            -> JsonPrimitive(this)
   is Boolean           -> JsonPrimitive(this)
@@ -898,5 +902,13 @@ fun Any.toJsonElement(): JsonElement = when (this) {
   is DoubleProperty    -> JsonPrimitive(this.value)
   is ObjectProperty<*> -> this.value.toJsonElement()
   is List<*>           -> jsonArray(this)
-  else                 -> err("making json object value with ${this::class} is not yet implemented")
+  else                 -> when {
+	this::class.isValue -> {
+	  this::class.memberProperties.first().getter.call(this).toJsonElement()
+	}
+
+	else                -> err("making json object value with ${this::class} is not yet implemented")
+  }
+
+
 }
