@@ -1,6 +1,5 @@
 @file:Suppress("UnstableApiUsage")
 
-modtype = LIB
 
 apis {
   klib
