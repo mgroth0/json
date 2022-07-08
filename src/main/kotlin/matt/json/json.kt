@@ -1,8 +1,9 @@
-@file:OptIn(InternalSerializationApi::class)
+@file:OptIn(InternalSerializationApi::class, ExperimentalSerializationApi::class)
 
 package matt.json
 
 import kotlinx.serialization.DeserializationStrategy
+import kotlinx.serialization.ExperimentalSerializationApi
 import kotlinx.serialization.InternalSerializationApi
 import kotlinx.serialization.KSerializer
 import kotlinx.serialization.SerializationStrategy
@@ -15,7 +16,9 @@ import kotlinx.serialization.json.JsonDecoder
 import kotlinx.serialization.json.JsonElement
 import kotlinx.serialization.json.JsonObject
 import kotlinx.serialization.json.JsonPrimitive
+import kotlinx.serialization.json.decodeFromStream
 import kotlinx.serialization.json.encodeToJsonElement
+import matt.file.JsonFile
 import matt.file.MFile
 import matt.klib.lang.NEVER
 
@@ -24,6 +27,8 @@ import kotlin.reflect.KClass
 
 fun String.parseJson() = Json.decodeFromString<JsonElement>(this)
 fun MFile.parseJson() = readText().parseJson()
+
+inline fun <reified T> Json.decodeFromFile(f: JsonFile) = decodeFromStream<T>(f.inputStream())
 
 
 /*class JITSerializer<T>(baseDescriptor: SerialDescriptor): SerializationStrategy<T> {
