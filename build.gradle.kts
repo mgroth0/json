@@ -11,7 +11,3 @@ dependencies {
   implementation(libs.fx.base)
   implementation(kotlin("reflect"))
 }
-
-plugins {
-  kotlin("plugin.serialization")
-}
