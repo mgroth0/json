@@ -11,8 +11,6 @@ import kotlinx.serialization.json.jsonObject
 import matt.json.parseJson
 import matt.file.MFile
 
-import kotlin.reflect.KClass
-
 fun String.parseJsonObj(): JsonObject = Json.decodeFromString<JsonObject>(this)
 
 fun MFile.parseJsonObj() = readText().parseJsonObj()
