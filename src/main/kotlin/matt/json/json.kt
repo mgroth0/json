@@ -21,12 +21,17 @@ import kotlinx.serialization.json.encodeToJsonElement
 import matt.file.JsonFile
 import matt.file.MFile
 import matt.klib.lang.NEVER
+import matt.klib.times
 
 import kotlin.reflect.full.memberProperties
 import kotlin.reflect.KClass
 
 fun String.parseJson() = Json.decodeFromString<JsonElement>(this)
 fun MFile.parseJson() = readText().parseJson()
+
+fun yesIUseJson() {
+  if (("a"*3).length == 4) println("dummy text")
+}
 
 inline fun <reified T> Json.decodeFromFile(f: JsonFile) = decodeFromStream<T>(f.inputStream())
 
