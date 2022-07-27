@@ -6,5 +6,5 @@ apis {
 dependencies {
   api(libs.kotlinx.serialization.json)
   implementation(libs.fx.base)
-  implementation(kotlin("reflect"))
+  implementation(libs.kt.reflect)
 }
