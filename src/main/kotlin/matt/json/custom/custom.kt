@@ -22,6 +22,7 @@ import kotlinx.serialization.json.buildJsonObject
 import kotlinx.serialization.json.double
 import kotlinx.serialization.json.doubleOrNull
 import kotlinx.serialization.json.int
+import kotlinx.serialization.json.jsonObject
 import kotlinx.serialization.json.jsonPrimitive
 import kotlinx.serialization.json.long
 import kotlinx.serialization.json.longOrNull
@@ -847,6 +848,8 @@ val JsonElement.double get() = jsonPrimitive.double
 
 val JsonElement.longOrNull get() = (this as? JsonPrimitive)?.longOrNull
 val JsonElement.long get() = jsonPrimitive.long
+
+val JsonElement.jsonObjectOrNull get() = (this as? JsonObject)?.jsonObject
 
 val JsonElement.stringOrNull get() = (this as? JsonPrimitive)?.stringOrNull
 val JsonPrimitive.stringOrNull get() = takeIf { it.isString }?.content
