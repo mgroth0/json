@@ -14,8 +14,12 @@ import matt.file.MFile
 fun String.parseJsonObj(): JsonObject = Json.decodeFromString<JsonObject>(this)
 
 fun MFile.parseJsonObj() = readText().parseJsonObj()
-fun MFile.writeJson(jsonElement: JsonElement) = writeText(Json.encodeToString(jsonElement))
-inline fun <reified T: Any?> MFile.writeJson(t: T) = writeText(Json.encodeToString(t))
+fun MFile.writeJson(jsonElement: JsonElement, pretty: Boolean = false) =
+  writeText((if (pretty) PrettyJson else Json).encodeToString(jsonElement))
+
+inline fun <reified T: Any?> MFile.writeJson(t: T, pretty: Boolean = false) =
+  writeText((if (pretty) PrettyJson else Json).encodeToString(t))
+
 inline fun <reified T: Any?> MFile.readJson(): T = Json.decodeFromString(readText())
 
 fun String.parseJsonObjs(): JsonArray = Json.decodeFromString<JsonArray>(this)
