@@ -11,10 +11,16 @@ import kotlinx.serialization.json.JsonEncoder
 import kotlinx.serialization.json.JsonObject
 import kotlinx.serialization.json.jsonArray
 import kotlinx.serialization.json.jsonObject
+import kotlin.reflect.KClass
 
-abstract class JsonSerializer<T>(qname: String): KSerializer<T> {
-  final override val descriptor = buildClassSerialDescriptor(qname)
+
+/*cls used to be qname: String, but this is much less typesafe*/
+abstract class JsonSerializer<T: Any>(cls: KClass<T>): KSerializer<T> {
+
+  final override val descriptor = buildClassSerialDescriptor(cls.qualifiedName!!) /*I don't understand why ths is necessary but I think it is.*/
+
   final override fun deserialize(decoder: Decoder): T {
+
 	return deserialize(jsonElement = (decoder as JsonDecoder).decodeJsonElement())
   }
 
@@ -27,13 +33,13 @@ abstract class JsonSerializer<T>(qname: String): KSerializer<T> {
 }
 
 
-abstract class JsonObjectSerializer<T>(qname: String): JsonSerializer<T>(qname) {
+abstract class JsonObjectSerializer<T: Any>(cls: KClass<T>): JsonSerializer<T>(cls) {
   final override fun deserialize(jsonElement: JsonElement): T = deserialize(jsonElement.jsonObject)
   abstract fun deserialize(jsonObject: JsonObject): T
   abstract override fun serialize(value: T): JsonObject
 }
 
-abstract class JsonArraySerializer<T>(qname: String): JsonSerializer<T>(qname) {
+abstract class JsonArraySerializer<T: Any>(cls: KClass<T>): JsonSerializer<T>(cls) {
   final override fun deserialize(jsonElement: JsonElement): T = deserialize(jsonElement.jsonArray)
   abstract fun deserialize(jsonArray: JsonArray): T
   abstract override fun serialize(value: T): JsonArray
