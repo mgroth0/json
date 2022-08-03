@@ -124,10 +124,13 @@ inline fun <reified T: Any> String.loadJsonList(): List<T> {
 inline fun <reified T: Any> MFile.loadJsonList(): List<T> = readText().loadJsonList<T>()
 
 
-operator fun JsonElement.set(s: String, v: Any) {
-  jsonObject[s] = v
-  //  this.asJsonObject.add(s, gson.fromJson(gson.toJson(v), JsonElement::class.java))
-}
+//operator fun JsonElement.set(s: String, v: Any) {
+//  println("s=$s")
+//  println("v=$v")
+//  jsonObject[s] = v
+//  jsonObject
+//  //  this.asJsonObject.add(s, gson.fromJson(gson.toJson(v), JsonElement::class.java))
+//}
 
 
 //inline fun <reified T> matt.klib.file.File.loadJsonList(): List<T> = readText().loadJsonList()
