@@ -897,7 +897,6 @@ fun jsonObj(
 fun Any?.toJsonElement(
   serializers: List<MiniSerializer> = listOf()
 ): JsonElement {
-  println("here toJsonElement for ${this}")
   return when (this) {
 	null                 -> JsonNull
 	is String            -> JsonPrimitive(this)
@@ -915,15 +914,11 @@ fun Any?.toJsonElement(
 	is List<*>           -> jsonArray(this)
 	else                 -> when {
 	  this::class.isValue -> {
-		println("we got avalue")
 		this::class.memberProperties.first().getter.call(this).toJsonElement(serializers = serializers)
 	  }
 
 	  else                -> {
-		println("we got a ${this}")
-		println("testing ${serializers.size} MiniSerializers")
 		serializers.firstOrNull {
-		  println("testing if ${it} can serialize ${this}")
 		  it.canSerialize(this)
 		}?.serialize(this) ?: err("making json object value with ${this::class} is not yet implemented")
 	  }
