@@ -34,6 +34,8 @@ import matt.json.custom.JsonWriter.MapJsonWriter
 import matt.json.custom.JsonWriter.NumberJsonWriter
 import matt.json.custom.JsonWriter.StringJsonWriter
 import matt.json.klaxon.Render
+import matt.json.ser.JsonObjectSerializer
+import matt.json.ser.MiniSerializer
 import matt.klib.boild.Builder
 import matt.klib.lang.err
 import kotlin.reflect.KProperty
@@ -872,41 +874,61 @@ fun jsonArray(vararg elements: Any?, serializeNulls: Boolean = false): kotlinx.s
 	  }
   }
 
-fun jsonObj(map: Map<*, *>): JsonObject = jsonObj(*map.map { it.key to it.value }.toTypedArray())
+fun jsonObj(
+  map: Map<*, *>,
+  serializers: List<MiniSerializer> = listOf()
+): JsonObject = jsonObj(*map.map { it.key to it.value }.toTypedArray(), serializers = serializers)
 
-fun jsonObj(vararg entries: Pair<*, *>, serializeNulls: Boolean = false): JsonObject = buildJsonObject {
+fun jsonObj(
+  vararg entries: Pair<*, *>,
+  serializeNulls: Boolean = false,
+  serializers: List<MiniSerializer> = listOf()
+): JsonObject = buildJsonObject {
   entries
 	.filter { serializeNulls || it.second != null }
 	.forEach {
 	  val sec = it.second
 	  val key = it.first
 	  require(key is String)
-	  put(key, sec?.toJsonElement() ?: JsonNull)
+	  put(key, sec?.toJsonElement(serializers = serializers) ?: JsonNull)
 	}
 }
 
-fun Any?.toJsonElement(): JsonElement = when (this) {
-  null                 -> JsonNull
-  is String            -> JsonPrimitive(this)
-  is Number            -> JsonPrimitive(this)
-  is Boolean           -> JsonPrimitive(this)
-  is Enum<*>           -> JsonPrimitive(this.name)
-  is JsonElement       -> this
-  is JsonWriter        -> this.toJsonElement()
-  is Map<*, *>         -> jsonObj(this)
-  is BooleanProperty   -> JsonPrimitive(this.value)
-  is StringProperty    -> JsonPrimitive(this.value)
-  is LongProperty      -> JsonPrimitive(this.value)
-  is DoubleProperty    -> JsonPrimitive(this.value)
-  is ObjectProperty<*> -> this.value.toJsonElement()
-  is List<*>           -> jsonArray(this)
-  else                 -> when {
-	this::class.isValue -> {
-	  this::class.memberProperties.first().getter.call(this).toJsonElement()
+fun Any?.toJsonElement(
+  serializers: List<MiniSerializer> = listOf()
+): JsonElement {
+  println("here toJsonElement for ${this}")
+  return when (this) {
+	null                 -> JsonNull
+	is String            -> JsonPrimitive(this)
+	is Number            -> JsonPrimitive(this)
+	is Boolean           -> JsonPrimitive(this)
+	is Enum<*>           -> JsonPrimitive(this.name)
+	is JsonElement       -> this
+	is JsonWriter        -> this.toJsonElement()
+	is Map<*, *>         -> jsonObj(this)
+	is BooleanProperty   -> JsonPrimitive(this.value)
+	is StringProperty    -> JsonPrimitive(this.value)
+	is LongProperty      -> JsonPrimitive(this.value)
+	is DoubleProperty    -> JsonPrimitive(this.value)
+	is ObjectProperty<*> -> this.value.toJsonElement(serializers = serializers)
+	is List<*>           -> jsonArray(this)
+	else                 -> when {
+	  this::class.isValue -> {
+		println("we got avalue")
+		this::class.memberProperties.first().getter.call(this).toJsonElement(serializers = serializers)
+	  }
+
+	  else                -> {
+		println("we got a ${this}")
+		println("testing ${serializers.size} MiniSerializers")
+		serializers.firstOrNull {
+		  println("testing if ${it} can serialize ${this}")
+		  it.canSerialize(this)
+		}?.serialize(this) ?: err("making json object value with ${this::class} is not yet implemented")
+	  }
 	}
 
-	else                -> err("making json object value with ${this::class} is not yet implemented")
+
   }
-
-
 }

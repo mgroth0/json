@@ -17,7 +17,8 @@ import kotlin.reflect.KClass
 /*cls used to be qname: String, but this is much less typesafe*/
 abstract class JsonSerializer<T: Any>(cls: KClass<T>): KSerializer<T> {
 
-  final override val descriptor = buildClassSerialDescriptor(cls.qualifiedName!!) /*I don't understand why ths is necessary but I think it is.*/
+  final override val descriptor =
+	buildClassSerialDescriptor(cls.qualifiedName!!) /*I don't understand why ths is necessary but I think it is.*/
 
   final override fun deserialize(decoder: Decoder): T {
 
@@ -43,4 +44,10 @@ abstract class JsonArraySerializer<T: Any>(cls: KClass<T>): JsonSerializer<T>(cl
   final override fun deserialize(jsonElement: JsonElement): T = deserialize(jsonElement.jsonArray)
   abstract fun deserialize(jsonArray: JsonArray): T
   abstract override fun serialize(value: T): JsonArray
+}
+
+
+interface MiniSerializer {
+  fun canSerialize(a: Any): Boolean
+  fun serialize(a: Any): JsonElement
 }
