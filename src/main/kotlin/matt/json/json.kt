@@ -18,13 +18,14 @@ import kotlinx.serialization.json.JsonObject
 import kotlinx.serialization.json.JsonPrimitive
 import kotlinx.serialization.json.decodeFromStream
 import kotlinx.serialization.json.encodeToJsonElement
+import kotlinx.serialization.json.encodeToStream
 import matt.file.JsonFile
 import matt.file.MFile
 import matt.klib.lang.NEVER
 import matt.klib.times
-
-import kotlin.reflect.full.memberProperties
+import java.io.OutputStream
 import kotlin.reflect.KClass
+import kotlin.reflect.full.memberProperties
 
 fun String.parseJson() = Json.decodeFromString<JsonElement>(this)
 fun MFile.parseJson() = readText().parseJson()
@@ -122,3 +123,6 @@ fun Any.loadProperties(obj: JsonElement) {
 
   }
 }
+
+@Suppress("OPT_IN_USAGE")
+inline fun <reified T> OutputStream.sendJson(o: T) = Json.encodeToStream(o, this)
