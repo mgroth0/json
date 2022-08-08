@@ -7,9 +7,9 @@ import kotlinx.serialization.json.JsonArray
 import kotlinx.serialization.json.JsonElement
 import kotlinx.serialization.json.JsonObject
 import kotlinx.serialization.json.decodeFromJsonElement
-import kotlinx.serialization.json.jsonObject
-import matt.json.parseJson
+import matt.file.JsonFile
 import matt.file.MFile
+import matt.json.parseJson
 
 fun String.parseJsonObj(): JsonObject = Json.decodeFromString<JsonObject>(this)
 
@@ -106,6 +106,8 @@ inline fun <reified T: Any> String.loadJson(): T = Json.decodeFromString(this)
 
 
 inline fun <reified T: Any> MFile.loadJson(): T = readText().loadJson()
+
+inline fun <reified T: Any> T.saveTo(f: JsonFile, pretty: Boolean = true) = f.save(this,pretty=pretty)
 
 inline fun <reified T: Any> String.loadJsonList(): List<T> {
 
