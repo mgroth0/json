@@ -21,7 +21,7 @@
         {
             "type": "matt.mstruct.bj.BuildJsonLibDependency",
             "cfg": "jvmMainImplementation",
-            "key": "fx-controls"
+            "key": "fx-base"
         },
 
         {

@@ -6,10 +6,13 @@ import javafx.beans.property.LongProperty
 import javafx.beans.property.ObjectProperty
 import kotlinx.serialization.json.JsonElement
 import kotlinx.serialization.json.JsonNull
+import kotlinx.serialization.json.JsonObject
 import kotlinx.serialization.json.JsonPrimitive
+import kotlinx.serialization.json.buildJsonArray
+import kotlinx.serialization.json.buildJsonObject
 import matt.json.custom.JsonWriter
-import matt.json.custom.jsonArray
-import matt.json.custom.jsonObj
+//import matt.json.custom.jsonArray
+//import matt.json.custom.jsonObj
 import matt.json.custom.toJsonElement
 import matt.json.ser.MiniSerializer
 import matt.klib.lang.err
@@ -49,4 +52,37 @@ fun Any?.toJsonElement(
 
 
   }
+}
+
+fun jsonArray(vararg elements: Any?, serializeNulls: Boolean = false): kotlinx.serialization.json.JsonArray =
+  buildJsonArray {
+	elements
+	  .filter { serializeNulls || it != null }
+	  .forEach {
+		this.add(it?.toJsonElement() ?: JsonNull)
+	  }
+  }
+
+fun jsonArray(elements: Iterable<Any?>, serializeNulls: Boolean = false) =
+  jsonArray(*elements.toList().toTypedArray(), serializeNulls = serializeNulls)
+
+
+fun jsonObj(
+  map: Map<*, *>,
+  serializers: List<MiniSerializer> = listOf()
+): JsonObject = jsonObj(*map.map { it.key to it.value }.toTypedArray(), serializers = serializers)
+
+fun jsonObj(
+  vararg entries: Pair<*, *>,
+  serializeNulls: Boolean = false,
+  serializers: List<MiniSerializer> = listOf()
+): JsonObject = buildJsonObject {
+  entries
+	.filter { serializeNulls || it.second != null }
+	.forEach {
+	  val sec = it.second
+	  val key = it.first
+	  require(key is String)
+	  put(key, sec?.toJsonElement(serializers = serializers) ?: JsonNull)
+	}
 }

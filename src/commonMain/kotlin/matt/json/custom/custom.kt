@@ -857,35 +857,7 @@ val JsonElement.bool get() = jsonPrimitive.boolean
 
 //fun jsonArray(elements: Array<Any?>, serializeNulls: Boolean = false) = jsonArray(*elements, serializeNulls = serializeNulls)
 
-fun jsonArray(elements: Iterable<Any?>, serializeNulls: Boolean = false) =
-  jsonArray(*elements.toList().toTypedArray(), serializeNulls = serializeNulls)
 
-fun jsonArray(vararg elements: Any?, serializeNulls: Boolean = false): kotlinx.serialization.json.JsonArray =
-  buildJsonArray {
-	elements
-	  .filter { serializeNulls || it != null }
-	  .forEach {
-		this.add(it?.toJsonElement() ?: JsonNull)
-	  }
-  }
 
-fun jsonObj(
-  map: Map<*, *>,
-  serializers: List<MiniSerializer> = listOf()
-): JsonObject = jsonObj(*map.map { it.key to it.value }.toTypedArray(), serializers = serializers)
 
-fun jsonObj(
-  vararg entries: Pair<*, *>,
-  serializeNulls: Boolean = false,
-  serializers: List<MiniSerializer> = listOf()
-): JsonObject = buildJsonObject {
-  entries
-	.filter { serializeNulls || it.second != null }
-	.forEach {
-	  val sec = it.second
-	  val key = it.first
-	  require(key is String)
-	  put(key, sec?.toJsonElement(serializers = serializers) ?: JsonNull)
-	}
-}
 
