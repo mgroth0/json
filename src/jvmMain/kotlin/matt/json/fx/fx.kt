@@ -1,9 +1,12 @@
 package matt.json.fx
 
+//import matt.json.custom.jsonArray
+//import matt.json.custom.jsonObj
 import javafx.beans.property.BooleanProperty
-import javafx.beans.property.StringProperty
+import javafx.beans.property.DoubleProperty
 import javafx.beans.property.LongProperty
 import javafx.beans.property.ObjectProperty
+import javafx.beans.property.StringProperty
 import kotlinx.serialization.json.JsonElement
 import kotlinx.serialization.json.JsonNull
 import kotlinx.serialization.json.JsonObject
@@ -11,8 +14,6 @@ import kotlinx.serialization.json.JsonPrimitive
 import kotlinx.serialization.json.buildJsonArray
 import kotlinx.serialization.json.buildJsonObject
 import matt.json.custom.JsonWriter
-//import matt.json.custom.jsonArray
-//import matt.json.custom.jsonObj
 import matt.json.custom.toJsonElement
 import matt.json.ser.MiniSerializer
 import matt.klib.lang.err
