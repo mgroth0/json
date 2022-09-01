@@ -16,11 +16,14 @@
             "cfg": "commonMainApi",
             "key": "kotlinx-serialization-json"
         },
+
+
         {
             "type": "matt.mstruct.bj.BuildJsonLibDependency",
             "cfg": "jvmMainImplementation",
-            "key": "fx-base"
+            "key": "fx-controls"
         },
+
         {
             "type": "matt.mstruct.bj.BuildJsonLibDependency",
             "cfg": "jvmMainImplementation",
