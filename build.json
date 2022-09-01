@@ -1,5 +1,5 @@
 {
-    "type": "matt.mstruct.bj.JVM_ONLYModule",
+    "type": "matt.mstruct.bj.NO_NATIVEModule",
     "dependencies": [
         {
             "type": "matt.mstruct.bj.BuildJsonProjectDependency",
