@@ -1,6 +1,5 @@
 package matt.json.fx
 
-import guru.nidi.graphviz.engine.Graphviz
 import javafx.beans.property.BooleanProperty
 import javafx.beans.property.StringProperty
 import javafx.beans.property.LongProperty
