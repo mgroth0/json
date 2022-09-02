@@ -88,7 +88,7 @@ fun MFile.save(je: JsonElement) {
 }
 
 inline fun <reified T> MFile.save(t: T, pretty: Boolean = true) {
-  parentFile!!.mkdirs()
+  getParentFile()!!.mkdirs()
   val j = if (pretty) PrettyJson else Json
   text=(j.encodeToString(t))
 }

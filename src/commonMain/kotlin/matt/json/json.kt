@@ -16,26 +16,24 @@ import kotlinx.serialization.json.JsonDecoder
 import kotlinx.serialization.json.JsonElement
 import kotlinx.serialization.json.JsonObject
 import kotlinx.serialization.json.JsonPrimitive
-import kotlinx.serialization.json.decodeFromStream
 import kotlinx.serialization.json.encodeToJsonElement
 import matt.file.JsonFile
 import matt.file.MFile
 import matt.klib.lang.NEVER
 import matt.klib.times
 import kotlin.reflect.KClass
-import kotlin.reflect.full.memberProperties
 
 fun String.parseJson() = Json.decodeFromString<JsonElement>(this)
 
 inline fun <reified T> String.parse() = Json.decodeFromString<T>(this)
 
-fun MFile.parseJson() = readText().parseJson()
+fun MFile.parseJson() = text.parseJson()
 
 fun yesIUseJson() {
   if (("a"*3).length == 4) println("dummy text")
 }
 
-inline fun <reified T> Json.decodeFromFile(f: JsonFile) = decodeFromStream<T>(f.inputStream())
+
 
 
 /*class JITSerializer<T>(baseDescriptor: SerialDescriptor): SerializationStrategy<T> {
@@ -108,20 +106,4 @@ fun <T> DeserializationStrategy<T>.withSerializationStrategy(s: Encoder.(T)->Uni
 inline fun <reified T> T.toJson() = Json.encodeToJsonElement(this)
 
 inline fun <reified T> T.toJsonString() = Json.encodeToString(this)
-
-
-fun Any.loadProperties(obj: JsonElement) {
-  require(obj is JsonObject)
-  val a = this
-  println(
-	"it is actually ambiguous what to do here. like if a default is set in the Any but absent from the json, does the prop here get reset or ignored?"
-  )
-  obj.forEach { key, v ->
-	require(v is JsonPrimitive)
-	if (key != "type") {
-	  a::class.memberProperties.first { it.name == key }.call(a)
-	}
-
-  }
-}
 
