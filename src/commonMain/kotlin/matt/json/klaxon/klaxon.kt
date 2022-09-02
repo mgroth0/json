@@ -2,6 +2,9 @@ package matt.json.klaxon
 
 /*slightly modified version of code I stole from klaxon library*/
 
+/*https://www.baeldung.com/kotlin/int-to-hex-string*/
+fun Int.toHexString() = toString(16)
+
 object Render {
   fun renderString(s: String) = StringBuilder().renderString(s).toString()
 
@@ -21,7 +24,7 @@ object Render {
 		  else     -> {
 			if (isNotPrintableUnicode(ch)) {
 			  append("\\u")
-			  append(Integer.toHexString(ch.code).padStart(4, '0'))
+			  append(ch.code.toHexString().padStart(4, '0'))
 			} else {
 			  append(ch)
 			}
@@ -40,11 +43,11 @@ object Render {
   }
 
   private fun isNotPrintableUnicode(c: Char): Boolean =
-	  c in '\u0000'..'\u001F' ||
-	  c in '\u007F'..'\u009F' ||
-	  c in '\u2000'..'\u20FF'
+	c in '\u0000'..'\u001F' ||
+		c in '\u007F'..'\u009F' ||
+		c in '\u2000'..'\u20FF'
 
-//  private val decimalFormat = DecimalFormat("0.0####E0;-0.0####E0")
+  //  private val decimalFormat = DecimalFormat("0.0####E0;-0.0####E0")
 }
 
 
