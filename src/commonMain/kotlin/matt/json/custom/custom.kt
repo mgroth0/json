@@ -7,6 +7,7 @@ import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.JsonArray
 import kotlinx.serialization.json.JsonElement
+import kotlinx.serialization.json.JsonNull
 import kotlinx.serialization.json.JsonObject
 import kotlinx.serialization.json.JsonPrimitive
 import kotlinx.serialization.json.boolean
@@ -852,6 +853,5 @@ val JsonElement.bool get() = jsonPrimitive.boolean
 //fun jsonArray(elements: Array<Any?>, serializeNulls: Boolean = false) = jsonArray(*elements, serializeNulls = serializeNulls)
 
 
-
-
+fun <T> JsonElement.nullOr(op: JsonElement.()->T): T? = if (this is JsonNull) null else this.op()
 
