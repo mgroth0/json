@@ -2,8 +2,6 @@ package matt.json.klaxon
 
 /*slightly modified version of code I stole from klaxon library*/
 
-import java.text.DecimalFormat
-
 object Render {
   fun renderString(s: String) = StringBuilder().renderString(s).toString()
 
@@ -46,7 +44,7 @@ object Render {
 	  c in '\u007F'..'\u009F' ||
 	  c in '\u2000'..'\u20FF'
 
-  private val decimalFormat = DecimalFormat("0.0####E0;-0.0####E0")
+//  private val decimalFormat = DecimalFormat("0.0####E0;-0.0####E0")
 }
 
 
