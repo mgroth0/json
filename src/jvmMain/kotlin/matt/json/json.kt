@@ -1,3 +1,4 @@
+@file:JvmName("JsonJvmKt")
 @file:OptIn(ExperimentalSerializationApi::class)
 
 package matt.json
