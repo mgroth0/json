@@ -1,3 +1,4 @@
+@file:JvmName("JsonJvmKt")
 @file:OptIn(InternalSerializationApi::class, ExperimentalSerializationApi::class)
 
 package matt.json
@@ -14,13 +15,11 @@ import kotlinx.serialization.encoding.Encoder
 import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.JsonDecoder
 import kotlinx.serialization.json.JsonElement
-import kotlinx.serialization.json.JsonObject
-import kotlinx.serialization.json.JsonPrimitive
 import kotlinx.serialization.json.encodeToJsonElement
-import matt.file.JsonFile
 import matt.file.MFile
 import matt.klib.lang.NEVER
 import matt.klib.times
+import kotlin.jvm.JvmName
 import kotlin.reflect.KClass
 
 fun String.parseJson() = Json.decodeFromString<JsonElement>(this)
