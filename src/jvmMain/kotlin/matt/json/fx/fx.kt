@@ -16,7 +16,7 @@ import kotlinx.serialization.json.buildJsonObject
 import matt.json.custom.JsonWriter
 import matt.json.custom.toJsonElement
 import matt.json.ser.MiniSerializer
-import matt.klib.lang.err
+import matt.lang.err
 import kotlin.reflect.full.memberProperties
 
 fun Any?.toJsonElement(
