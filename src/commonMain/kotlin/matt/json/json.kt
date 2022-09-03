@@ -18,7 +18,7 @@ import kotlinx.serialization.json.JsonElement
 import kotlinx.serialization.json.encodeToJsonElement
 import matt.file.MFile
 import matt.lang.NEVER
-import matt.klib.times
+import matt.prim.str.times
 import kotlin.jvm.JvmName
 import kotlin.reflect.KClass
 
