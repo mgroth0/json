@@ -8,7 +8,7 @@ import kotlinx.serialization.json.JsonElement
 import kotlin.reflect.KClass
 
 /*cls used to be qname: String, but this is much less typesafe*/
-actual abstract class ser<T: Any> actual constructor(cls: KClass<T>): KSerializer<T> {
+actual abstract class MySerializer<T: Any> actual constructor(cls: KClass<*>): KSerializer<T> {
   actual final override val descriptor: SerialDescriptor
 	get() = TODO("Not yet implemented")
 

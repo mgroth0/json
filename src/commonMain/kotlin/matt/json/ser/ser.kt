@@ -13,7 +13,7 @@ import kotlin.reflect.KClass
 
 
 /*cls used to be qname: String, but this is much less typesafe*/
-expect abstract class ser<T: Any>(cls: KClass<T>): KSerializer<T> {
+expect abstract class MySerializer<T: Any>(cls: KClass<*>): KSerializer<T> {
 
   final override val descriptor: SerialDescriptor
   final override fun deserialize(decoder: Decoder): T
@@ -24,13 +24,13 @@ expect abstract class ser<T: Any>(cls: KClass<T>): KSerializer<T> {
 }
 
 
-abstract class JsonObjectSerializer<T: Any>(cls: KClass<T>): ser<T>(cls) {
+abstract class JsonObjectSerializer<T: Any>(cls: KClass<*>): MySerializer<T>(cls) {
   final override fun deserialize(jsonElement: JsonElement): T = deserialize(jsonElement.jsonObject)
   abstract fun deserialize(jsonObject: JsonObject): T
   abstract override fun serialize(value: T): JsonObject
 }
 
-abstract class JsonArraySerializer<T: Any>(cls: KClass<T>): ser<T>(cls) {
+abstract class JsonArraySerializer<T: Any>(cls: KClass<T>): MySerializer<T>(cls) {
   final override fun deserialize(jsonElement: JsonElement): T = deserialize(jsonElement.jsonArray)
   abstract fun deserialize(jsonArray: JsonArray): T
   abstract override fun serialize(value: T): JsonArray
