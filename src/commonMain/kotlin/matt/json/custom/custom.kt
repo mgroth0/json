@@ -845,7 +845,12 @@ val JsonElement.jsonObjectOrNull get() = (this as? JsonObject)?.jsonObject
 
 val JsonElement.stringOrNull get() = (this as? JsonPrimitive)?.stringOrNull
 val JsonPrimitive.stringOrNull get() = takeIf { it.isString }?.content
-val JsonElement.string get() = jsonPrimitive.also { require(it.isString) }.content
+val JsonElement.string
+  get() = jsonPrimitive.also {
+	require(
+	  it.isString
+	) { "expected string but got \"${it.content}\"" }
+  }.content
 
 val JsonElement.boolOrNull get() = (this as? JsonPrimitive)?.booleanOrNull
 val JsonElement.bool get() = jsonPrimitive.boolean

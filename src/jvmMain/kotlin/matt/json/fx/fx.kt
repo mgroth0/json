@@ -17,6 +17,7 @@ import matt.json.custom.JsonWriter
 import matt.json.custom.toJsonElement
 import matt.json.ser.MiniSerializer
 import matt.lang.err
+import matt.obs.prop.BindableProperty
 import kotlin.reflect.full.memberProperties
 
 fun Any?.toJsonElement(
@@ -25,21 +26,22 @@ fun Any?.toJsonElement(
 
 
   return when (this) {
-	null               -> JsonNull
-	is String          -> JsonPrimitive(this)
-	is Number          -> JsonPrimitive(this)
-	is Boolean         -> JsonPrimitive(this)
-	is Enum<*>         -> JsonPrimitive(this.name)
-	is JsonElement     -> this
-	is JsonWriter      -> this.toJsonElement()
-	is Map<*, *>       -> jsonObj(this)
-	is BooleanProperty -> JsonPrimitive(this.value)
-	is StringProperty    -> JsonPrimitive(this.value)
-	is LongProperty      -> JsonPrimitive(this.value)
-	is DoubleProperty    -> JsonPrimitive(this.value)
-	is ObjectProperty<*> -> this.value.toJsonElement(serializers = serializers)
-	is List<*>           -> jsonArray(this)
-	else                 -> when {
+	null                   -> JsonNull
+	is String              -> JsonPrimitive(this)
+	is Number              -> JsonPrimitive(this)
+	is Boolean             -> JsonPrimitive(this)
+	is Enum<*>             -> JsonPrimitive(this.name)
+	is JsonElement         -> this
+	is JsonWriter          -> this.toJsonElement()
+	is Map<*, *>           -> jsonObj(this)
+	is BooleanProperty     -> JsonPrimitive(this.value)
+	is StringProperty      -> JsonPrimitive(this.value)
+	is LongProperty        -> JsonPrimitive(this.value)
+	is DoubleProperty      -> JsonPrimitive(this.value)
+	is ObjectProperty<*>   -> this.value.toJsonElement(serializers = serializers)
+	is BindableProperty<*> -> this.value.toJsonElement(serializers = serializers)
+	is List<*>             -> jsonArray(this)
+	else                   -> when {
 	  this::class.isValue -> {
 		this::class.memberProperties.first().getter.call(this).toJsonElement(serializers = serializers)
 	  }
