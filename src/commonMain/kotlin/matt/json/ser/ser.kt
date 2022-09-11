@@ -22,8 +22,6 @@ expect abstract class MySerializer<T: Any>(cls: KClass<*>): KSerializer<T> {
   abstract fun serialize(value: T): JsonElement
 
 }
-
-
 abstract class JsonObjectSerializer<T: Any>(cls: KClass<*>): MySerializer<T>(cls) {
   final override fun deserialize(jsonElement: JsonElement): T = deserialize(jsonElement.jsonObject)
   abstract fun deserialize(jsonObject: JsonObject): T
