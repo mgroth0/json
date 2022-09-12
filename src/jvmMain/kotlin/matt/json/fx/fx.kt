@@ -59,11 +59,9 @@ fun Any?.toJsonElement(
 
 fun jsonArray(vararg elements: Any?, serializeNulls: Boolean = false): kotlinx.serialization.json.JsonArray =
   buildJsonArray {
-	elements
-	  .filter { serializeNulls || it != null }
-	  .forEach {
-		this.add(it?.toJsonElement() ?: JsonNull)
-	  }
+	elements.filter { serializeNulls || it != null }.forEach {
+	  this.add(it?.toJsonElement() ?: JsonNull)
+	}
   }
 
 fun jsonArray(elements: Iterable<Any?>, serializeNulls: Boolean = false) =
@@ -71,21 +69,22 @@ fun jsonArray(elements: Iterable<Any?>, serializeNulls: Boolean = false) =
 
 
 fun jsonObj(
-  map: Map<*, *>,
-  serializers: List<MiniSerializer> = listOf()
+  map: Map<*, *>, serializers: List<MiniSerializer> = listOf()
 ): JsonObject = jsonObj(*map.map { it.key to it.value }.toTypedArray(), serializers = serializers)
 
 fun jsonObj(
   vararg entries: Pair<*, *>,
   serializeNulls: Boolean = false,
+  serializeEmptyLists: Boolean = true,
   serializers: List<MiniSerializer> = listOf()
 ): JsonObject = buildJsonObject {
-  entries
-	.filter { serializeNulls || it.second != null }
-	.forEach {
-	  val sec = it.second
-	  val key = it.first
-	  require(key is String)
-	  put(key, sec?.toJsonElement(serializers = serializers) ?: JsonNull)
-	}
+  entries.filter { serializeNulls || it.second != null }.forEach {
+	val key = it.first
+	val value = it.second
+	require(key is String)
+	val j = value?.toJsonElement(serializers = serializers) ?: JsonNull
+	if ((serializeNulls || j !is JsonNull) && (serializeEmptyLists || j !is kotlinx.serialization.json.JsonArray || j.isNotEmpty())) put(
+	  key, j
+	)
+  }
 }
