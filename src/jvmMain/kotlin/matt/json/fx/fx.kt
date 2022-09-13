@@ -1,3 +1,5 @@
+@file:OptIn(InternalSerializationApi::class)
+
 package matt.json.fx
 
 //import matt.json.custom.jsonArray
@@ -7,12 +9,17 @@ import javafx.beans.property.DoubleProperty
 import javafx.beans.property.LongProperty
 import javafx.beans.property.ObjectProperty
 import javafx.beans.property.StringProperty
+import kotlinx.serialization.InternalSerializationApi
+import kotlinx.serialization.KSerializer
+import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.JsonElement
 import kotlinx.serialization.json.JsonNull
 import kotlinx.serialization.json.JsonObject
 import kotlinx.serialization.json.JsonPrimitive
 import kotlinx.serialization.json.buildJsonArray
 import kotlinx.serialization.json.buildJsonObject
+import kotlinx.serialization.serializer
+import kotlinx.serialization.serializerOrNull
 import matt.json.custom.JsonWriter
 import matt.json.custom.toJsonElement
 import matt.json.ser.MySerializer
@@ -25,6 +32,7 @@ fun Any?.toJsonElement(
 ): JsonElement {
 
 
+  @Suppress("UNCHECKED_CAST")
   return when (this) {
 	null                   -> JsonNull
 	is String              -> JsonPrimitive(this)
@@ -42,11 +50,12 @@ fun Any?.toJsonElement(
 	is BindableProperty<*> -> this.value.toJsonElement(serializers = serializers)
 	is List<*>             -> jsonArray(this)
 	else                   -> when {
-	  this::class.isValue -> {
+	  this::class.isValue                    -> {
 		this::class.memberProperties.first().getter.call(this).toJsonElement(serializers = serializers)
 	  }
 
-	  else                -> {
+	  this::class.serializerOrNull() != null -> Json.encodeToJsonElement(this::class.serializer() as KSerializer<Any>, this)
+	  else                                   -> {
 		serializers.firstOrNull {
 		  it.canSerialize(this)
 		}?.castAndSerialize(this) ?: err("making json object value with ${this::class} is not yet implemented")
