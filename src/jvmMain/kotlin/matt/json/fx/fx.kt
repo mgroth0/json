@@ -49,7 +49,7 @@ fun Any?.toJsonElement(
 	  else                -> {
 		serializers.firstOrNull {
 		  it.canSerialize(this)
-		}?.serialize(this) ?: err("making json object value with ${this::class} is not yet implemented")
+		}?.castAndSerialize(this) ?: err("making json object value with ${this::class} is not yet implemented")
 	  }
 	}
 
