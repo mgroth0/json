@@ -34,13 +34,13 @@ abstract class JsonObjectSerializer<T: Any>(cls: KClass<*>): MySerializer<T>(cls
   abstract override fun serialize(value: T): JsonObject
 }
 
-abstract class JsonArraySerializer<T: Any>(cls: KClass<T>): MySerializer<T>(cls) {
+abstract class JsonArraySerializer<T: Any>(cls: KClass<*>): MySerializer<T>(cls) {
   final override fun deserialize(jsonElement: JsonElement): T = deserialize(jsonElement.jsonArray)
   abstract fun deserialize(jsonArray: JsonArray): T
   abstract override fun serialize(value: T): JsonArray
 }
 
-abstract class JsonPrimitiveSerializer<T: Any>(cls: KClass<T>): MySerializer<T>(cls) {
+abstract class JsonPrimitiveSerializer<T: Any>(cls: KClass<*>): MySerializer<T>(cls) {
   final override fun deserialize(jsonElement: JsonElement): T = deserialize(jsonElement.jsonPrimitive)
   abstract fun deserialize(jsonPrimitive: JsonPrimitive): T
   abstract override fun serialize(value: T): JsonPrimitive

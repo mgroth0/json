@@ -22,9 +22,12 @@ import kotlinx.serialization.serializer
 import kotlinx.serialization.serializerOrNull
 import matt.json.custom.JsonWriter
 import matt.json.custom.toJsonElement
+import matt.json.ser.JsonObjectSerializer
 import matt.json.ser.MySerializer
 import matt.lang.err
+import matt.obs.hold.NamedObsHolder
 import matt.obs.prop.BindableProperty
+import kotlin.reflect.KClass
 import kotlin.reflect.full.memberProperties
 import kotlin.reflect.jvm.isAccessible
 
@@ -108,4 +111,13 @@ fun jsonObj(
 	  key, j
 	)
   }
+}
+
+
+abstract class JsonObjectFXSerializer<T: NamedObsHolder<*>>(val cls: KClass<T>): JsonObjectSerializer<T>(cls) {
+  open val miniSerializers: List<MySerializer<*>> = listOf()
+  final override fun serialize(value: T) = jsonObj(
+	value.namedObservables(),
+	serializers = miniSerializers
+  )
 }
