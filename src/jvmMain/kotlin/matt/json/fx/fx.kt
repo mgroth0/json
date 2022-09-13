@@ -26,6 +26,7 @@ import matt.json.ser.MySerializer
 import matt.lang.err
 import matt.obs.prop.BindableProperty
 import kotlin.reflect.full.memberProperties
+import kotlin.reflect.jvm.isAccessible
 
 fun Any?.toJsonElement(
   serializers: List<MySerializer<*>> = listOf()
@@ -50,11 +51,22 @@ fun Any?.toJsonElement(
 	is BindableProperty<*> -> this.value.toJsonElement(serializers = serializers)
 	is List<*>             -> jsonArray(this)
 	else                   -> when {
+
+	  this::class.serializerOrNull() != null -> Json.encodeToJsonElement(
+		this::class.serializer() as KSerializer<Any>, this
+	  )
+
 	  this::class.isValue                    -> {
-		this::class.memberProperties.first().getter.call(this).toJsonElement(serializers = serializers)
+		this::class.memberProperties.first().run {
+		  val oldAccessible = isAccessible
+		  isAccessible = true
+		  val r = getter.call(this).toJsonElement(serializers = serializers)
+		  isAccessible = oldAccessible
+		  r
+		}
 	  }
 
-	  this::class.serializerOrNull() != null -> Json.encodeToJsonElement(this::class.serializer() as KSerializer<Any>, this)
+
 	  else                                   -> {
 		serializers.firstOrNull {
 		  it.canSerialize(this)
