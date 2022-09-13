@@ -23,7 +23,7 @@ expect abstract class MySerializer<T: Any>(cls: KClass<*>): KSerializer<T> {
   final override fun serialize(encoder: Encoder, value: T)
   abstract fun deserialize(jsonElement: JsonElement): T
   abstract fun serialize(value: T): JsonElement
-
+  fun castAndSerialize(value: Any): JsonElement
 
 
 }

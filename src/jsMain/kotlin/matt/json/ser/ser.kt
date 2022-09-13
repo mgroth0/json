@@ -29,4 +29,9 @@ actual abstract class MySerializer<T: Any> actual constructor(cls: KClass<*>): K
 	return value::class.isSubTypeOf(cls)
   }
 
+  actual fun castAndSerialize(value: Any): JsonElement {
+	@Suppress("UNCHECKED_CAST")
+	return serialize(value as T)
+  }
+
 }

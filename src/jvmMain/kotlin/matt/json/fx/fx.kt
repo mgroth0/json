@@ -15,13 +15,13 @@ import kotlinx.serialization.json.buildJsonArray
 import kotlinx.serialization.json.buildJsonObject
 import matt.json.custom.JsonWriter
 import matt.json.custom.toJsonElement
-import matt.json.ser.MiniSerializer
+import matt.json.ser.MySerializer
 import matt.lang.err
 import matt.obs.prop.BindableProperty
 import kotlin.reflect.full.memberProperties
 
 fun Any?.toJsonElement(
-  serializers: List<MiniSerializer> = listOf()
+  serializers: List<MySerializer<*>> = listOf()
 ): JsonElement {
 
 
