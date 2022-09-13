@@ -1,4 +1,3 @@
-
 @file:OptIn(InternalSerializationApi::class, ExperimentalSerializationApi::class)
 
 package matt.json
@@ -15,12 +14,14 @@ import kotlinx.serialization.encoding.Encoder
 import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.JsonDecoder
 import kotlinx.serialization.json.JsonElement
+import kotlinx.serialization.json.decodeFromJsonElement
 import kotlinx.serialization.json.encodeToJsonElement
 import matt.file.MFile
 import matt.lang.NEVER
 import matt.prim.str.times
-import kotlin.jvm.JvmName
 import kotlin.reflect.KClass
+
+inline fun <reified T> JsonElement.decode() = Json.decodeFromJsonElement<T>(this)
 
 fun String.parseJson() = Json.decodeFromString<JsonElement>(this)
 
@@ -31,8 +32,6 @@ fun MFile.parseJson() = text.parseJson()
 fun yesIUseJson() {
   if (("a"*3).length == 4) println("dummy text")
 }
-
-
 
 
 /*class JITSerializer<T>(baseDescriptor: SerialDescriptor): SerializationStrategy<T> {
