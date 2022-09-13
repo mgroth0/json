@@ -69,14 +69,14 @@ fun jsonArray(elements: Iterable<Any?>, serializeNulls: Boolean = false) =
 
 
 fun jsonObj(
-  map: Map<*, *>, serializers: List<MiniSerializer> = listOf()
+  map: Map<*, *>, serializers: List<MySerializer<*>> = listOf()
 ): JsonObject = jsonObj(*map.map { it.key to it.value }.toTypedArray(), serializers = serializers)
 
 fun jsonObj(
   vararg entries: Pair<*, *>,
   serializeNulls: Boolean = false,
   serializeEmptyLists: Boolean = true,
-  serializers: List<MiniSerializer> = listOf()
+  serializers: List<MySerializer<*>> = listOf()
 ): JsonObject = buildJsonObject {
   entries.filter { serializeNulls || it.second != null }.forEach {
 	val key = it.first
