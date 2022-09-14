@@ -21,10 +21,16 @@ class BindablePropertySerializer<T>(val serializer: KSerializer<T>):
 
 }
 
-class BasicObservableListImplSerializer<E: Any>(val serializer: KSerializer<E>):
+class BasicObservableListImplSerializer<E: Any>(val serializer: KSerializer<in E>):
   JsonArraySerializer<BasicObservableListImpl<E>>(BasicObservableListImpl::class) {
   override fun deserialize(jsonArray: JsonArray): BasicObservableListImpl<E> {
-	return BasicObservableListImpl(jsonArray.map { Json.decodeFromJsonElement(serializer, it) })
+
+	/*THIS UNCHECKED CAST IS NECESSARY BECAUSE KOTLINX.SERIALIZATION DOESN'T PREFORM WELL FOR SEALED CLASS POLYMORPHIC SERIALIZERS WHEN YOU ARE CREATING A LIST OF A SPECIFIC SUBCLASS. NOT USING THE BASE CLASS SERIALIZER LEADS TO AN ERROR. SO AN 'IN' GENERIC AND AN UNCHECKED CASE IS NECESSARY. THIS WOULD BE A GREAT THING TO BRING UP ON THE KOTLINX.SERIALIZATION GITHUB.*/
+
+	return BasicObservableListImpl(jsonArray.map {
+	  @Suppress("UNCHECKED_CAST")
+	  Json.decodeFromJsonElement(serializer, it) as E
+	})
   }
 
   override fun serialize(value: BasicObservableListImpl<E>): JsonArray {
