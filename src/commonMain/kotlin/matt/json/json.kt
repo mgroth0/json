@@ -104,4 +104,5 @@ fun <T> DeserializationStrategy<T>.withSerializationStrategy(s: Encoder.(T)->Uni
 inline fun <reified T> T.toJson() = Json.encodeToJsonElement(this)
 
 inline fun <reified T> T.toJsonString() = Json.encodeToString(this)
+const val yesIUseJsonButAnInlineFunSoItDoesntShowInBytecode = "yesIUseJsonButAnInlineFunSoItDoesntShowInBytecode"
 
