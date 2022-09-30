@@ -17,6 +17,7 @@ import kotlinx.serialization.json.JsonElement
 import kotlinx.serialization.json.decodeFromJsonElement
 import kotlinx.serialization.json.encodeToJsonElement
 import matt.file.MFile
+import matt.json.prim.PrettyJson
 import matt.lang.NEVER
 import matt.prim.str.times
 import kotlin.reflect.KClass
@@ -104,6 +105,7 @@ fun <T> DeserializationStrategy<T>.withSerializationStrategy(s: Encoder.(T)->Uni
 inline fun <reified T> T.toJson() = Json.encodeToJsonElement(this)
 
 inline fun <reified T> T.toJsonString() = Json.encodeToString(this)
+inline fun <reified T> T.toPrettyJsonString() = PrettyJson.encodeToString(this)
 
 fun yesIUseJsonButAnInlineFunSoItDoesntShowInBytecode() = "yesIUseJsonButAnInlineFunSoItDoesntShowInBytecode"
 
