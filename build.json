@@ -24,6 +24,10 @@
             "type": "matt.mstruct.bj.BuildJsonLibDependency",
             "cfg": "jvmMainImplementation",
             "key": "kt-reflect"
+        },	{
+            "type" : "matt.mstruct.bj.BuildJsonProjectDependency",
+            "cfg" :  "commonMainApi",
+            "path" : ":k:model"
         }
     ]
 }
