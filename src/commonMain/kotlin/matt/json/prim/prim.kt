@@ -7,29 +7,29 @@ import kotlinx.serialization.json.JsonArray
 import kotlinx.serialization.json.JsonElement
 import kotlinx.serialization.json.JsonObject
 import kotlinx.serialization.json.decodeFromJsonElement
-import matt.file.JsonFile
-import matt.file.MFile
 import matt.json.parseJson
+import matt.model.text.HasText
+import matt.model.text.WritableText
 
 fun String.parseJsonObj(): JsonObject = Json.decodeFromString<JsonObject>(this)
 
-fun MFile.parseJsonObj() = text.parseJsonObj()
-fun MFile.writeJson(jsonElement: JsonElement, pretty: Boolean = false) {
+fun HasText.parseJsonObj() = text.parseJsonObj()
+fun WritableText.writeJson(jsonElement: JsonElement, pretty: Boolean = false) {
   text=((if (pretty) PrettyJson else Json).encodeToString(jsonElement))
 }
 
 
-inline fun <reified T: Any?> MFile.writeJson(t: T, pretty: Boolean = false) {
+inline fun <reified T: Any?> WritableText.writeJson(t: T, pretty: Boolean = false) {
   text=((if (pretty) PrettyJson else Json).encodeToString(t))
 }
 
 
-inline fun <reified T: Any?> MFile.readJson(): T = Json.decodeFromString(text)
+inline fun <reified T: Any?> HasText.readJson(): T = Json.decodeFromString(text)
 
 fun String.parseJsonObjs(): JsonArray = Json.decodeFromString<JsonArray>(this)
 
 
-fun MFile.parseJsonObjs() = text.parseJsonObjs()
+fun HasText.parseJsonObjs() = text.parseJsonObjs()
 
 
 val PrettyJson = Json {
@@ -57,7 +57,7 @@ fun String.toPrettyJson() = PrettyJson.encodeToString(parseJson())
 //  exitProcess(1)
 //}
 
-fun MFile.toPrettyJson() = text.toPrettyJson()
+fun HasText.toPrettyJson() = text.toPrettyJson()
 
 
 fun String.isValidJson(): Boolean = try {
@@ -77,18 +77,15 @@ fun String.isValidJson(): Boolean = try {
 //  false
 //}
 
-fun MFile.isValidJson() = text.isValidJson()
+fun HasText.isValidJson() = text.isValidJson()
 
-fun MFile.save(je: JsonElement) {
-
-  getParentFile()!!.mkdirs() //  MatchGroupCollection
-  //  JsonObject().
-
+fun WritableText.save(je: JsonElement) {
+  /*getParentFile()!!.mkdirs()*/
   text=(je.toString())
 }
 
-inline fun <reified T> MFile.save(t: T, pretty: Boolean = true) {
-  getParentFile()!!.mkdirs()
+inline fun <reified T> WritableText.save(t: T, pretty: Boolean = true) {
+  /*getParentFile()!!.mkdirs()*/
   val j = if (pretty) PrettyJson else Json
   text=(j.encodeToString(t))
 }
@@ -101,7 +98,7 @@ fun String.loadAndFormatJson() = toPrettyJson()
 //  GsonBuilder().setPrettyPrinting().serializeNulls().create().toJson(it)
 //}
 
-fun MFile.loadAndFormatJson() = text.loadAndFormatJson()
+fun HasText.loadAndFormatJson() = text.loadAndFormatJson()
 
 inline fun <reified T: Any> String.loadJson(): T = Json.decodeFromString(this)
 
@@ -110,9 +107,9 @@ inline fun <reified T: Any> String.loadJson(): T = Json.decodeFromString(this)
 //)
 
 
-inline fun <reified T: Any> MFile.loadJson(): T = text.loadJson()
+inline fun <reified T: Any> HasText.loadJson(): T = text.loadJson()
 
-inline fun <reified T: Any> T.saveTo(f: JsonFile, pretty: Boolean = true) = f.save(this,pretty=pretty)
+inline fun <reified T: Any> T.saveTo(f: WritableText, pretty: Boolean = true) = f.save(this,pretty=pretty)
 
 inline fun <reified T: Any> String.loadJsonList(): List<T> {
 
@@ -128,7 +125,7 @@ inline fun <reified T: Any> String.loadJsonList(): List<T> {
 //  return gson.fromJson(this, arrayOf<T>()::class.java).toList()
 //}
 
-inline fun <reified T: Any> MFile.loadJsonList(): List<T> = text.loadJsonList<T>()
+inline fun <reified T: Any> HasText.loadJsonList(): List<T> = text.loadJsonList<T>()
 
 
 //operator fun JsonElement.set(s: String, v: Any) {

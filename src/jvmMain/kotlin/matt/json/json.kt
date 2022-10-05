@@ -1,18 +1,16 @@
 @file:JvmName("JsonJvmKt")
-@file:OptIn(ExperimentalSerializationApi::class)
 
 package matt.json
 
-import kotlinx.serialization.ExperimentalSerializationApi
 import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.JsonElement
 import kotlinx.serialization.json.JsonObject
 import kotlinx.serialization.json.JsonPrimitive
 import kotlinx.serialization.json.decodeFromStream
-import matt.file.JsonFile
+import matt.model.stream.Streamable
 import kotlin.reflect.full.memberProperties
 
-inline fun <reified T> Json.decodeFromFile(f: JsonFile) = decodeFromStream<T>(f.inputStream())
+inline fun <reified T> Json.decodeFromStreamable(f: Streamable) = decodeFromStream<T>(f.inputStream())
 
 
 fun Any.loadProperties(obj: JsonElement) {

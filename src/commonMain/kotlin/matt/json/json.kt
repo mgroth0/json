@@ -1,10 +1,6 @@
-@file:OptIn(InternalSerializationApi::class, ExperimentalSerializationApi::class)
-
 package matt.json
 
 import kotlinx.serialization.DeserializationStrategy
-import kotlinx.serialization.ExperimentalSerializationApi
-import kotlinx.serialization.InternalSerializationApi
 import kotlinx.serialization.KSerializer
 import kotlinx.serialization.SerializationStrategy
 import kotlinx.serialization.decodeFromString
@@ -16,9 +12,9 @@ import kotlinx.serialization.json.JsonDecoder
 import kotlinx.serialization.json.JsonElement
 import kotlinx.serialization.json.decodeFromJsonElement
 import kotlinx.serialization.json.encodeToJsonElement
-import matt.file.MFile
 import matt.json.prim.PrettyJson
 import matt.lang.NEVER
+import matt.model.text.HasText
 import matt.prim.str.times
 import kotlin.reflect.KClass
 
@@ -28,7 +24,7 @@ fun String.parseJson() = Json.decodeFromString<JsonElement>(this)
 
 inline fun <reified T> String.parse() = Json.decodeFromString<T>(this)
 
-fun MFile.parseJson() = text.parseJson()
+fun HasText.parseJson() = text.parseJson()
 
 fun yesIUseJson() {
   if (("a"*3).length == 4) println("dummy text")
