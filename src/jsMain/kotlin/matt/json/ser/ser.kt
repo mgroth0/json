@@ -10,19 +10,14 @@ import kotlin.reflect.KClass
 
 /*cls used to be qname: String, but this is much less typesafe*/
 actual abstract class MySerializer<T: Any> actual constructor(cls: KClass<*>): KSerializer<T> {
-
   val cls = cls
-
-  actual final override val descriptor: SerialDescriptor
-	get() = TODO("Not yet implemented")
-
+  actual final override val descriptor: SerialDescriptor get() = TODO("Not yet implemented")
   actual final override fun deserialize(decoder: Decoder): T {
 	TODO("Not yet implemented")
   }
 
-  actual final override fun serialize(encoder: Encoder, value: T) {
-  }
 
+  actual final override fun serialize(encoder: Encoder, value: T) {}
   actual abstract fun deserialize(jsonElement: JsonElement): T
   actual abstract fun serialize(value: T): JsonElement
   actual fun canSerialize(value: Any): Boolean {
@@ -33,5 +28,4 @@ actual abstract class MySerializer<T: Any> actual constructor(cls: KClass<*>): K
 	@Suppress("UNCHECKED_CAST")
 	return serialize(value as T)
   }
-
 }
