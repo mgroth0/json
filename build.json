@@ -4,11 +4,6 @@
 	{
 	  "type" : "matt.mstruct.bj.BuildJsonProjectDependency",
 	  "cfg" :  "commonMainApi",
-	  "path" : ":k:file"
-	},
-	{
-	  "type" : "matt.mstruct.bj.BuildJsonProjectDependency",
-	  "cfg" :  "commonMainApi",
 	  "path" : ":k:reflect"
 	},
 	{
