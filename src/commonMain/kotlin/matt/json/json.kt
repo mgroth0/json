@@ -15,7 +15,6 @@ import kotlinx.serialization.json.encodeToJsonElement
 import matt.json.prim.PrettyJson
 import matt.lang.NEVER
 import matt.model.text.HasText
-import matt.prim.str.times
 import kotlin.reflect.KClass
 
 inline fun <reified T> JsonElement.decode() = Json.decodeFromJsonElement<T>(this)
@@ -25,10 +24,6 @@ fun String.parseJson() = Json.decodeFromString<JsonElement>(this)
 inline fun <reified T> String.parse() = Json.decodeFromString<T>(this)
 
 fun HasText.parseJson() = text.parseJson()
-
-fun yesIUseJson() {
-  if (("a"*3).length == 4) println("dummy text")
-}
 
 
 /*class JITSerializer<T>(baseDescriptor: SerialDescriptor): SerializationStrategy<T> {
