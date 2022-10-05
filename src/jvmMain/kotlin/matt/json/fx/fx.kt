@@ -4,11 +4,6 @@ package matt.json.fx
 
 //import matt.json.custom.jsonArray
 //import matt.json.custom.jsonObj
-import javafx.beans.property.BooleanProperty
-import javafx.beans.property.DoubleProperty
-import javafx.beans.property.LongProperty
-import javafx.beans.property.ObjectProperty
-import javafx.beans.property.StringProperty
 import kotlinx.serialization.InternalSerializationApi
 import kotlinx.serialization.KSerializer
 import kotlinx.serialization.json.Json
@@ -46,11 +41,6 @@ fun Any?.toJsonElement(
 	is JsonElement         -> this
 	is JsonWriter          -> this.toJsonElement()
 	is Map<*, *>           -> jsonObj(this)
-	is BooleanProperty     -> JsonPrimitive(this.value)
-	is StringProperty      -> JsonPrimitive(this.value)
-	is LongProperty        -> JsonPrimitive(this.value)
-	is DoubleProperty      -> JsonPrimitive(this.value)
-	is ObjectProperty<*>   -> this.value.toJsonElement(serializers = serializers)
 	is BindableProperty<*> -> this.value.toJsonElement(serializers = serializers)
 	is List<*>             -> jsonArray(this)
 	else                   -> when {
