@@ -15,7 +15,10 @@ import kotlinx.serialization.json.encodeToJsonElement
 import matt.json.prim.PrettyJson
 import matt.lang.NEVER
 import matt.model.text.HasText
+import matt.model.yes.YesIUse
 import kotlin.reflect.KClass
+
+object YesIUseJson: YesIUse
 
 inline fun <reified T> JsonElement.decode() = Json.decodeFromJsonElement<T>(this)
 
