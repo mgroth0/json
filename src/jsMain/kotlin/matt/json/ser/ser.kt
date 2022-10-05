@@ -5,7 +5,7 @@ import kotlinx.serialization.descriptors.SerialDescriptor
 import kotlinx.serialization.encoding.Decoder
 import kotlinx.serialization.encoding.Encoder
 import kotlinx.serialization.json.JsonElement
-import matt.lang.reflect.isSubTypeOf
+import matt.reflect.isSubTypeOf
 import kotlin.reflect.KClass
 
 /*cls used to be qname: String, but this is much less typesafe*/
