@@ -7,11 +7,6 @@
 	  "path" : ":k:file"
 	},
 	{
-	  "type" : "matt.mstruct.bj.BuildJsonProjectDependency",
-	  "cfg" :  "commonMainApi",
-	  "path" : ":k:obs"
-	},
-	{
 	  "type" : "matt.mstruct.bj.BuildJsonLibDependency",
 	  "cfg" :  "commonMainApi",
 	  "key" :  "kotlinx-serialization-json"
