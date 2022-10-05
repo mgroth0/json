@@ -1,3 +1,4 @@
+@file:JvmName("OldfxJvmKt")
 @file:OptIn(InternalSerializationApi::class)
 
 package matt.json.oldfx
