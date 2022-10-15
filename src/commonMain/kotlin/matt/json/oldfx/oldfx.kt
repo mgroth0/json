@@ -10,10 +10,10 @@ import kotlinx.serialization.json.JsonNull
 import kotlinx.serialization.json.JsonObject
 import kotlinx.serialization.json.buildJsonArray
 import kotlinx.serialization.json.buildJsonObject
-import matt.json.ser.MySerializer
+import matt.json.ser.MyJsonSerializer
 
 expect fun Any?.toJsonElement(
-  serializers: List<MySerializer<*>> = listOf()
+  serializers: List<MyJsonSerializer<*>> = listOf()
 ): JsonElement
 
 fun jsonArray(vararg elements: Any?, serializeNulls: Boolean = false): kotlinx.serialization.json.JsonArray =
@@ -28,7 +28,7 @@ fun jsonArray(elements: Iterable<Any?>, serializeNulls: Boolean = false) =
 
 
 fun jsonObj(
-  map: Map<*, *>, serializers: List<MySerializer<*>> = listOf()
+  map: Map<*, *>, serializers: List<MyJsonSerializer<*>> = listOf()
 ): JsonObject = jsonObj(*map.map { it.key to it.value }.toTypedArray(), serializers = serializers)
 
 
@@ -39,7 +39,7 @@ fun jsonObj(
   vararg entries: Pair<*, *>,
   serializeNulls: Boolean = false,
   serializeEmptyLists: Boolean = true,
-  serializers: List<MySerializer<*>> = listOf()
+  serializers: List<MyJsonSerializer<*>> = listOf()
 ): JsonObject = buildJsonObject {
   entries.filter { serializeNulls || it.second != null }.forEach {
 	val key = it.first

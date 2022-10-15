@@ -10,12 +10,13 @@ import kotlinx.serialization.encoding.Encoder
 import kotlinx.serialization.json.JsonDecoder
 import kotlinx.serialization.json.JsonElement
 import kotlinx.serialization.json.JsonEncoder
+import matt.model.idea.SerIdea
 import matt.reflect.YesIUseReflect
 import kotlin.reflect.KClass
 import kotlin.reflect.full.isSubclassOf
 
 /*cls used to be qname: String, but this is much less typesafe*/
-actual abstract class MySerializer<T: Any> actual constructor(cls: KClass<*>): KSerializer<T> {
+actual abstract class MyJsonSerializer<T: Any> actual constructor(cls: KClass<*>): KSerializer<T>, SerIdea {
 
   private val cls = cls
 
