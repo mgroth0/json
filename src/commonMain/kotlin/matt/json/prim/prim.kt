@@ -109,7 +109,7 @@ inline fun <reified T: Any> String.loadJson(): T = Json.decodeFromString(this)
 
 inline fun <reified T: Any> HasText.loadJson(): T = text.loadJson()
 
-inline fun <reified T: Any> T.saveTo(f: WritableText, pretty: Boolean = true) = f.save(this,pretty=pretty)
+inline fun <reified T: Any> T.saveAsJsonTo(f: WritableText, pretty: Boolean = true) = f.save(this,pretty=pretty)
 
 inline fun <reified T: Any> String.loadJsonList(): List<T> {
 
