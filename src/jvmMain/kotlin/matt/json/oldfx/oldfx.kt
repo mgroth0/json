@@ -15,7 +15,7 @@ import matt.json.custom.JsonWriter
 import matt.json.custom.toJsonElement
 import matt.json.ser.MyJsonSerializer
 import matt.lang.err
-import matt.model.value.ValueWrapper
+import matt.lang.model.value.ValueWrapper
 import kotlin.reflect.full.memberProperties
 import kotlin.reflect.jvm.isAccessible
 
