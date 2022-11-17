@@ -36,6 +36,7 @@ actual fun Any?.toJsonElement(
 	is Map<*, *>       -> jsonObj(this)
 	is ValueWrapper<*> -> this.value.toJsonElement(serializers = serializers)
 	is List<*>         -> jsonArray(this)
+	is Array<*>        -> jsonArray(*this)
 	else               -> when {
 
 	  this::class.serializerOrNull() != null -> Json.encodeToJsonElement(

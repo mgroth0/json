@@ -16,7 +16,7 @@ expect fun Any?.toJsonElement(
   serializers: List<MyJsonSerializer<*>> = listOf()
 ): JsonElement
 
-fun jsonArray(vararg elements: Any?, serializeNulls: Boolean = false): kotlinx.serialization.json.JsonArray =
+fun jsonArray(vararg elements: Any?, serializeNulls: Boolean = false): JsonArray =
   buildJsonArray {
 	elements.filter { serializeNulls || it != null }.forEach {
 	  this.add(it?.toJsonElement() ?: JsonNull)
