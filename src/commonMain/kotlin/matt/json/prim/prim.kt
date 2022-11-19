@@ -8,8 +8,8 @@ import kotlinx.serialization.json.JsonElement
 import kotlinx.serialization.json.JsonObject
 import kotlinx.serialization.json.decodeFromJsonElement
 import matt.json.parseJson
-import matt.model.text.HasText
-import matt.model.text.WritableText
+import matt.model.obj.text.HasText
+import matt.model.obj.text.WritableText
 
 fun String.parseJsonObj(): JsonObject = Json.decodeFromString<JsonObject>(this)
 

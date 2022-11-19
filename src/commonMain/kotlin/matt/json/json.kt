@@ -14,8 +14,8 @@ import kotlinx.serialization.json.decodeFromJsonElement
 import kotlinx.serialization.json.encodeToJsonElement
 import matt.json.prim.PrettyJson
 import matt.lang.NEVER
-import matt.model.text.HasText
-import matt.model.yes.YesIUse
+import matt.model.obj.text.HasText
+import matt.model.code.yes.YesIUse
 import kotlin.reflect.KClass
 
 object YesIUseJson: YesIUse

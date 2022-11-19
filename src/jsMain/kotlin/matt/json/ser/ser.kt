@@ -5,7 +5,7 @@ import kotlinx.serialization.descriptors.SerialDescriptor
 import kotlinx.serialization.encoding.Decoder
 import kotlinx.serialization.encoding.Encoder
 import kotlinx.serialization.json.JsonElement
-import matt.model.idea.SerIdea
+import matt.model.code.idea.SerIdea
 import matt.reflect.isSubTypeOf
 import kotlin.reflect.KClass
 

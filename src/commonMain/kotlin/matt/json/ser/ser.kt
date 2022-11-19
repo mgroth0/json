@@ -11,7 +11,7 @@ import kotlinx.serialization.json.JsonPrimitive
 import kotlinx.serialization.json.jsonArray
 import kotlinx.serialization.json.jsonObject
 import kotlinx.serialization.json.jsonPrimitive
-import matt.model.idea.SerIdea
+import matt.model.code.idea.SerIdea
 import kotlin.reflect.KClass
 
 
