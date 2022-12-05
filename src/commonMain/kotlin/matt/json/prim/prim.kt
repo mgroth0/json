@@ -15,12 +15,12 @@ fun String.parseJsonObj(): JsonObject = Json.decodeFromString<JsonObject>(this)
 
 fun HasText.parseJsonObj() = text.parseJsonObj()
 fun WritableText.writeJson(jsonElement: JsonElement, pretty: Boolean = false) {
-  text=((if (pretty) PrettyJson else Json).encodeToString(jsonElement))
+  text = ((if (pretty) PrettyJson else Json).encodeToString(jsonElement))
 }
 
 
 inline fun <reified T: Any?> WritableText.writeJson(t: T, pretty: Boolean = false) {
-  text=((if (pretty) PrettyJson else Json).encodeToString(t))
+  text = ((if (pretty) PrettyJson else Json).encodeToString(t))
 }
 
 
@@ -32,8 +32,31 @@ fun String.parseJsonObjs(): JsonArray = Json.decodeFromString<JsonArray>(this)
 fun HasText.parseJsonObjs() = text.parseJsonObjs()
 
 
-val PrettyJson = Json {
-  prettyPrint = true
+val PrettyJson by lazy {
+  Json {
+	prettyPrint = true
+  }
+}
+val IgnoreUnknownKeysJson by lazy {
+  Json {
+	ignoreUnknownKeys = true
+  }
+}
+
+private var warnedAboutUnknownKeys = false
+fun json(
+  ignoreUnknownKeys: Boolean
+) = when {
+  ignoreUnknownKeys -> {
+	if (!warnedAboutUnknownKeys) {
+	  println("WARNING: ignoring unknown keys")
+	  warnedAboutUnknownKeys =true
+	}
+
+	IgnoreUnknownKeysJson
+  }
+
+  else              -> Json
 }
 
 fun String.toPrettyJson() = PrettyJson.encodeToString(parseJson())
@@ -81,13 +104,13 @@ fun HasText.isValidJson() = text.isValidJson()
 
 fun WritableText.save(je: JsonElement) {
   /*getParentFile()!!.mkdirs()*/
-  text=(je.toString())
+  text = (je.toString())
 }
 
 inline fun <reified T> WritableText.save(t: T, pretty: Boolean = true) {
   /*getParentFile()!!.mkdirs()*/
   val j = if (pretty) PrettyJson else Json
-  text=(j.encodeToString(t))
+  text = (j.encodeToString(t))
 }
 
 
@@ -100,16 +123,19 @@ fun String.loadAndFormatJson() = toPrettyJson()
 
 fun HasText.loadAndFormatJson() = text.loadAndFormatJson()
 
-inline fun <reified T: Any> String.loadJson(): T = Json.decodeFromString(this)
+inline fun <reified T: Any> String.loadJson(
+  ignoreUnknownKeys: Boolean = false
+): T = json(ignoreUnknownKeys = ignoreUnknownKeys).decodeFromString(this)
 
 //  gson.fromJson(
 //  this, type.java
 //)
 
 
-inline fun <reified T: Any> HasText.loadJson(): T = text.loadJson()
+inline fun <reified T: Any> HasText.loadJson(ignoreUnknownKeys: Boolean = false): T =
+  text.loadJson(ignoreUnknownKeys = ignoreUnknownKeys)
 
-inline fun <reified T: Any> T.saveAsJsonTo(f: WritableText, pretty: Boolean = true) = f.save(this,pretty=pretty)
+inline fun <reified T: Any> T.saveAsJsonTo(f: WritableText, pretty: Boolean = true) = f.save(this, pretty = pretty)
 
 inline fun <reified T: Any> String.loadJsonList(): List<T> {
 
