@@ -7,9 +7,12 @@ import kotlinx.serialization.json.JsonArray
 import kotlinx.serialization.json.JsonElement
 import kotlinx.serialization.json.JsonObject
 import kotlinx.serialization.json.decodeFromJsonElement
+import kotlinx.serialization.serializer
 import matt.json.parseJson
 import matt.model.obj.text.HasText
+import matt.model.obj.text.MightExistAndWritableText
 import matt.model.obj.text.WritableText
+import kotlin.reflect.KClass
 
 fun String.parseJsonObj(): JsonObject = Json.decodeFromString<JsonObject>(this)
 
@@ -50,7 +53,7 @@ fun json(
   ignoreUnknownKeys -> {
 	if (!warnedAboutUnknownKeys) {
 	  println("WARNING: ignoring unknown keys")
-	  warnedAboutUnknownKeys =true
+	  warnedAboutUnknownKeys = true
 	}
 
 	IgnoreUnknownKeysJson
@@ -127,6 +130,11 @@ inline fun <reified T: Any> String.loadJson(
   ignoreUnknownKeys: Boolean = false
 ): T = json(ignoreUnknownKeys = ignoreUnknownKeys).decodeFromString(this)
 
+fun <T: Any> String.loadJson(
+  cls: KClass<T>,
+  ignoreUnknownKeys: Boolean = false
+): T = json(ignoreUnknownKeys = ignoreUnknownKeys).decodeFromString(cls.serializer(), this)
+
 //  gson.fromJson(
 //  this, type.java
 //)
@@ -135,12 +143,15 @@ inline fun <reified T: Any> String.loadJson(
 inline fun <reified T: Any> HasText.loadJson(ignoreUnknownKeys: Boolean = false): T =
   text.loadJson(ignoreUnknownKeys = ignoreUnknownKeys)
 
+fun <T: Any> HasText.loadJson(cls: KClass<T>, ignoreUnknownKeys: Boolean = false): T =
+  text.loadJson(cls, ignoreUnknownKeys = ignoreUnknownKeys)
+
 inline fun <reified T: Any> T.saveAsJsonTo(f: WritableText, pretty: Boolean = true) = f.save(this, pretty = pretty)
 
 inline fun <reified T: Any> String.loadJsonList(): List<T> {
 
   return Json.decodeFromString<JsonArray>(this).map {
-	Json.decodeFromJsonElement<T>(it)
+	Json.decodeFromJsonElement(it)
   }
 
   //  @Suppress("UNCHECKED_CAST") return (gson.fromJson(
@@ -164,3 +175,28 @@ inline fun <reified T: Any> HasText.loadJsonList(): List<T> = text.loadJsonList<
 
 
 //inline fun <reified T> matt.klib.file.File.loadJsonList(): List<T> = readText().loadJsonList()
+
+
+
+inline fun <reified T> MightExistAndWritableText.loadOrSaveJson(
+  forceRecreate: Boolean = false,
+  op: ()->T
+): T {
+  return if (!forceRecreate && exists()) {
+	loadJson()
+  } else op().also {
+	text = kotlinx.serialization.json.Json.encodeToString(it)
+  }
+}
+
+fun <T: Any> MightExistAndWritableText.loadOrSaveJson(
+  cls: KClass<T>,
+  forceRecreate: Boolean = false,
+  op: ()->T
+): T {
+  return if (!forceRecreate && exists()) {
+	loadJson(cls)
+  } else op().also {
+	text = kotlinx.serialization.json.Json.encodeToString(cls.serializer(), it)
+  }
+}
