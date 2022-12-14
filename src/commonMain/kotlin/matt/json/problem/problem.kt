@@ -26,7 +26,7 @@ data class SubB(val data: Double): SuperClass()
 
 @Serializable
 @SerialName("MapContainer")
-data class MapContainer<K: SuperClass, V>(val map: Map<K, V>): Map<K, V> by map
+data class MapContainer<K: SuperClass, V>(val map: Map<K, V>)
 
 @Serializable
 @SerialName("StringWrapper")
