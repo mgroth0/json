@@ -45,6 +45,11 @@ val IgnoreUnknownKeysJson by lazy {
 	ignoreUnknownKeys = true
   }
 }
+val EncodeDefaultsJson by lazy {
+  Json {
+	encodeDefaults = true
+  }
+}
 
 private var warnedAboutUnknownKeys = false
 fun json(
@@ -175,7 +180,6 @@ inline fun <reified T: Any> HasText.loadJsonList(): List<T> = text.loadJsonList<
 
 
 //inline fun <reified T> matt.klib.file.File.loadJsonList(): List<T> = readText().loadJsonList()
-
 
 
 inline fun <reified T> MightExistAndWritableText.loadOrSaveJson(
