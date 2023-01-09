@@ -21,6 +21,7 @@ actual abstract class MyJsonSerializer<T: Any> actual constructor(cls: KClass<*>
   actual final override fun serialize(encoder: Encoder, value: T) {}
   actual abstract fun deserialize(jsonElement: JsonElement): T
   actual abstract fun serialize(value: T): JsonElement
+
   actual fun canSerialize(value: Any): Boolean {
 	return value::class.isSubTypeOf(cls)
   }
