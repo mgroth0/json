@@ -177,9 +177,9 @@ enum class CollectionType {
 //
 //		when (d) {
 //		  is SuperDelegate     -> d.set(fromJ(it))
-//		  is SuperListDelegate -> d.setAll(fromJ(it) as Collection<*>)
-//		  is SuperSetDelegate  -> {                //                                println("running d.setAll(${it.toJsonWriter().toJsonString()})")
-//			d.setAll(fromJ(it) as Collection<*>)
+//		  is SuperListDelegate -> d.matt.lang.setall.setAll(fromJ(it) as Collection<*>)
+//		  is SuperSetDelegate  -> {                //                                println("running d.matt.lang.setall.setAll(${it.toJsonWriter().toJsonString()})")
+//			d.matt.lang.setall.setAll(fromJ(it) as Collection<*>)
 //		  }
 //		}
 //	  }, optional = optional, default = default
