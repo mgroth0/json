@@ -14,8 +14,8 @@ import kotlinx.serialization.json.decodeFromJsonElement
 import kotlinx.serialization.json.encodeToJsonElement
 import matt.json.prim.PrettyJson
 import matt.lang.NEVER
-import matt.model.obj.text.HasText
 import matt.model.code.yes.YesIUse
+import matt.model.obj.text.HasText
 import kotlin.reflect.KClass
 
 object YesIUseJson: YesIUse
@@ -102,4 +102,6 @@ inline fun <reified T> T.toJsonString() = Json.encodeToString(this)
 inline fun <reified T> T.toPrettyJsonString() = PrettyJson.encodeToString(this)
 
 fun yesIUseJsonButAnInlineFunSoItDoesntShowInBytecode() = "yesIUseJsonButAnInlineFunSoItDoesntShowInBytecode"
+
+
 
