@@ -186,10 +186,11 @@ inline fun <reified T> MightExistAndWritableText.loadOrSaveJson(
   forceRecreate: Boolean = false,
   op: ()->T
 ): T {
-  return if (!forceRecreate && exists()) {
-	loadJson()
+  val theText = lazy { text }
+  return if (!forceRecreate && exists() && theText.value.isNotBlank()) {
+	theText.value.loadJson()
   } else op().also {
-	text = kotlinx.serialization.json.Json.encodeToString(it)
+	text = Json.encodeToString(it)
   }
 }
 
@@ -201,6 +202,6 @@ fun <T: Any> MightExistAndWritableText.loadOrSaveJson(
   return if (!forceRecreate && exists()) {
 	loadJson(cls)
   } else op().also {
-	text = kotlinx.serialization.json.Json.encodeToString(cls.serializer(), it)
+	text = Json.encodeToString(cls.serializer(), it)
   }
 }
