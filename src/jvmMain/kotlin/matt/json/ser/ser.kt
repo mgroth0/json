@@ -12,12 +12,11 @@ import kotlinx.serialization.json.JsonElement
 import kotlinx.serialization.json.JsonEncoder
 import matt.model.code.idea.SerIdea
 import kotlin.reflect.KClass
-import kotlin.reflect.full.isSubclassOf
 
 /*cls used to be qname: String, but this is much less typesafe*/
-actual abstract class MyJsonSerializer<T: Any> actual constructor(cls: KClass<*>): KSerializer<T>, SerIdea {
+actual abstract class MyJsonSerializer<T: Any> actual constructor(private val cls: KClass<*>): KSerializer<T>, SerIdea {
 
-  private val cls = cls
+  /*private val cls = cls*/
 
   actual final override val descriptor: SerialDescriptor =
 	buildClassSerialDescriptor(cls.qualifiedName!!) /*I don't understand why ths is necessary but I think it is.*/
@@ -39,7 +38,8 @@ actual abstract class MyJsonSerializer<T: Any> actual constructor(cls: KClass<*>
 	val yes = YesIUseReflect
   }*/
 
-  actual fun canSerialize(value: Any) = value::class.isSubclassOf(cls)
+  actual fun canSerialize(value: Any) = cls.isInstance(value)
+	/*value::class.isSubclassOf(cls)*/
   actual fun castAndSerialize(value: Any): JsonElement {
 	@Suppress("UNCHECKED_CAST")
 	return serialize(value as T)
