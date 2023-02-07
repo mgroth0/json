@@ -41,15 +41,19 @@ actual fun Any?.toJsonElement(
 		this::class.serializer() as KSerializer<Any>, this
 	  )
 
-	  this::class.isValue                    -> {
-		this::class.memberProperties.first().run {
+
+	  /*JUST MAKE A SERIALIZER FOR VALUE CLASSES*/
+
+	  /*this::class.isValue                    -> err("just make a serializer for ${this::class}!")*/
+
+/*		this::class.memberProperties.first().run {
 		  val oldAccessible = isAccessible
 		  isAccessible = true
 		  val r = getter.call(this).toJsonElement(serializers = serializers)
 		  isAccessible = oldAccessible
 		  r
-		}
-	  }
+		}*/
+	  /*}*/
 
 
 	  else                                   -> {
