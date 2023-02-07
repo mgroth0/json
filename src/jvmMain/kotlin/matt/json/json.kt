@@ -3,15 +3,12 @@
 package matt.json
 
 import kotlinx.serialization.json.Json
-import kotlinx.serialization.json.JsonElement
-import kotlinx.serialization.json.JsonObject
-import kotlinx.serialization.json.JsonPrimitive
 import kotlinx.serialization.json.decodeFromStream
 import matt.model.obj.stream.Streamable
-import kotlin.reflect.full.memberProperties
 
 inline fun <reified T> Json.decodeFromStreamable(f: Streamable) = decodeFromStream<T>(f.inputStream())
 
+/*
 
 fun Any.loadProperties(obj: JsonElement) {
   require(obj is JsonObject)
@@ -28,3 +25,4 @@ fun Any.loadProperties(obj: JsonElement) {
   }
 }
 
+*/
