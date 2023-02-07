@@ -11,7 +11,6 @@ import kotlinx.serialization.json.JsonDecoder
 import kotlinx.serialization.json.JsonElement
 import kotlinx.serialization.json.JsonEncoder
 import matt.model.code.idea.SerIdea
-import matt.reflect.YesIUseReflect
 import kotlin.reflect.KClass
 import kotlin.reflect.full.isSubclassOf
 
@@ -36,9 +35,9 @@ actual abstract class MyJsonSerializer<T: Any> actual constructor(cls: KClass<*>
   actual abstract fun serialize(value: T): JsonElement
 
 
-  companion object {
+  /*companion object {
 	val yes = YesIUseReflect
-  }
+  }*/
 
   actual fun canSerialize(value: Any) = value::class.isSubclassOf(cls)
   actual fun castAndSerialize(value: Any): JsonElement {
