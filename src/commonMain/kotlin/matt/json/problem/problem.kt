@@ -72,7 +72,7 @@ fun main() {
 
 
 		/*I wish I could remove all of this primitive wrapper stuff*/
-		default {
+		defaultDeserializer {
 		  when (it) {
 			StringWrapper::class.simpleName -> StringClassSerializer
 			DoubleWrapper::class.simpleName -> DoubleClassSerializer
