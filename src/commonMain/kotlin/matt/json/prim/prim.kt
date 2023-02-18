@@ -10,7 +10,6 @@ import kotlinx.serialization.json.decodeFromJsonElement
 import kotlinx.serialization.serializer
 import matt.json.parseJson
 import matt.model.obj.text.HasText
-import matt.model.obj.text.MightExistAndWritableText
 import matt.model.obj.text.WritableText
 import kotlin.reflect.KClass
 
@@ -181,27 +180,3 @@ inline fun <reified T: Any> HasText.loadJsonList(): List<T> = text.loadJsonList<
 
 //inline fun <reified T> matt.klib.file.File.loadJsonList(): List<T> = readText().loadJsonList()
 
-
-inline fun <reified T> MightExistAndWritableText.loadOrSaveJson(
-  forceRecreate: Boolean = false,
-  op: ()->T
-): T {
-  val theText = lazy { text }
-  return if (!forceRecreate && exists() && theText.value.isNotBlank()) {
-	theText.value.loadJson()
-  } else op().also {
-	text = Json.encodeToString(it)
-  }
-}
-
-fun <T: Any> MightExistAndWritableText.loadOrSaveJson(
-  cls: KClass<T>,
-  forceRecreate: Boolean = false,
-  op: ()->T
-): T {
-  return if (!forceRecreate && exists()) {
-	loadJson(cls)
-  } else op().also {
-	text = Json.encodeToString(cls.serializer(), it)
-  }
-}
