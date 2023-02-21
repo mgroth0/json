@@ -24,7 +24,9 @@ inline fun <reified T> JsonElement.decode() = Json.decodeFromJsonElement<T>(this
 
 fun String.parseJson() = Json.decodeFromString<JsonElement>(this)
 
-inline fun <reified T> String.parse() = Json.decodeFromString<T>(this)
+inline fun <reified T> String.parse(
+  json: Json = Json
+) = json.decodeFromString<T>(this)
 
 fun HasText.parseJson() = text.parseJson()
 
@@ -102,6 +104,7 @@ inline fun <reified T> T.toJsonString() = Json.encodeToString(this)
 inline fun <reified T> T.toPrettyJsonString() = PrettyJson.encodeToString(this)
 
 fun yesIUseJsonButAnInlineFunSoItDoesntShowInBytecode() = "yesIUseJsonButAnInlineFunSoItDoesntShowInBytecode"
+
 
 
 
