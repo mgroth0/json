@@ -16,6 +16,7 @@ import matt.json.prim.PrettyJson
 import matt.lang.NEVER
 import matt.model.code.yes.YesIUse
 import matt.model.obj.text.HasText
+import matt.model.op.convert.StringConverter
 import kotlin.reflect.KClass
 
 object YesIUseJson: YesIUse
@@ -104,6 +105,18 @@ inline fun <reified T> T.toJsonString() = Json.encodeToString(this)
 inline fun <reified T> T.toPrettyJsonString() = PrettyJson.encodeToString(this)
 
 fun yesIUseJsonButAnInlineFunSoItDoesntShowInBytecode() = "yesIUseJsonButAnInlineFunSoItDoesntShowInBytecode"
+
+
+class JsonStringConverter<T>(private val ser: KSerializer<T>): StringConverter<T> {
+  override fun toString(t: T): String {
+	return Json.encodeToString(ser, t)
+  }
+
+  override fun fromString(s: String): T {
+	return Json.decodeFromString(ser, s)
+  }
+
+}
 
 
 
