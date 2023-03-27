@@ -4,7 +4,9 @@ package matt.json
 
 import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.decodeFromStream
+import kotlinx.serialization.serializer
 import matt.model.obj.stream.Streamable
+import kotlin.reflect.KClass
 
 inline fun <reified T> Json.decodeFromStreamable(f: Streamable) = decodeFromStream<T>(f.inputStream())
 
@@ -26,3 +28,12 @@ fun Any.loadProperties(obj: JsonElement) {
 }
 
 */
+
+
+actual fun <T : Any> String.parseNoInline(
+    json: Json,
+    cls: KClass<T>
+) = json.decodeFromString(
+    cls.serializer(),
+    this
+)
