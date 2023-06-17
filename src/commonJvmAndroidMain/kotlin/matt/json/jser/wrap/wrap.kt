@@ -33,6 +33,18 @@ abstract class JavaIoSerializableWrapper<T : Any>(innerObject: T? = null) : Seri
     private fun readObject(`in`: ObjectInputStream) {
         innerObject = `in`.readJson(cls)
     }
+
+    override fun equals(other: Any?): Boolean {
+        return other != null && other::class == this::class && (other as JavaIoSerializableWrapper<*>).innerObject == innerObject
+    }
+
+    override fun hashCode(): Int {
+        var result = cls.hashCode()
+        result = 31 * result + innerObject.hashCode()
+        return result
+    }
+
+
 }
 
 
