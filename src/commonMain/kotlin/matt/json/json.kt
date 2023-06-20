@@ -1,9 +1,16 @@
 package matt.json
 
-import kotlinx.serialization.*
+import kotlinx.serialization.DeserializationStrategy
+import kotlinx.serialization.KSerializer
+import kotlinx.serialization.SerializationStrategy
+import kotlinx.serialization.encodeToString
 import kotlinx.serialization.encoding.Decoder
 import kotlinx.serialization.encoding.Encoder
-import kotlinx.serialization.json.*
+import kotlinx.serialization.json.Json
+import kotlinx.serialization.json.JsonDecoder
+import kotlinx.serialization.json.JsonElement
+import kotlinx.serialization.json.decodeFromJsonElement
+import kotlinx.serialization.json.encodeToJsonElement
 import matt.json.prim.PrettyJson
 import matt.lang.NEVER
 import matt.model.code.yes.YesIUse
@@ -24,7 +31,7 @@ inline fun <reified T> String.parse(
 expect fun <T : Any> String.parseNoInline(
     json: Json = Json,
     cls: KClass<T>
-) : T
+): T
 
 
 fun HasText.parseJson() = text.parseJson()
@@ -121,16 +128,16 @@ inline fun <reified T> T.toPrettyJsonString() = PrettyJson.encodeToString(this)
 fun yesIUseJsonButAnInlineFunSoItDoesntShowInBytecode() = "yesIUseJsonButAnInlineFunSoItDoesntShowInBytecode"
 
 
-class JsonStringConverter<T>(private val ser: KSerializer<T>) : StringConverter<T> {
+class JsonStringConverter<T>(private val ser: KSerializer<T>, private val json: Json) : StringConverter<T> {
     override fun toString(t: T): String {
-        return Json.encodeToString(
+        return json.encodeToString(
             ser,
             t
         )
     }
 
     override fun fromString(s: String): T {
-        return Json.decodeFromString(
+        return json.decodeFromString(
             ser,
             s
         )
