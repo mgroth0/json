@@ -14,11 +14,6 @@ class JsonConverter<T>(
     }
 
     override fun fromString(s: String): T {
-        println("DESERIALIZING 1: $s")
-        println("JSON=$json")
-        println("ser=$ser")
-        val r = json.decodeFromString(ser, s)
-        println("DESERIALIZING 2: $r")
-        return r
+        return json.decodeFromString(ser, s)
     }
 }
