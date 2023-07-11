@@ -1,5 +1,3 @@
-
-
 package matt.json.oldfx
 
 //import matt.json.custom.jsonArray
@@ -13,41 +11,45 @@ import kotlinx.serialization.json.buildJsonObject
 import matt.json.ser.MyJsonSerializer
 
 expect fun Any?.toJsonElement(
-  serializers: List<MyJsonSerializer<*>> = listOf()
+    serializers: List<MyJsonSerializer<*>> = listOf()
 ): JsonElement
 
-fun jsonArray(vararg elements: Any?, serializeNulls: Boolean = false): JsonArray =
-  buildJsonArray {
-	elements.filter { serializeNulls || it != null }.forEach {
-	  this.add(it?.toJsonElement() ?: JsonNull)
-	}
-  }
+fun jsonArray(
+    vararg elements: Any?,
+    serializeNulls: Boolean = false
+): JsonArray =
+    buildJsonArray {
+        elements.filter { serializeNulls || it != null }.forEach {
+            this.add(it?.toJsonElement() ?: JsonNull)
+        }
+    }
 
-fun jsonArray(elements: Iterable<Any?>, serializeNulls: Boolean = false) =
-  jsonArray(*elements.toList().toTypedArray(), serializeNulls = serializeNulls)
+fun jsonArray(
+    elements: Iterable<Any?>,
+    serializeNulls: Boolean = false
+) =
+    jsonArray(*elements.toList().toTypedArray(), serializeNulls = serializeNulls)
 
 
 fun jsonObj(
-  map: Map<*, *>, serializers: List<MyJsonSerializer<*>> = listOf()
+    map: Map<*, *>,
+    serializers: List<MyJsonSerializer<*>> = listOf()
 ): JsonObject = jsonObj(*map.map { it.key to it.value }.toTypedArray(), serializers = serializers)
 
 
-
-
-
 fun jsonObj(
-  vararg entries: Pair<*, *>,
-  serializeNulls: Boolean = false,
-  serializeEmptyLists: Boolean = true,
-  serializers: List<MyJsonSerializer<*>> = listOf()
+    vararg entries: Pair<*, *>,
+    serializeNulls: Boolean = false,
+    serializeEmptyLists: Boolean = true,
+    serializers: List<MyJsonSerializer<*>> = listOf()
 ): JsonObject = buildJsonObject {
-  entries.filter { serializeNulls || it.second != null }.forEach {
-	val key = it.first
-	val value = it.second
-	require(key is String)
-	val j = value?.toJsonElement(serializers = serializers) ?: JsonNull
-	if ((serializeNulls || j !is JsonNull) && (serializeEmptyLists || j !is JsonArray || j.isNotEmpty())) put(
-	  key, j
-	)
-  }
+    entries.filter { serializeNulls || it.second != null }.forEach {
+        val key = it.first
+        val value = it.second
+        key as String
+        val j = value?.toJsonElement(serializers = serializers) ?: JsonNull
+        if ((serializeNulls || j !is JsonNull) && (serializeEmptyLists || j !is JsonArray || j.isNotEmpty())) put(
+            key, j
+        )
+    }
 }
