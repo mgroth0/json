@@ -1,7 +1,9 @@
 {
   "type": "MultiPlatformModule",
   "jvm": {},
-  "js": {"type":"lib"},
+  "js": {
+    "type": "lib"
+  },
   "android": {
     "type": "Lib"
   },
@@ -10,6 +12,11 @@
       "type": "Project",
       "cfg": "commonMainApi",
       "path": ":k:model"
+    },
+    {
+      "type": "Project",
+      "cfg": "jvmTestImplementation",
+      "path": ":k:test"
     }
   ]
 }
