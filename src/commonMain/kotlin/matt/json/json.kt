@@ -28,6 +28,7 @@ inline fun <reified T> String.parse(
     json: Json = Json
 ) = json.decodeFromString<T>(this)
 
+@Deprecated("can use @Suppress(\"INLINE_FROM_HIGHER_PLATFORM\")")
 expect fun <T : Any> String.parseNoInline(
     json: Json = Json,
     cls: KClass<T>
