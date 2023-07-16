@@ -9,11 +9,6 @@
       "type": "Project",
       "cfg": "commonMainApi",
       "path": ":k:model"
-    },
-    {
-      "type": "Project",
-      "cfg": "jvmTestImplementation",
-      "path": ":k:test"
     }
   ]
 }
