@@ -8,7 +8,10 @@ import java.io.ObjectOutputStream
 import kotlin.reflect.KClass
 
 @OptIn(InternalSerializationApi::class)
-internal fun <T : Any> ObjectOutputStream.writeJson(cls: KClass<T>, obj: T) {
+internal fun <T : Any> ObjectOutputStream.writeJson(
+    cls: KClass<T>,
+    obj: T
+) {
     val s = Json.encodeToString(cls.serializer(), obj)
     writeInt(s.length)
     write(s.encodeToByteArray())

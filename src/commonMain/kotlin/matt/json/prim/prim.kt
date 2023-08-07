@@ -1,6 +1,5 @@
 package matt.json.prim
 
-import kotlinx.serialization.decodeFromString
 import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.JsonArray
@@ -114,7 +113,7 @@ fun WritableText.save(je: JsonElement) {
   text = (je.toString())
 }
 
-inline fun <reified T> WritableText.save(t: T, pretty: Boolean = true) {
+inline fun <reified T> WritableText.saveJson(t: T, pretty: Boolean = true) {
   /*getParentFile()!!.mkdirs()*/
   val j = if (pretty) PrettyJson else Json
   text = (j.encodeToString(t))
@@ -150,7 +149,7 @@ inline fun <reified T: Any> HasText.loadJson(ignoreUnknownKeys: Boolean = false)
 fun <T: Any> HasText.loadJson(cls: KClass<T>, ignoreUnknownKeys: Boolean = false): T =
   text.loadJson(cls, ignoreUnknownKeys = ignoreUnknownKeys)
 
-inline fun <reified T: Any> T.saveAsJsonTo(f: WritableText, pretty: Boolean = true) = f.save(this, pretty = pretty)
+inline fun <reified T: Any> T.saveAsJsonTo(f: WritableText, pretty: Boolean = true) = f.saveJson(this, pretty = pretty)
 
 inline fun <reified T: Any> String.loadJsonList(): List<T> {
 
