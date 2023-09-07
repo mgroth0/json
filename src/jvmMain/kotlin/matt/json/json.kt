@@ -29,11 +29,11 @@ fun Any.loadProperties(obj: JsonElement) {
 
 */
 
-
-actual fun <T : Any> String.parseNoInline(
-    json: Json,
-    cls: KClass<T>
-) = json.decodeFromString(
-    cls.serializer(),
-    this
-)
+//
+//actual fun <T : Any> String.parseNoInline(
+//    json: Json,
+//    cls: KClass<T>
+//) = json.decodeFromString(
+//    cls.serializer(),
+//    this
+//)
