@@ -2,6 +2,7 @@ package matt.json
 
 import kotlinx.serialization.DeserializationStrategy
 import kotlinx.serialization.KSerializer
+import kotlinx.serialization.Serializable
 import kotlinx.serialization.SerializationStrategy
 import kotlinx.serialization.encodeToString
 import kotlinx.serialization.encoding.Decoder
@@ -121,15 +122,19 @@ fun <T> DeserializationStrategy<T>.withSerializationStrategy(s: Encoder.(T) -> U
     })
 
 
-inline fun <reified T> T.toJson() = Json.encodeToJsonElement(this)
+inline fun <reified T: Any?> T.toJson() = Json.encodeToJsonElement(this)
 
-inline fun <reified T> T.toJsonString() = Json.encodeToString(this)
-inline fun <reified T> T.toPrettyJsonString() = PrettyJson.encodeToString(this)
+inline fun <reified T: Any?> T.toJsonString() = Json.encodeToString(this)
+inline fun <reified T: Any?> T.toPrettyJsonString() = PrettyJson.encodeToString(this)
+
 
 fun yesIUseJsonButAnInlineFunSoItDoesntShowInBytecode() = "yesIUseJsonButAnInlineFunSoItDoesntShowInBytecode"
 
 
-class JsonStringConverter<T>(private val ser: KSerializer<T>, private val json: Json) : StringConverter<T> {
+class JsonStringConverter<T>(
+    private val ser: KSerializer<T>,
+    private val json: Json
+) : StringConverter<T> {
     override fun toString(t: T): String {
         return json.encodeToString(
             ser,
