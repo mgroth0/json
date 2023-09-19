@@ -4,9 +4,10 @@ package matt.json
 
 import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.decodeFromStream
-import kotlinx.serialization.serializer
+import matt.json.prim.loadJson
 import matt.model.obj.stream.Streamable
-import kotlin.reflect.KClass
+import matt.model.obj.text.HasText
+import java.io.FileNotFoundException
 
 inline fun <reified T> Json.decodeFromStreamable(f: Streamable) = decodeFromStream<T>(f.inputStream())
 
@@ -37,3 +38,12 @@ fun Any.loadProperties(obj: JsonElement) {
 //    cls.serializer(),
 //    this
 //)
+
+/*faster than checking if the file exists on each load. Especially if the file is there, in which case it didn't need to be checked in the first place. Fewer OS calls.*/
+inline fun <reified T : Any> HasText.loadJsonOrNullIfFileNotFound(ignoreUnknownKeys: Boolean = false): T? {
+    return try {
+        text.loadJson(ignoreUnknownKeys = ignoreUnknownKeys)
+    } catch (e: FileNotFoundException) {
+        null
+    }
+}

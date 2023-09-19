@@ -15,17 +15,23 @@ import kotlin.reflect.KClass
 fun String.parseJsonObj(): JsonObject = Json.decodeFromString<JsonObject>(this)
 
 fun HasText.parseJsonObj() = text.parseJsonObj()
-fun WritableText.writeJson(jsonElement: JsonElement, pretty: Boolean = false) {
-  text = ((if (pretty) PrettyJson else Json).encodeToString(jsonElement))
+fun WritableText.writeJson(
+    jsonElement: JsonElement,
+    pretty: Boolean = false
+) {
+    text = ((if (pretty) PrettyJson else Json).encodeToString(jsonElement))
 }
 
 
-inline fun <reified T: Any?> WritableText.writeJson(t: T, pretty: Boolean = false) {
-  text = ((if (pretty) PrettyJson else Json).encodeToString(t))
+inline fun <reified T : Any?> WritableText.writeJson(
+    t: T,
+    pretty: Boolean = false
+) {
+    text = ((if (pretty) PrettyJson else Json).encodeToString(t))
 }
 
 
-inline fun <reified T: Any?> HasText.readJson(): T = Json.decodeFromString(text)
+inline fun <reified T : Any?> HasText.readJson(): T = Json.decodeFromString(text)
 
 fun String.parseJsonObjs(): JsonArray = Json.decodeFromString<JsonArray>(this)
 
@@ -34,35 +40,35 @@ fun HasText.parseJsonObjs() = text.parseJsonObjs()
 
 
 val PrettyJson by lazy {
-  Json {
-	prettyPrint = true
-  }
+    Json {
+        prettyPrint = true
+    }
 }
 val IgnoreUnknownKeysJson by lazy {
-  Json {
-	ignoreUnknownKeys = true
-  }
+    Json {
+        ignoreUnknownKeys = true
+    }
 }
 val EncodeDefaultsJson by lazy {
-  Json {
-	encodeDefaults = true
-  }
+    Json {
+        encodeDefaults = true
+    }
 }
 
 private var warnedAboutUnknownKeys = false
 fun json(
-  ignoreUnknownKeys: Boolean
+    ignoreUnknownKeys: Boolean
 ) = when {
-  ignoreUnknownKeys -> {
-	if (!warnedAboutUnknownKeys) {
-	  println("WARNING: ignoring unknown keys")
-	  warnedAboutUnknownKeys = true
-	}
+    ignoreUnknownKeys -> {
+        if (!warnedAboutUnknownKeys) {
+            println("WARNING: ignoring unknown keys")
+            warnedAboutUnknownKeys = true
+        }
 
-	IgnoreUnknownKeysJson
-  }
+        IgnoreUnknownKeysJson
+    }
 
-  else              -> Json
+    else              -> Json
 }
 
 fun String.toPrettyJson() = PrettyJson.encodeToString(parseJson())
@@ -90,10 +96,10 @@ fun HasText.toPrettyJson() = text.toPrettyJson()
 
 
 fun String.isValidJson(): Boolean = try {
-  Json.decodeFromString<kotlinx.serialization.json.JsonElement>(this)
-  true
+    Json.decodeFromString<kotlinx.serialization.json.JsonElement>(this)
+    true
 } catch (e: kotlinx.serialization.SerializationException) {
-  false
+    false
 }
 
 
@@ -109,14 +115,17 @@ fun String.isValidJson(): Boolean = try {
 fun HasText.isValidJson() = text.isValidJson()
 
 fun WritableText.save(je: JsonElement) {
-  /*getParentFile()!!.mkdirs()*/
-  text = (je.toString())
+    /*getParentFile()!!.mkdirs()*/
+    text = (je.toString())
 }
 
-inline fun <reified T> WritableText.saveJson(t: T, pretty: Boolean = true) {
-  /*getParentFile()!!.mkdirs()*/
-  val j = if (pretty) PrettyJson else Json
-  text = (j.encodeToString(t))
+inline fun <reified T> WritableText.saveJson(
+    t: T,
+    pretty: Boolean = true
+) {
+    /*getParentFile()!!.mkdirs()*/
+    val j = if (pretty) PrettyJson else Json
+    text = (j.encodeToString(t))
 }
 
 
@@ -129,13 +138,13 @@ fun String.loadAndFormatJson() = toPrettyJson()
 
 fun HasText.loadAndFormatJson() = text.loadAndFormatJson()
 
-inline fun <reified T: Any> String.loadJson(
-  ignoreUnknownKeys: Boolean = false
+inline fun <reified T : Any> String.loadJson(
+    ignoreUnknownKeys: Boolean = false
 ): T = json(ignoreUnknownKeys = ignoreUnknownKeys).decodeFromString(this)
 
-fun <T: Any> String.loadJson(
-  cls: KClass<T>,
-  ignoreUnknownKeys: Boolean = false
+fun <T : Any> String.loadJson(
+    cls: KClass<T>,
+    ignoreUnknownKeys: Boolean = false
 ): T = json(ignoreUnknownKeys = ignoreUnknownKeys).decodeFromString(cls.serializer(), this)
 
 //  gson.fromJson(
@@ -143,29 +152,37 @@ fun <T: Any> String.loadJson(
 //)
 
 
-inline fun <reified T: Any> HasText.loadJson(ignoreUnknownKeys: Boolean = false): T =
-  text.loadJson(ignoreUnknownKeys = ignoreUnknownKeys)
+inline fun <reified T : Any> HasText.loadJson(ignoreUnknownKeys: Boolean = false): T =
+    text.loadJson(ignoreUnknownKeys = ignoreUnknownKeys)
 
-fun <T: Any> HasText.loadJson(cls: KClass<T>, ignoreUnknownKeys: Boolean = false): T =
-  text.loadJson(cls, ignoreUnknownKeys = ignoreUnknownKeys)
 
-inline fun <reified T: Any> T.saveAsJsonTo(f: WritableText, pretty: Boolean = true) = f.saveJson(this, pretty = pretty)
 
-inline fun <reified T: Any> String.loadJsonList(): List<T> {
+fun <T : Any> HasText.loadJson(
+    cls: KClass<T>,
+    ignoreUnknownKeys: Boolean = false
+): T =
+    text.loadJson(cls, ignoreUnknownKeys = ignoreUnknownKeys)
 
-  return Json.decodeFromString<JsonArray>(this).map {
-	Json.decodeFromJsonElement(it)
-  }
+inline fun <reified T : Any> T.saveAsJsonTo(
+    f: WritableText,
+    pretty: Boolean = true
+) = f.saveJson(this, pretty = pretty)
 
-  //  @Suppress("UNCHECKED_CAST") return (gson.fromJson(
-  //	this, type.java.arrayType()
-  //  ) as Array<T>).toList()
+inline fun <reified T : Any> String.loadJsonList(): List<T> {
+
+    return Json.decodeFromString<JsonArray>(this).map {
+        Json.decodeFromJsonElement(it)
+    }
+
+    //  @Suppress("UNCHECKED_CAST") return (gson.fromJson(
+    //	this, type.java.arrayType()
+    //  ) as Array<T>).toList()
 }
 //inline fun <reified T> String.loadJsonList(): List<T> {
 //  return gson.fromJson(this, arrayOf<T>()::class.java).toList()
 //}
 
-inline fun <reified T: Any> HasText.loadJsonList(): List<T> = text.loadJsonList<T>()
+inline fun <reified T : Any> HasText.loadJsonList(): List<T> = text.loadJsonList<T>()
 
 
 //operator fun JsonElement.set(s: String, v: Any) {

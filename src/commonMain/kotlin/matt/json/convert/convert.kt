@@ -2,7 +2,7 @@ package matt.json.convert
 
 import kotlinx.serialization.KSerializer
 import kotlinx.serialization.json.Json
-import matt.model.op.convert.StringConverter
+import matt.prim.converters.StringConverter
 
 
 class JsonConverter<T>(

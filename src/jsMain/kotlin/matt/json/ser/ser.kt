@@ -9,7 +9,7 @@ import matt.model.code.idea.SerIdea
 import kotlin.reflect.KClass
 
 /*cls used to be qname: String, but this is much less typesafe*/
-actual abstract class MyJsonSerializer<T: Any> actual constructor(val cls: KClass<*>): KSerializer<T>, SerIdea {
+actual abstract class MyJsonSerializer<T: Any> actual constructor(private val cls: KClass<*>): KSerializer<T>, SerIdea {
   actual final override val descriptor: SerialDescriptor get() = TODO("Not yet implemented")
   actual final override fun deserialize(decoder: Decoder): T {
 	TODO("Not yet implemented")

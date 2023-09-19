@@ -2,7 +2,6 @@ package matt.json
 
 import kotlinx.serialization.DeserializationStrategy
 import kotlinx.serialization.KSerializer
-import kotlinx.serialization.Serializable
 import kotlinx.serialization.SerializationStrategy
 import kotlinx.serialization.encodeToString
 import kotlinx.serialization.encoding.Decoder
@@ -16,7 +15,7 @@ import matt.json.prim.PrettyJson
 import matt.lang.NEVER
 import matt.model.code.yes.YesIUse
 import matt.model.obj.text.HasText
-import matt.model.op.convert.StringConverter
+import matt.prim.converters.StringConverter
 import kotlin.reflect.KClass
 
 object YesIUseJson : YesIUse
