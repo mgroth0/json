@@ -3,7 +3,7 @@ package matt.json.test
 
 import matt.json.custom.int
 import matt.json.prim.parseJsonObj
-import matt.test.JupiterTestAssertions.assertRunsInOneMinute
+import matt.test.assertions.JupiterTestAssertions.assertRunsInOneMinute
 import kotlin.test.Test
 import kotlin.test.assertEquals
 

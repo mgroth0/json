@@ -4,11 +4,11 @@ import kotlinx.serialization.InternalSerializationApi
 import kotlinx.serialization.json.Json
 import kotlinx.serialization.serializer
 import java.io.ObjectInputStream
-import java.io.ObjectOutputStream
+import java.io.ObjectOutput
 import kotlin.reflect.KClass
 
 @OptIn(InternalSerializationApi::class)
-internal fun <T : Any> ObjectOutputStream.writeJson(
+internal fun <T : Any> ObjectOutput.writeJson(
     cls: KClass<T>,
     obj: T
 ) {
@@ -18,7 +18,7 @@ internal fun <T : Any> ObjectOutputStream.writeJson(
 }
 
 
-private inline fun <reified T : Any> ObjectOutputStream.writeJson(obj: T) {
+private inline fun <reified T : Any> ObjectOutput.writeJson(obj: T) {
     writeJson(T::class, obj)
 }
 
