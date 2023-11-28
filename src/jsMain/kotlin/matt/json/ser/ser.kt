@@ -16,7 +16,9 @@ actual abstract class MyJsonSerializer<T: Any> actual constructor(private val cl
   }
 
 
-  actual final override fun serialize(encoder: Encoder, value: T) {}
+  actual final override fun serialize(encoder: Encoder, value: T) {
+      TODO("Not yet implemented")
+  }
   actual abstract fun deserialize(jsonElement: JsonElement): T
   actual abstract fun serialize(value: T): JsonElement
 

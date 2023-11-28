@@ -1,20 +1,21 @@
 {
-    "type": "MultiPlatformModule",
-    "dependencies": [
-        {
-            "type": "Project",
-            "cfg": "commonMainApi",
-            "path": ":k:model"
-        },
-        {
-            "type": "Project",
-            "cfg": "jvmTestImplementation",
-            "path": ":k:test"
-        }
-    ],
-    "jvm": {
+  "type": "MultiPlatformModule",
+  "dependencies": [
+    {
+      "type": "Project",
+      "cfg": "commonMainApi",
+      "path": ":k:model"
     },
-    "js": {
-        "type": "lib"
+    {
+      "type": "Project",
+      "cfg": "jvmTestImplementation",
+      "path": ":k:test"
     }
+  ],
+  "jvm": {
+  },
+  "js": {
+    "type": "lib"
+  },
+  "native": "LIB"
 }
