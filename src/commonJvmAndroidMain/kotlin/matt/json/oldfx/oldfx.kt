@@ -1,9 +1,7 @@
-@file:JvmName("OldfxJvmKt")
-@file:OptIn(InternalSerializationApi::class)
+@file:JvmName("OldfxJvmAndroidKt")
 
 package matt.json.oldfx
 
-import kotlinx.serialization.InternalSerializationApi
 import kotlinx.serialization.KSerializer
 import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.JsonElement
@@ -20,11 +18,14 @@ import matt.lang.model.value.ValueWrapper
 import matt.model.ser.JvmQualifiedClassNameSerializer
 import matt.model.ser.SimpleClassNameSerializer
 
+
 private fun Any.findSerializer() = when (this) {
     is JvmQualifiedClassName -> JvmQualifiedClassNameSerializer
     is SimpleClassName       -> SimpleClassNameSerializer
     else                     -> this::class.serializerOrNull()
 }
+
+
 
 actual fun Any?.toJsonElement(
     serializers: List<MyJsonSerializer<*>>

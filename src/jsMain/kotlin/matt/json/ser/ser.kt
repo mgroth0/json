@@ -10,14 +10,14 @@ import kotlin.reflect.KClass
 
 /*cls used to be qname: String, but this is much less typesafe*/
 actual abstract class MyJsonSerializer<T: Any> actual constructor(private val cls: KClass<*>): KSerializer<T>, SerIdea {
-  actual final override val descriptor: SerialDescriptor get() = TODO("Not yet implemented")
+  actual final override val descriptor: SerialDescriptor get() = TODO()
   actual final override fun deserialize(decoder: Decoder): T {
-	TODO("Not yet implemented")
+	TODO()
   }
 
 
   actual final override fun serialize(encoder: Encoder, value: T) {
-      TODO("Not yet implemented")
+      TODO()
   }
   actual abstract fun deserialize(jsonElement: JsonElement): T
   actual abstract fun serialize(value: T): JsonElement

@@ -73,24 +73,6 @@ fun json(
 
 fun String.toPrettyJson() = PrettyJson.encodeToString(parseJson())
 
-//  try {
-
-
-//
-//  val json = JsonParser.parseString(this)
-//
-//
-//  val gson = GsonBuilder()
-//	.setPrettyPrinting()
-//	.serializeNulls() /*TODO: dont do this, its slower*/
-//	.create()
-//  gson.toJson(json)
-//} catch (e: JsonSyntaxException) {
-//  println(e.message)
-//  println("\n\n\n${this}\n\n\n")
-//  e.printStackTrace()
-//  exitProcess(1)
-//}
 
 fun HasText.toPrettyJson() = text.toPrettyJson()
 

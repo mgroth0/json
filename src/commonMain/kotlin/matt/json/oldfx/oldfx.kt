@@ -17,12 +17,9 @@ expect fun Any?.toJsonElement(
 fun jsonArray(
     vararg elements: Any?,
     serializeNulls: Boolean = false
-): JsonArray =
-    buildJsonArray {
-        elements.filter { serializeNulls || it != null }.forEach {
-            this.add(it?.toJsonElement() ?: JsonNull)
-        }
-    }
+): JsonArray = buildJsonArray {
+    addAll(elements.filter { serializeNulls || it != null }.map { it?.toJsonElement() ?: JsonNull })
+}
 
 fun jsonArray(
     elements: Iterable<Any?>,
