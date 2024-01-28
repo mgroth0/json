@@ -18,7 +18,7 @@ import matt.lang.model.value.ValueWrapper
 import matt.model.ser.JvmQualifiedClassNameSerializer
 import matt.model.ser.SimpleClassNameSerializer
 
-
+@Suppress("NoExtensionOfAny")
 private fun Any.findSerializer() = when (this) {
     is JvmQualifiedClassName -> JvmQualifiedClassNameSerializer
     is SimpleClassName       -> SimpleClassNameSerializer
@@ -26,7 +26,7 @@ private fun Any.findSerializer() = when (this) {
 }
 
 
-
+@Suppress("NoExtensionOfAny")
 actual fun Any?.toJsonElement(
     serializers: List<MyJsonSerializer<*>>
 ): JsonElement {

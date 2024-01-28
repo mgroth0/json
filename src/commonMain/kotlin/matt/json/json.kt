@@ -13,12 +13,10 @@ import kotlinx.serialization.json.decodeFromJsonElement
 import kotlinx.serialization.json.encodeToJsonElement
 import matt.json.prim.PrettyJson
 import matt.lang.NEVER
-import matt.model.code.yes.YesIUse
 import matt.model.obj.text.HasText
 import matt.prim.converters.StringConverter
 import kotlin.reflect.KClass
 
-object YesIUseJson : YesIUse
 
 inline fun <reified T> JsonElement.decode() = Json.decodeFromJsonElement<T>(this)
 
@@ -125,9 +123,6 @@ inline fun <reified T: Any?> T.toJson() = Json.encodeToJsonElement(this)
 
 inline fun <reified T: Any?> T.toJsonString() = Json.encodeToString(this)
 inline fun <reified T: Any?> T.toPrettyJsonString() = PrettyJson.encodeToString(this)
-
-
-fun yesIUseJsonButAnInlineFunSoItDoesntShowInBytecode() = "yesIUseJsonButAnInlineFunSoItDoesntShowInBytecode"
 
 
 class JsonStringConverter<T>(

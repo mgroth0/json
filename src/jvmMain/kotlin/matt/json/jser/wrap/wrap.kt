@@ -25,20 +25,20 @@ abstract class JavaIoSerializableWrapper<T : Any>(innerObject: T? = null) : TsSe
     }
 
 
-    override fun writeObject(out: ObjectOutputStream) {
+    final override fun writeObject(out: ObjectOutputStream) {
         out.writeJson(cls, innerObject)
     }
 
 
-    override fun readObject(`in`: ObjectInputStream) {
+    final override fun readObject(`in`: ObjectInputStream) {
         innerObject = `in`.readJson(cls)
     }
 
-    override fun equals(other: Any?): Boolean {
+    final override fun equals(other: Any?): Boolean {
         return other != null && other::class == this::class && (other as JavaIoSerializableWrapper<*>).innerObject == innerObject
     }
 
-    override fun hashCode(): Int {
+    final override fun hashCode(): Int {
         var result = cls.hashCode()
         result = 31 * result + innerObject.hashCode()
         return result

@@ -9,7 +9,10 @@ import kotlinx.serialization.json.JsonObject
 import kotlinx.serialization.json.buildJsonArray
 import kotlinx.serialization.json.buildJsonObject
 import matt.json.ser.MyJsonSerializer
+import matt.json.toJsonString
+import matt.json.toPrettyJsonString
 
+@Suppress("NoExtensionOfAny")
 expect fun Any?.toJsonElement(
     serializers: List<MyJsonSerializer<*>> = listOf()
 ): JsonElement
@@ -50,3 +53,10 @@ fun jsonObj(
         )
     }
 }
+
+fun jsonObjString(
+    vararg entries: Pair<*, *>,
+) = jsonObj(*entries).toJsonString()
+fun prettyJsonObjString(
+    vararg entries: Pair<*, *>,
+) = jsonObj(*entries).toPrettyJsonString()

@@ -2,7 +2,6 @@
 
 package matt.json.custom
 
-import kotlinx.serialization.decodeFromString
 import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.JsonArray
@@ -27,6 +26,7 @@ import matt.json.custom.JsonWriter.MapJsonWriter
 import matt.json.custom.JsonWriter.NumberJsonWriter
 import matt.json.custom.JsonWriter.StringJsonWriter
 import matt.json.klaxon.Render
+import matt.lang.anno.Open
 import matt.model.obj.boild.Builder
 import kotlin.jvm.JvmName
 import kotlin.reflect.KProperty
@@ -37,7 +37,7 @@ interface SimpleGson
 const val AUTOMATIC_TYPEKEY = "AUTOMATIC_TYPEKEY"
 
 enum class CollectionType {
-  ELEMENT, LIST, SET
+    ELEMENT, LIST, SET
 }
 
 //
@@ -506,30 +506,34 @@ enum class CollectionType {
 //}
 
 
-@JvmName("toJsonWriterInt") fun Collection<Int>.toJsonWriter(): ListJsonWriter<JsonWriter> {
-  return ListJsonWriter(map { it.toJsonWriter() })
+@JvmName("toJsonWriterInt")
+fun Collection<Int>.toJsonWriter(): ListJsonWriter<JsonWriter> {
+    return ListJsonWriter(map { it.toJsonWriter() })
 }
 
 
 fun Collection<Long>.toJsonWriter(): ListJsonWriter<JsonWriter> {
-  return ListJsonWriter(map { it.toJsonWriter() })
+    return ListJsonWriter(map { it.toJsonWriter() })
 }
 
 @JvmName("toJsonWriterStringString")
 fun Map<String, String>.toJsonWriter(): MapJsonWriter<StringJsonWriter, StringJsonWriter> {
-  return MapJsonWriter(this.mapKeys { StringJsonWriter(it.key) }.mapValues { StringJsonWriter(it.value) })
+    return MapJsonWriter(this.mapKeys { StringJsonWriter(it.key) }.mapValues { StringJsonWriter(it.value) })
 }
 
-@JvmName("toJsonWriterBoolean") fun Collection<Boolean>.toJsonWriter(): ListJsonWriter<JsonWriter> {
-  return ListJsonWriter(map { it.toJsonWriter() })
+@JvmName("toJsonWriterBoolean")
+fun Collection<Boolean>.toJsonWriter(): ListJsonWriter<JsonWriter> {
+    return ListJsonWriter(map { it.toJsonWriter() })
 }
 
-@JvmName("toJsonWriterDouble") fun Collection<Double>.toJsonWriter(): ListJsonWriter<JsonWriter> {
-  return ListJsonWriter(map { it.toJsonWriter() })
+@JvmName("toJsonWriterDouble")
+fun Collection<Double>.toJsonWriter(): ListJsonWriter<JsonWriter> {
+    return ListJsonWriter(map { it.toJsonWriter() })
 }
 
-@JvmName("toJsonWriterString") fun Collection<String>.toJsonWriter(): ListJsonWriter<JsonWriter> {
-  return ListJsonWriter(map { it.toJsonWriter() })
+@JvmName("toJsonWriterString")
+fun Collection<String>.toJsonWriter(): ListJsonWriter<JsonWriter> {
+    return ListJsonWriter(map { it.toJsonWriter() })
 }
 
 //fun <J: Any> List</*matt.json.custom.Json<*>*/J>.toJsonWriter(
@@ -571,24 +575,24 @@ fun Map<String, String>.toJsonWriter(): MapJsonWriter<StringJsonWriter, StringJs
 }*/
 
 
-
-@Suppress("unused") interface JsonArray<T: Any> {
-
-  val json: Triple<(JsonElement)->Unit, (T)->JsonWriter, ()->Sequence<T>>
-
-  fun toJson() = json.third().map { json.second(it) }
-  fun loadElements(ja: JsonArray) {
-	ja.forEach {
-	  json.first(it)
-	}
-  }
-}
+//
+//interface JsonArray<T : Any> {
+//
+//    val json: Triple<(JsonElement) -> Unit, (T) -> JsonWriter, () -> Sequence<T>>
+//
+//    fun toJson() = json.third().map { json.second(it) }
+//    fun loadElements(ja: JsonArray) {
+//        ja.forEach {
+//            json.first(it)
+//        }
+//    }
+//}
 
 const val TYPE_KEY = "type"
 val TYPE_KEY_JSON_WRITER = TYPE_KEY.toJsonWriter()
 
-interface JsonParser<T: Any>: Builder<T> {
-  fun fromJson(jv: JsonElement): T
+interface JsonParser<T : Any> : Builder<T> {
+    fun fromJson(jv: JsonElement): T
 }
 
 
@@ -648,104 +652,105 @@ inline fun <reified T: matt.json.custom.Json<in T>> JsonElement.deserialize(): T
 fun JsonElement.toJsonWriter() = GsonElementJsonWriter(this)
 
 
-object NullJsonWriter: JsonWriter() {
-  override fun toJsonString(): String {
-	return "null"
-  }
+object NullJsonWriter : JsonWriter() {
+    override fun toJsonString(): String {
+        return "null"
+    }
 
 }
 
 
 interface ToJsonString {
-  fun toJsonString(): String
+    fun toJsonString(): String
 }
 
-sealed class JsonWriter: ToJsonString {
+sealed class JsonWriter : ToJsonString {
 
 
-  class MapJsonWriter<K: JsonWriter, V: JsonWriter>(
-	val m: Map<K, V>
-  ): JsonWriter() {
+    class MapJsonWriter<K : JsonWriter, V : JsonWriter>(
+        val m: Map<K, V>
+    ) : JsonWriter() {
 
 
-	override fun toJsonString(): String {
-	  return "{${
-		m.toList().joinToString(",") {
-		  "${it.first.toJsonString()}:${it.second.toJsonString()}"
-		}
-	  }}"
-	}
+        override fun toJsonString(): String {
+            return "{${
+                m.toList().joinToString(",") {
+                    "${it.first.toJsonString()}:${it.second.toJsonString()}"
+                }
+            }}"
+        }
 
-  }
+    }
 
-  data class StringJsonWriter(val s: String): JsonWriter() {
-	override fun toJsonString() = Render.renderString(s)
-  }
+    data class StringJsonWriter(val s: String) : JsonWriter() {
+        override fun toJsonString() = Render.renderString(s)
+    }
 
-  data class NumberJsonWriter(val n: Number): JsonWriter() {
-	override fun toJsonString() = Json.encodeToString(n)
-  }
+    data class NumberJsonWriter(val n: Number) : JsonWriter() {
+        override fun toJsonString() = Json.encodeToString(n)
+    }
 
-  data class BooleanJsonWriter(val b: Boolean): JsonWriter() {
-	override fun toJsonString() = Json.encodeToString(b)
-  }
+    data class BooleanJsonWriter(val b: Boolean) : JsonWriter() {
+        override fun toJsonString() = Json.encodeToString(b)
+    }
 
-  class ListJsonWriter<T: JsonWriter>(
-	val l: List<T>
-  ): JsonWriter() {
-
-
-	override fun toJsonString(): String {
-	  return "[${l.joinToString(",") { it.toJsonString() }}]"
-	}
-
-  }
-
-  @Suppress("unused") class ArrayJsonWriter<T: JsonWriter>(
-	val l: Array<T>
-  ): JsonWriter() {
+    class ListJsonWriter<T : JsonWriter>(
+        val l: List<T>
+    ) : JsonWriter() {
 
 
-	override fun toJsonString(): String {
-	  return "[${l.joinToString(",") { it.toJsonString() }}]"
-	}
+        override fun toJsonString(): String {
+            return "[${l.joinToString(",") { it.toJsonString() }}]"
+        }
 
-  }
+    }
 
-  class GsonElementJsonWriter(
-	val e: JsonElement
-  ): JsonWriter() {
-	override fun toJsonString() = Json.encodeToString(e)
-  }
-
-  class GsonArrayWriter<T: JsonWriter>(
-	private val jarray: JsonArray
-  ): JsonWriter() {
+    @Suppress("unused")
+    class ArrayJsonWriter<T : JsonWriter>(
+        val l: Array<T>
+    ) : JsonWriter() {
 
 
-	override fun toJsonString(): String {
+        override fun toJsonString(): String {
+            return "[${l.joinToString(",") { it.toJsonString() }}]"
+        }
 
-	  return Json.encodeToString(jarray)
+    }
 
-	  //	  return "[${jarray.toList().matt.async.flow.joinToString(",") { it.toGson() }}]"
-	}
+    class GsonElementJsonWriter(
+        val e: JsonElement
+    ) : JsonWriter() {
+        override fun toJsonString() = Json.encodeToString(e)
+    }
 
-  }
-
-  class JsonPropMapWriter(
-	val m: JsonPropMap<*>
-  ): JsonWriter() {
+    class GsonArrayWriter<T : JsonWriter>(
+        private val jarray: JsonArray
+    ) : JsonWriter() {
 
 
-	override fun toJsonString(): String {
-	  return MapJsonWriter(m.toJson().map { it.key.name.toJsonWriter() to it.value }.toMap()).toJsonString()
-	}
+        override fun toJsonString(): String {
 
-  }
+            return Json.encodeToString(jarray)
+
+            //	  return "[${jarray.toList().matt.async.flow.joinToString(",") { it.toGson() }}]"
+        }
+
+    }
+
+    class JsonPropMapWriter(
+        val m: JsonPropMap<*>
+    ) : JsonWriter() {
+
+
+        override fun toJsonString(): String {
+            return MapJsonWriter(m.toJson().map { it.key.name.toJsonWriter() to it.value }.toMap()).toJsonString()
+        }
+
+    }
 
 }
 
-fun <K: JsonWriter, V: JsonWriter> Map<K, V>.toJsonWriter() = MapJsonWriter(this)
+fun <K : JsonWriter, V : JsonWriter> Map<K, V>.toJsonWriter() = MapJsonWriter(this)
 
 fun String.toJsonWriter() = StringJsonWriter(this)
 
@@ -757,13 +762,15 @@ fun Boolean.toJsonWriter() = BooleanJsonWriter(this)
 
 
 interface JsonPropMap<T> {
-  fun toJson(): Map<KProperty<Any?>, JsonWriter>
-  fun toJsonWriter() = JsonPropMapWriter(this)
+    fun toJson(): Map<KProperty<Any?>, JsonWriter>
+
+    @Open
+    fun toJsonWriter() = JsonPropMapWriter(this)
 }
 
 
 interface LinkedProp<T> {
-  fun update(value: T)
+    fun update(value: T)
 }
 
 
@@ -811,14 +818,14 @@ val DEBUG_COMPILER = """
 
 
 fun convertJsonKey(v: Any?): String {
-  return when (v) {
-	is KProperty<*> -> v.name
-	else            -> v.toString()
-  }
+    return when (v) {
+        is KProperty<*> -> v.name
+        else            -> v.toString()
+    }
 }
 
 
-fun <T: JsonWriter> T.toJsonElement() = Json.decodeFromString<JsonElement>(toJsonString())
+fun <T : JsonWriter> T.toJsonElement() = Json.decodeFromString<JsonElement>(toJsonString())
 
 
 //interface JsonProxyMap<T: Any>: JsonParser<T> {
@@ -828,11 +835,11 @@ fun <T: JsonWriter> T.toJsonElement() = Json.decodeFromString<JsonElement>(toJso
 
 val JsonElement.intOrNull get() = (this as? JsonPrimitive)?.intOrNull
 val JsonPrimitive.intOrNull
-  get() = try {
-	int
-  } catch (e: NumberFormatException) {
-	null
-  }
+    get() = try {
+        int
+    } catch (e: NumberFormatException) {
+        null
+    }
 val JsonElement.int get() = jsonPrimitive.int
 
 val JsonElement.doubleOrNull get() = (this as? JsonPrimitive)?.doubleOrNull
@@ -846,11 +853,11 @@ val JsonElement.jsonObjectOrNull get() = (this as? JsonObject)?.jsonObject
 val JsonElement.stringOrNull get() = (this as? JsonPrimitive)?.stringOrNull
 val JsonPrimitive.stringOrNull get() = takeIf { it.isString }?.content
 val JsonElement.string
-  get() = jsonPrimitive.also {
-	require(
-	  it.isString
-	) { "expected string but got \"${it.content}\"" }
-  }.content
+    get() = jsonPrimitive.also {
+        require(
+            it.isString
+        ) { "expected string but got \"${it.content}\"" }
+    }.content
 
 val JsonElement.boolOrNull get() = (this as? JsonPrimitive)?.booleanOrNull
 val JsonElement.bool get() = jsonPrimitive.boolean
@@ -858,5 +865,5 @@ val JsonElement.bool get() = jsonPrimitive.boolean
 //fun jsonArray(elements: Array<Any?>, serializeNulls: Boolean = false) = jsonArray(*elements, serializeNulls = serializeNulls)
 
 
-fun <T> JsonElement.nullOr(op: JsonElement.()->T): T? = if (this is JsonNull) null else this.op()
+fun <T> JsonElement.nullOr(op: JsonElement.() -> T): T? = if (this is JsonNull) null else this.op()
 

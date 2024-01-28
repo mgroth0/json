@@ -9,6 +9,7 @@ import java.io.Serializable
 @SeeURL("https://github.com/gradle/gradle/issues/13588")
 interface JavaIoSerializable : Serializable {
 
+
     private fun writeObject(out: ObjectOutputStream) {
         out.defaultWriteObject()
     }
