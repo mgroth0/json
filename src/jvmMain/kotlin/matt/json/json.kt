@@ -44,12 +44,10 @@ fun Any.loadProperties(obj: JsonElement) {
 //)
 
 /*faster than checking if the file exists on each load. Especially if the file is there, in which case it didn't need to be checked in the first place. Fewer OS calls.*/
-inline fun <reified T : Any> HasText.loadJsonOrNullIfFileNotFound(ignoreUnknownKeys: Boolean = false): T? {
-    return try {
-        text.loadJson(ignoreUnknownKeys = ignoreUnknownKeys)
-    } catch (e: FileNotFoundException) {
-        null
-    }
+inline fun <reified T : Any> HasText.loadJsonOrNullIfFileNotFound(ignoreUnknownKeys: Boolean = false): T? = try {
+    text.loadJson(ignoreUnknownKeys = ignoreUnknownKeys)
+} catch (e: FileNotFoundException) {
+    null
 }
 
 

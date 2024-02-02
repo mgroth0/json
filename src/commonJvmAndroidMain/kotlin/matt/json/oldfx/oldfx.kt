@@ -49,7 +49,7 @@ actual fun Any?.toJsonElement(
 
             findSerializer().let {
 
-                when(it) {
+                when (it) {
 
                     is Any -> Json.encodeToJsonElement(
                         it as KSerializer<Any>, this

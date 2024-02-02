@@ -507,34 +507,22 @@ enum class CollectionType {
 
 
 @JvmName("toJsonWriterInt")
-fun Collection<Int>.toJsonWriter(): ListJsonWriter<JsonWriter> {
-    return ListJsonWriter(map { it.toJsonWriter() })
-}
+fun Collection<Int>.toJsonWriter(): ListJsonWriter<JsonWriter> = ListJsonWriter(map { it.toJsonWriter() })
 
 
-fun Collection<Long>.toJsonWriter(): ListJsonWriter<JsonWriter> {
-    return ListJsonWriter(map { it.toJsonWriter() })
-}
+fun Collection<Long>.toJsonWriter(): ListJsonWriter<JsonWriter> = ListJsonWriter(map { it.toJsonWriter() })
 
 @JvmName("toJsonWriterStringString")
-fun Map<String, String>.toJsonWriter(): MapJsonWriter<StringJsonWriter, StringJsonWriter> {
-    return MapJsonWriter(this.mapKeys { StringJsonWriter(it.key) }.mapValues { StringJsonWriter(it.value) })
-}
+fun Map<String, String>.toJsonWriter(): MapJsonWriter<StringJsonWriter, StringJsonWriter> = MapJsonWriter(this.mapKeys { StringJsonWriter(it.key) }.mapValues { StringJsonWriter(it.value) })
 
 @JvmName("toJsonWriterBoolean")
-fun Collection<Boolean>.toJsonWriter(): ListJsonWriter<JsonWriter> {
-    return ListJsonWriter(map { it.toJsonWriter() })
-}
+fun Collection<Boolean>.toJsonWriter(): ListJsonWriter<JsonWriter> = ListJsonWriter(map { it.toJsonWriter() })
 
 @JvmName("toJsonWriterDouble")
-fun Collection<Double>.toJsonWriter(): ListJsonWriter<JsonWriter> {
-    return ListJsonWriter(map { it.toJsonWriter() })
-}
+fun Collection<Double>.toJsonWriter(): ListJsonWriter<JsonWriter> = ListJsonWriter(map { it.toJsonWriter() })
 
 @JvmName("toJsonWriterString")
-fun Collection<String>.toJsonWriter(): ListJsonWriter<JsonWriter> {
-    return ListJsonWriter(map { it.toJsonWriter() })
-}
+fun Collection<String>.toJsonWriter(): ListJsonWriter<JsonWriter> = ListJsonWriter(map { it.toJsonWriter() })
 
 //fun <J: Any> List</*matt.json.custom.Json<*>*/J>.toJsonWriter(
 //  proxyMap: JsonProxyMap<*>? = null,
@@ -615,15 +603,15 @@ inline fun <reified T: Any> JsonElement.deserialize(
 	}, this)
 
 
-	*//*kotlinx.serialization.json.Json.decodeFromJsonElement<T>(this)*//*
+ *//*kotlinx.serialization.json.Json.decodeFromJsonElement<T>(this)*//*
 
-	*//*val type = typekey ?: jsonObject[TYPE_KEY]!!.string*//*
+ *//*val type = typekey ?: jsonObject[TYPE_KEY]!!.string*//*
 
-	*//*1.5*//*    *//*val skcls = Resource::class.sealedSubclasses*//*
+ *//*1.5*//*    *//*val skcls = Resource::class.sealedSubclasses*//*
 
-	*//*val skcls = superclass.subclasses()*//*
+ *//*val skcls = superclass.subclasses()*//*
 
-	*//*val c = skcls.first {
+ *//*val c = skcls.first {
 	  it.simpleName == type
 	}
 
@@ -653,9 +641,7 @@ fun JsonElement.toJsonWriter() = GsonElementJsonWriter(this)
 
 
 object NullJsonWriter : JsonWriter() {
-    override fun toJsonString(): String {
-        return "null"
-    }
+    override fun toJsonString(): String = "null"
 
 }
 
@@ -672,13 +658,11 @@ sealed class JsonWriter : ToJsonString {
     ) : JsonWriter() {
 
 
-        override fun toJsonString(): String {
-            return "{${
-                m.toList().joinToString(",") {
-                    "${it.first.toJsonString()}:${it.second.toJsonString()}"
-                }
-            }}"
-        }
+        override fun toJsonString(): String = "{${
+            m.toList().joinToString(",") {
+                "${it.first.toJsonString()}:${it.second.toJsonString()}"
+            }
+        }}"
 
     }
 
@@ -699,9 +683,7 @@ sealed class JsonWriter : ToJsonString {
     ) : JsonWriter() {
 
 
-        override fun toJsonString(): String {
-            return "[${l.joinToString(",") { it.toJsonString() }}]"
-        }
+        override fun toJsonString(): String = "[${l.joinToString(",") { it.toJsonString() }}]"
 
     }
 
@@ -711,9 +693,7 @@ sealed class JsonWriter : ToJsonString {
     ) : JsonWriter() {
 
 
-        override fun toJsonString(): String {
-            return "[${l.joinToString(",") { it.toJsonString() }}]"
-        }
+        override fun toJsonString(): String = "[${l.joinToString(",") { it.toJsonString() }}]"
 
     }
 
@@ -742,9 +722,7 @@ sealed class JsonWriter : ToJsonString {
     ) : JsonWriter() {
 
 
-        override fun toJsonString(): String {
-            return MapJsonWriter(m.toJson().map { it.key.name.toJsonWriter() to it.value }.toMap()).toJsonString()
-        }
+        override fun toJsonString(): String = MapJsonWriter(m.toJson().map { it.key.name.toJsonWriter() to it.value }.toMap()).toJsonString()
 
     }
 
@@ -817,11 +795,9 @@ val DEBUG_COMPILER = """
 """.trimIndent()
 
 
-fun convertJsonKey(v: Any?): String {
-    return when (v) {
-        is KProperty<*> -> v.name
-        else            -> v.toString()
-    }
+fun convertJsonKey(v: Any?): String = when (v) {
+    is KProperty<*> -> v.name
+    else            -> v.toString()
 }
 
 

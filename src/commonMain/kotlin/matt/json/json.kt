@@ -74,26 +74,20 @@ fun <T> DeserializationStrategy<T>.withSerializationStrategy(s: SerializationStr
 fun <T> SerializationStrategy<T>.withDeserializationStrategy(d: Decoder.() -> T) =
     withDeserializationStrategy(object : DeserializationStrategy<T> {
         override val descriptor get() = NEVER
-        override fun deserialize(decoder: Decoder): T {
-            return decoder.d()
-        }
+        override fun deserialize(decoder: Decoder): T = decoder.d()
     })
 
 fun <T> SerializationStrategy<T>.withJsonDeserializationStrategy(d: (JsonElement) -> T) =
     withDeserializationStrategy(object : DeserializationStrategy<T> {
         override val descriptor get() = NEVER
-        override fun deserialize(decoder: Decoder): T {
-            return d((decoder as JsonDecoder).decodeJsonElement())
-        }
+        override fun deserialize(decoder: Decoder): T = d((decoder as JsonDecoder).decodeJsonElement())
     })
 
 @Suppress("UNCHECKED_CAST")
 fun <T> SerializationStrategy<T>.withDeserializationStrategyHack(d: Decoder.() -> Any) =
     withDeserializationStrategy(object : DeserializationStrategy<T> {
         override val descriptor get() = NEVER
-        override fun deserialize(decoder: Decoder): T {
-            return decoder.d() as T
-        }
+        override fun deserialize(decoder: Decoder): T = decoder.d() as T
     })
 
 inline fun <reified T : Any> SerializationStrategy<T>.withDeserializationStrategyInline(
@@ -102,9 +96,7 @@ inline fun <reified T : Any> SerializationStrategy<T>.withDeserializationStrateg
 ) =
     withDeserializationStrategy(object : DeserializationStrategy<T> {
         override val descriptor get() = NEVER
-        override fun deserialize(decoder: Decoder): T {
-            return decoder.d()
-        }
+        override fun deserialize(decoder: Decoder): T = decoder.d()
     })
 
 fun <T> DeserializationStrategy<T>.withSerializationStrategy(s: Encoder.(T) -> Unit) =
@@ -113,9 +105,7 @@ fun <T> DeserializationStrategy<T>.withSerializationStrategy(s: Encoder.(T) -> U
         override fun serialize(
             encoder: Encoder,
             value: T
-        ) {
-            return encoder.s(value)
-        }
+        ) = encoder.s(value)
     })
 
 
@@ -129,19 +119,15 @@ class JsonStringConverter<T>(
     private val ser: KSerializer<T>,
     private val json: Json
 ) : StringConverter<T> {
-    override fun toString(t: T): String {
-        return json.encodeToString(
-            ser,
-            t
-        )
-    }
+    override fun toString(t: T): String = json.encodeToString(
+        ser,
+        t
+    )
 
-    override fun fromString(s: String): T {
-        return json.decodeFromString(
-            ser,
-            s
-        )
-    }
+    override fun fromString(s: String): T = json.decodeFromString(
+        ser,
+        s
+    )
 
 }
 

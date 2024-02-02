@@ -16,11 +16,9 @@ class JsonSystemProp<T : Any>(
         serializer: KSerializer<T>
     ) : this(key, serializer, null)
 
-    override fun get(): T {
-        return System.getProperty(key)?.let { value ->
-            Json.decodeFromString(serializer, value)
-        } ?: default ?: error("no default set for enum property ser=${serializer} $key")
-    }
+    override fun get(): T = System.getProperty(key)?.let { value ->
+        Json.decodeFromString(serializer, value)
+    } ?: default ?: error("no default set for enum property ser=$serializer $key")
 
     override fun set(t: T) {
         System.setProperty(key, Json.encodeToString(serializer, t))

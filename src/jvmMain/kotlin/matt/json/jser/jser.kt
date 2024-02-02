@@ -6,13 +6,14 @@ import kotlinx.serialization.serializer
 import java.io.ObjectInputStream
 import java.io.ObjectOutput
 import kotlin.reflect.KClass
+import kotlin.reflect.cast
 
-@OptIn(InternalSerializationApi::class)
 internal fun <T : Any> ObjectOutput.writeJson(
     cls: KClass<T>,
     obj: T
 ) {
-    val s = Json.encodeToString(cls.serializer(), obj)
+    check(cls.java.typeParameters.isEmpty())
+    val s = Json.encodeToString(serializer(cls,listOf(/*safe because I check type params are empty*/),false /*ensured not null in kotlin non-null param above*/), obj)
     writeInt(s.length)
     write(s.encodeToByteArray())
 }
@@ -31,14 +32,14 @@ private inline fun <reified T : Any> ObjectOutput.writeJson(obj: T) {
 
 
 @OptIn(InternalSerializationApi::class)
-internal fun <T : Any> ObjectInputStream.readJson(cls: KClass<T>): T {
+internal fun <T : Any> ObjectInputStream.readJsonAssumingNeverNull(cls: KClass<T>): T {
     val length = readInt()
     val sIn = readNBytes(length).decodeToString()
-    return Json.decodeFromString(cls.serializer(), sIn)
+    check(cls.java.typeParameters.isEmpty())
+    val o = Json.decodeFromString(serializer(cls,listOf(/*safe because I check type params are empty*/),isNullable=false), sIn)
+    return cls.cast(o)
 }
 
 
-private inline fun <reified T : Any> ObjectInputStream.readJson(): T {
-    return readJson(T::class)
-}
+private inline fun <reified T : Any> ObjectInputStream.readJsonAssumingNeverNull(): T = readJsonAssumingNeverNull(T::class)
 

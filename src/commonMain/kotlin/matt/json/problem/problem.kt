@@ -82,7 +82,7 @@ fun main() {
                     when (it) {
                         StringWrapper::class.simpleName -> StringClassSerializer
                         DoubleWrapper::class.simpleName -> DoubleClassSerializer
-                        else                            -> throw RuntimeException("unknown type: ${it}?")
+                        else                            -> throw RuntimeException("unknown type: $it?")
                     }
                 }
                 subclass(String::class, StringClassSerializer)

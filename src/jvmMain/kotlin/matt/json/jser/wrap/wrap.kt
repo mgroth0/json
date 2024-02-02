@@ -1,6 +1,6 @@
 package matt.json.jser.wrap
 
-import matt.json.jser.readJson
+import matt.json.jser.readJsonAssumingNeverNull
 import matt.json.jser.writeJson
 import matt.lang.anno.SeeURL
 import matt.lang.anno.ser.TsSerializable
@@ -26,17 +26,15 @@ abstract class JavaIoSerializableWrapper<T : Any>(innerObject: T? = null) : TsSe
 
 
     final override fun writeObject(out: ObjectOutputStream) {
-        out.writeJson(cls, innerObject)
+        out.writeJson(cls,innerObject)
     }
 
 
     final override fun readObject(`in`: ObjectInputStream) {
-        innerObject = `in`.readJson(cls)
+        innerObject = `in`.readJsonAssumingNeverNull(cls)
     }
 
-    final override fun equals(other: Any?): Boolean {
-        return other != null && other::class == this::class && (other as JavaIoSerializableWrapper<*>).innerObject == innerObject
-    }
+    final override fun equals(other: Any?): Boolean = other != null && other::class == this::class && (other as JavaIoSerializableWrapper<*>).innerObject == innerObject
 
     final override fun hashCode(): Int {
         var result = cls.hashCode()

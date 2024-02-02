@@ -46,10 +46,7 @@ abstract class MyJsonSerializer<T : Any>(private val cls: KClass<*>) : KSerializ
     }
 
 
-    final override fun deserialize(decoder: Decoder): T {
-
-        return deserialize(jsonElement = (decoder as JsonDecoder).decodeJsonElement())
-    }
+    final override fun deserialize(decoder: Decoder): T = deserialize(jsonElement = (decoder as JsonDecoder).decodeJsonElement())
 
     final override fun serialize(
         encoder: Encoder,
