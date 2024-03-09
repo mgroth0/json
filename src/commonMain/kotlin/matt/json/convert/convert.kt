@@ -7,7 +7,7 @@ import matt.prim.converters.StringConverter
 
 class JsonConverter<T>(
     private val ser: KSerializer<T>,
-    private val json: Json = Json,
+    private val json: Json = Json
 ) : StringConverter<T> {
     override fun toString(t: T): String = json.encodeToString(ser, t)
 

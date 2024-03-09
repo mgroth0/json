@@ -18,7 +18,5 @@ interface JavaIoSerializable : Serializable {
     private fun readObject(`in`: ObjectInputStream) {
         `in`.defaultReadObject()
     }
-
-
 }
 

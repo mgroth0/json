@@ -77,22 +77,15 @@ fun String.toPrettyJson() = PrettyJson.encodeToString(parseJson())
 fun HasText.toPrettyJson() = text.toPrettyJson()
 
 
-fun String.isValidJson(): Boolean = try {
-    Json.decodeFromString<kotlinx.serialization.json.JsonElement>(this)
-    true
-} catch (e: kotlinx.serialization.SerializationException) {
-    false
-}
+fun String.isValidJson(): Boolean =
+    try {
+        Json.decodeFromString<kotlinx.serialization.json.JsonElement>(this)
+        true
+    } catch (e: kotlinx.serialization.SerializationException) {
+        false
+    }
 
 
-//try {
-//  GsonBuilder()
-//	.serializeNulls()
-//	.create().fromJson(this, Any::class.java)
-//  true
-//} catch (ex: JsonSyntaxException) {
-//  false
-//}
 
 fun HasText.isValidJson() = text.isValidJson()
 
@@ -111,12 +104,8 @@ inline fun <reified T> WritableText.saveJson(
 }
 
 
-//fun <T: Any> T.toGson(): String = gson.toJson(this)
 
 fun String.loadAndFormatJson() = toPrettyJson()
-//  parseJson().let {
-//  GsonBuilder().setPrettyPrinting().serializeNulls().create().toJson(it)
-//}
 
 fun HasText.loadAndFormatJson() = text.loadAndFormatJson()
 
@@ -129,9 +118,6 @@ fun <T : Any> String.loadJson(
     ignoreUnknownKeys: Boolean = false
 ): T = json(ignoreUnknownKeys = ignoreUnknownKeys).decodeFromString(cls.serializer(), this)
 
-//  gson.fromJson(
-//  this, type.java
-//)
 
 
 inline fun <reified T : Any> HasText.loadJson(ignoreUnknownKeys: Boolean = false): T =
@@ -150,31 +136,9 @@ inline fun <reified T : Any> T.saveAsJsonTo(
     pretty: Boolean = true
 ) = f.saveJson(this, pretty = pretty)
 
-inline fun <reified T : Any> String.loadJsonList(): List<T> {
-
-    return Json.decodeFromString<JsonArray>(this).map {
+inline fun <reified T : Any> String.loadJsonList(): List<T> =
+    Json.decodeFromString<JsonArray>(this).map {
         Json.decodeFromJsonElement(it)
     }
 
-    //  @Suppress("UNCHECKED_CAST") return (gson.fromJson(
-    //	this, type.java.arrayType()
-    //  ) as Array<T>).toList()
-}
-//inline fun <reified T> String.loadJsonList(): List<T> {
-//  return gson.fromJson(this, arrayOf<T>()::class.java).toList()
-//}
-
 inline fun <reified T : Any> HasText.loadJsonList(): List<T> = text.loadJsonList<T>()
-
-
-//operator fun JsonElement.set(s: String, v: Any) {
-//  println("s=$s")
-//  println("v=$v")
-//  jsonObject[s] = v
-//  jsonObject
-//  //  this.asJsonObject.add(s, gson.fromJson(gson.toJson(v), JsonElement::class.java))
-//}
-
-
-//inline fun <reified T> matt.klib.file.File.loadJsonList(): List<T> = readText().loadJsonList()
-

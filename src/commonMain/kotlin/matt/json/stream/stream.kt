@@ -20,22 +20,21 @@ abstract class JsonStreamer {
     ) {
 
         writeText(Json.encodeToString(serializer, value))
-
     }
 
 
     abstract suspend fun close()
 
 
-    suspend fun startArrayStreamer() = JsonArrayStreamer(this).apply {
-        start()
-    }
+    suspend fun startArrayStreamer() =
+        JsonArrayStreamer(this).apply {
+            start()
+        }
 
-    suspend fun startObjectStreamer() = JsonObjectStreamer(this).apply {
-        start()
-    }
-
-
+    suspend fun startObjectStreamer() =
+        JsonObjectStreamer(this).apply {
+            start()
+        }
 }
 
 abstract class JsonCollectionStreamer(
@@ -95,7 +94,7 @@ abstract class JsonCollectionStreamer(
 
     suspend fun startArrayStreamer(): JsonArrayStreamer {
         preValue()
-        val r =streamer.startArrayStreamer()
+        val r = streamer.startArrayStreamer()
         setStatusToValueAdded() /*ideally would have an intermediate state for when a nested value is still being written*/
         return r
     }
@@ -106,7 +105,6 @@ abstract class JsonCollectionStreamer(
         setStatusToValueAdded() /*ideally would have an intermediate state for when a nested value is still being written*/
         return r
     }
-
 }
 
 
@@ -134,8 +132,6 @@ class JsonArrayStreamer(
     override fun setStatusToValueAdded() {
         status = Started(ArrayElement)
     }
-
-
 }
 
 

@@ -66,42 +66,45 @@ fun main() {
     theMap[SubB(3.0)] = SubA(1.0)
     theMap[SubB(4.0)] = FakeNull /*wish I could make this just `null`*/
     val theMapContainer = MapContainer(theMap)
-    @Suppress("UNCHECKED_CAST") val format = Json {
-        allowStructuredMapKeys = true
-        ignoreUnknownKeys = true
-        serializersModule = SerializersModule {
-            polymorphic(SuperClass::class) {
-                subclass(SubA::class)
-                subclass(SubB::class)
-            }
-            polymorphic(Any::class) {
-
-
-                /*I wish I could remove all of this primitive wrapper stuff*/
-                defaultDeserializer {
-                    when (it) {
-                        StringWrapper::class.simpleName -> StringClassSerializer
-                        DoubleWrapper::class.simpleName -> DoubleClassSerializer
-                        else                            -> throw RuntimeException("unknown type: $it?")
+    @Suppress("UNCHECKED_CAST") val format =
+        Json {
+            allowStructuredMapKeys = true
+            ignoreUnknownKeys = true
+            serializersModule =
+                SerializersModule {
+                    polymorphic(SuperClass::class) {
+                        subclass(SubA::class)
+                        subclass(SubB::class)
                     }
-                }
-                subclass(String::class, StringClassSerializer)
-                subclass(Double::class, DoubleClassSerializer)
-                subclass(SubA::class)
-                subclass(SubB::class)
-                subclass(FakeNull::class)
-            }
+                    polymorphic(Any::class) {
 
-            polymorphic(
-                MapContainer::class,
-                MapContainer::class,
-                actualSerializer = MapContainer.serializer(
-                    PolymorphicSerializer(SuperClass::class),
-                    PolymorphicSerializer(Any::class)
-                ) as KSerializer<MapContainer<*, *>>
-            )
+
+                        /*I wish I could remove all of this primitive wrapper stuff*/
+                        defaultDeserializer {
+                            when (it) {
+                                StringWrapper::class.simpleName -> StringClassSerializer
+                                DoubleWrapper::class.simpleName -> DoubleClassSerializer
+                                else                            -> throw RuntimeException("unknown type: $it?")
+                            }
+                        }
+                        subclass(String::class, StringClassSerializer)
+                        subclass(Double::class, DoubleClassSerializer)
+                        subclass(SubA::class)
+                        subclass(SubB::class)
+                        subclass(FakeNull::class)
+                    }
+
+                    polymorphic(
+                        MapContainer::class,
+                        MapContainer::class,
+                        actualSerializer =
+                            MapContainer.serializer(
+                                PolymorphicSerializer(SuperClass::class),
+                                PolymorphicSerializer(Any::class)
+                            ) as KSerializer<MapContainer<*, *>>
+                    )
+                }
         }
-    }
     val encoded = format.encodeToString(PolymorphicSerializer(MapContainer::class), theMapContainer)
     println("\n\n${encoded}\n\n")
     val decoded = format.decodeFromString(PolymorphicSerializer(MapContainer::class), encoded)

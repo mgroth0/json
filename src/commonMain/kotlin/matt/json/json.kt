@@ -12,7 +12,7 @@ import kotlinx.serialization.json.JsonElement
 import kotlinx.serialization.json.decodeFromJsonElement
 import kotlinx.serialization.json.encodeToJsonElement
 import matt.json.prim.PrettyJson
-import matt.lang.NEVER
+import matt.lang.common.NEVER
 import matt.model.obj.text.HasText
 import matt.prim.converters.StringConverter
 import kotlin.reflect.KClass
@@ -25,13 +25,6 @@ fun String.parseJson() = Json.decodeFromString<JsonElement>(this)
 inline fun <reified T> String.parse(
     json: Json = Json
 ) = json.decodeFromString<T>(this)
-
-//@Deprecated("can use @Suppress(\"INLINE_FROM_HIGHER_PLATFORM\")")
-//expect fun <T : Any> String.parseNoInline(
-//    json: Json = Json,
-//    cls: KClass<T>
-//): T
-
 
 fun HasText.parseJson() = text.parseJson()
 
@@ -47,66 +40,78 @@ fun HasText.parseJson() = text.parseJson()
 }*/
 
 
-fun <T> SerializationStrategy<T>.withDeserializationStrategy(d: DeserializationStrategy<T>) = object : KSerializer<T> {
-    override val descriptor = this@withDeserializationStrategy.descriptor
-    override fun deserialize(decoder: Decoder) = d.deserialize(decoder)
-    override fun serialize(
-        encoder: Encoder,
-        value: T
-    ) = this@withDeserializationStrategy.serialize(
-        encoder,
-        value
-    )
-}
+fun <T> SerializationStrategy<T>.withDeserializationStrategy(d: DeserializationStrategy<T>) =
+    object : KSerializer<T> {
+        override val descriptor = this@withDeserializationStrategy.descriptor
+        override fun deserialize(decoder: Decoder) = d.deserialize(decoder)
+        override fun serialize(
+            encoder: Encoder,
+            value: T
+        ) = this@withDeserializationStrategy.serialize(
+            encoder,
+            value
+        )
+    }
 
-fun <T> DeserializationStrategy<T>.withSerializationStrategy(s: SerializationStrategy<T>) = object : KSerializer<T> {
-    override val descriptor = this@withSerializationStrategy.descriptor
-    override fun deserialize(decoder: Decoder) = this@withSerializationStrategy.deserialize(decoder)
-    override fun serialize(
-        encoder: Encoder,
-        value: T
-    ) = s.serialize(
-        encoder,
-        value
-    )
-}
+fun <T> DeserializationStrategy<T>.withSerializationStrategy(s: SerializationStrategy<T>) =
+    object : KSerializer<T> {
+        override val descriptor = this@withSerializationStrategy.descriptor
+        override fun deserialize(decoder: Decoder) = this@withSerializationStrategy.deserialize(decoder)
+        override fun serialize(
+            encoder: Encoder,
+            value: T
+        ) = s.serialize(
+            encoder,
+            value
+        )
+    }
 
 fun <T> SerializationStrategy<T>.withDeserializationStrategy(d: Decoder.() -> T) =
-    withDeserializationStrategy(object : DeserializationStrategy<T> {
-        override val descriptor get() = NEVER
-        override fun deserialize(decoder: Decoder): T = decoder.d()
-    })
+    withDeserializationStrategy(
+        object : DeserializationStrategy<T> {
+            override val descriptor get() = NEVER
+            override fun deserialize(decoder: Decoder): T = decoder.d()
+        }
+    )
 
 fun <T> SerializationStrategy<T>.withJsonDeserializationStrategy(d: (JsonElement) -> T) =
-    withDeserializationStrategy(object : DeserializationStrategy<T> {
-        override val descriptor get() = NEVER
-        override fun deserialize(decoder: Decoder): T = d((decoder as JsonDecoder).decodeJsonElement())
-    })
+    withDeserializationStrategy(
+        object : DeserializationStrategy<T> {
+            override val descriptor get() = NEVER
+            override fun deserialize(decoder: Decoder): T = d((decoder as JsonDecoder).decodeJsonElement())
+        }
+    )
 
 @Suppress("UNCHECKED_CAST")
 fun <T> SerializationStrategy<T>.withDeserializationStrategyHack(d: Decoder.() -> Any) =
-    withDeserializationStrategy(object : DeserializationStrategy<T> {
-        override val descriptor get() = NEVER
-        override fun deserialize(decoder: Decoder): T = decoder.d() as T
-    })
+    withDeserializationStrategy(
+        object : DeserializationStrategy<T> {
+            override val descriptor get() = NEVER
+            override fun deserialize(decoder: Decoder): T = decoder.d() as T
+        }
+    )
 
 inline fun <reified T : Any> SerializationStrategy<T>.withDeserializationStrategyInline(
     @Suppress("UNUSED_PARAMETER") cls: KClass<T>,
     crossinline d: Decoder.() -> T
 ) =
-    withDeserializationStrategy(object : DeserializationStrategy<T> {
-        override val descriptor get() = NEVER
-        override fun deserialize(decoder: Decoder): T = decoder.d()
-    })
+    withDeserializationStrategy(
+        object : DeserializationStrategy<T> {
+            override val descriptor get() = NEVER
+            override fun deserialize(decoder: Decoder): T = decoder.d()
+        }
+    )
 
 fun <T> DeserializationStrategy<T>.withSerializationStrategy(s: Encoder.(T) -> Unit) =
-    withSerializationStrategy(object : SerializationStrategy<T> {
-        override val descriptor get() = NEVER
-        override fun serialize(
-            encoder: Encoder,
-            value: T
-        ) = encoder.s(value)
-    })
+    withSerializationStrategy(
+        object : SerializationStrategy<T> {
+            override val descriptor get() = NEVER
+            override fun serialize(
+                encoder: Encoder,
+                value: T
+            ) = encoder.s(value)
+        }
+    )
 
 
 inline fun <reified T: Any?> T.toJson() = Json.encodeToJsonElement(this)
@@ -119,15 +124,16 @@ class JsonStringConverter<T>(
     private val ser: KSerializer<T>,
     private val json: Json
 ) : StringConverter<T> {
-    override fun toString(t: T): String = json.encodeToString(
-        ser,
-        t
-    )
+    override fun toString(t: T): String =
+        json.encodeToString(
+            ser,
+            t
+        )
 
-    override fun fromString(s: String): T = json.decodeFromString(
-        ser,
-        s
-    )
-
+    override fun fromString(s: String): T =
+        json.decodeFromString(
+            ser,
+            s
+        )
 }
 

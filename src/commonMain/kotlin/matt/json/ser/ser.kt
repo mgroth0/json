@@ -17,23 +17,7 @@ import matt.model.code.idea.SerIdea
 import kotlin.reflect.KClass
 
 
-///*cls used to be qname: String, but this is much less typesafe*/
-//expect abstract class MyJsonSerializer<T : Any>(cls: KClass<*>) : KSerializer<T>, SerIdea {
-//
-//    fun canSerialize(value: Any): Boolean
-//    final override val descriptor: SerialDescriptor
-//    final override fun deserialize(decoder: Decoder): T
-//    final override fun serialize(
-//        encoder: Encoder,
-//        value: T
-//    )
-//
-//    abstract fun deserialize(jsonElement: JsonElement): T
-//    abstract fun serialize(value: T): JsonElement
-//    fun castAndSerialize(value: Any): JsonElement
-//
-//
-//}
+
 
 
 /*cls used to be qname: String, but this is much less typesafe*/
@@ -66,8 +50,6 @@ abstract class MyJsonSerializer<T : Any>(private val cls: KClass<*>) : KSerializ
         @Suppress("UNCHECKED_CAST")
         return serialize(value as T)
     }
-
-
 }
 
 

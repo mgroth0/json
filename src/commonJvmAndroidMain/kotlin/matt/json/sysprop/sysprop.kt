@@ -2,8 +2,8 @@ package matt.json.sysprop
 
 import kotlinx.serialization.KSerializer
 import kotlinx.serialization.json.Json
-import matt.lang.sysprop.JavaSystemProp
-import matt.lang.sysprop.SystemProp
+import matt.lang.sysprop.common.JavaSystemProp
+import matt.lang.sysprop.common.SystemProp
 
 class JsonSystemProp<T : Any>(
     override val key: String,
@@ -16,13 +16,12 @@ class JsonSystemProp<T : Any>(
         serializer: KSerializer<T>
     ) : this(key, serializer, null)
 
-    override fun get(): T = System.getProperty(key)?.let { value ->
-        Json.decodeFromString(serializer, value)
-    } ?: default ?: error("no default set for enum property ser=$serializer $key")
+    override fun get(): T =
+        System.getProperty(key)?.let { value ->
+            Json.decodeFromString(serializer, value)
+        } ?: default ?: error("no default set for enum property ser=$serializer $key")
 
     override fun set(t: T) {
         System.setProperty(key, Json.encodeToString(serializer, t))
     }
-
-
 }

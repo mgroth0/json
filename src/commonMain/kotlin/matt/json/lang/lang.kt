@@ -8,11 +8,12 @@ import kotlinx.serialization.json.JsonObject
 import kotlinx.serialization.json.jsonObject
 
 
-inline fun <reified T> JsonElement.getOrNull(s: String): T? = try {
-    this[s]
-} catch (e: JsonObjectDoesNotContainKey) {
-    null
-}
+inline fun <reified T> JsonElement.getOrNull(s: String): T? =
+    try {
+        this[s]
+    } catch (e: JsonObjectDoesNotContainKey) {
+        null
+    }
 
 
 sealed class JsonException: Exception()
@@ -27,7 +28,7 @@ inline operator fun <reified T> JsonElement.get(s: String): T? {
     if (this !is JsonObject) {
         throw IsNotJsonObjectException()
     }
-    val o = this.jsonObject
+    val o = jsonObject
     if (s !in o) {
         throw JsonObjectDoesNotContainKey(s)
     }
