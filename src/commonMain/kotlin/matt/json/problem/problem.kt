@@ -66,7 +66,7 @@ fun main() {
     theMap[SubB(3.0)] = SubA(1.0)
     theMap[SubB(4.0)] = FakeNull /*wish I could make this just `null`*/
     val theMapContainer = MapContainer(theMap)
-    @Suppress("UNCHECKED_CAST") val format =
+    val format =
         Json {
             allowStructuredMapKeys = true
             ignoreUnknownKeys = true
@@ -94,7 +94,7 @@ fun main() {
                         subclass(FakeNull::class)
                     }
 
-                    polymorphic(
+               /*     polymorphic(
                         MapContainer::class,
                         MapContainer::class,
                         actualSerializer =
@@ -102,7 +102,7 @@ fun main() {
                                 PolymorphicSerializer(SuperClass::class),
                                 PolymorphicSerializer(Any::class)
                             ) as KSerializer<MapContainer<*, *>>
-                    )
+                    )*/
                 }
         }
     val encoded = format.encodeToString(PolymorphicSerializer(MapContainer::class), theMapContainer)

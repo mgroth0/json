@@ -82,7 +82,8 @@ fun <T> SerializationStrategy<T>.withJsonDeserializationStrategy(d: (JsonElement
         }
     )
 
-@Suppress("UNCHECKED_CAST")
+/*
+
 fun <T> SerializationStrategy<T>.withDeserializationStrategyHack(d: Decoder.() -> Any) =
     withDeserializationStrategy(
         object : DeserializationStrategy<T> {
@@ -90,6 +91,7 @@ fun <T> SerializationStrategy<T>.withDeserializationStrategyHack(d: Decoder.() -
             override fun deserialize(decoder: Decoder): T = decoder.d() as T
         }
     )
+*/
 
 inline fun <reified T : Any> SerializationStrategy<T>.withDeserializationStrategyInline(
     @Suppress("UNUSED_PARAMETER") cls: KClass<T>,

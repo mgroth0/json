@@ -45,11 +45,8 @@ abstract class MyJsonSerializer<T : Any>(private val cls: KClass<*>) : KSerializ
 
     fun canSerialize(value: Any) = cls.isInstance(value)
 
-    /*value::class.isSubclassOf(cls)*/
-    fun castAndSerialize(value: Any): JsonElement {
-        @Suppress("UNCHECKED_CAST")
-        return serialize(value as T)
-    }
+    /*value::class.isSubclassOf(cls)
+    fun castAndSerialize(value: Any): JsonElement = serialize(value as T)*/
 }
 
 

@@ -1,24 +1,15 @@
 
 package matt.json.oldfx
 
-import kotlinx.serialization.KSerializer
-import kotlinx.serialization.json.Json
-import kotlinx.serialization.json.JsonElement
-import kotlinx.serialization.json.JsonNull
-import kotlinx.serialization.json.JsonPrimitive
 import kotlinx.serialization.serializerOrNull
-import matt.json.custom.JsonWriter
-import matt.json.custom.toJsonElement
-import matt.json.oldfx.common.jsonArray
-import matt.json.oldfx.common.jsonObj
-import matt.json.ser.MyJsonSerializer
 import matt.lang.classname.common.JvmQualifiedClassName
 import matt.lang.classname.common.SimpleClassName
-import matt.lang.common.err
-import matt.lang.model.value.ValueWrapper
 import matt.model.ser.JvmQualifiedClassNameSerializer
 import matt.model.ser.SimpleClassNameSerializer
 
+/*
+ * I will have to find another way to register these, whether as contextual, marked at use site, or whatever... once they are settled get rid of this. Until then, this serves as a reminder that these serializers need sorting out...
+*/
 @Suppress("NoExtensionOfAny")
 private fun Any.findSerializer() =
     when (this) {
@@ -28,14 +19,12 @@ private fun Any.findSerializer() =
     }
 
 
+/*
 @Suppress("NoExtensionOfAny")
 actual fun Any?.toJsonElement(
     serializers: List<MyJsonSerializer<*>>
-): JsonElement {
-
-
-    @Suppress("UNCHECKED_CAST")
-    return when (this) {
+): JsonElement =
+    when (this) {
         null               -> JsonNull
         is String          -> JsonPrimitive(this)
         is Number          -> JsonPrimitive(this)
@@ -55,11 +44,12 @@ actual fun Any?.toJsonElement(
 
                     is Any ->
                         Json.encodeToJsonElement(
-                            it as KSerializer<Any>, this
+                            it as KSerializer<*>, this
                         )
 
 
-                    /*
+
+
 
 
                     JUST MAKE A SERIALIZER FOR VALUE CLASSES
@@ -76,7 +66,8 @@ actual fun Any?.toJsonElement(
                     }
 
 
-                     */
+
+
 
 
                     else                                   -> {
@@ -88,4 +79,4 @@ actual fun Any?.toJsonElement(
                 }
             }
     }
-}
+*/
