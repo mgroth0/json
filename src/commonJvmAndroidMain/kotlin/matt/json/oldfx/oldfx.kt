@@ -1,6 +1,7 @@
 
 package matt.json.oldfx
 
+import kotlinx.serialization.InternalSerializationApi
 import kotlinx.serialization.serializerOrNull
 import matt.lang.classname.common.JvmQualifiedClassName
 import matt.lang.classname.common.SimpleClassName
@@ -10,6 +11,7 @@ import matt.model.ser.SimpleClassNameSerializer
 /*
  * I will have to find another way to register these, whether as contextual, marked at use site, or whatever... once they are settled get rid of this. Until then, this serves as a reminder that these serializers need sorting out...
 */
+@OptIn(InternalSerializationApi::class)
 @Suppress("NoExtensionOfAny")
 private fun Any.findSerializer() =
     when (this) {

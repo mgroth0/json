@@ -1,5 +1,6 @@
 package matt.json.prim.saveload
 
+import kotlinx.serialization.InternalSerializationApi
 import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
 import kotlinx.serialization.serializer
@@ -52,6 +53,7 @@ inline fun <reified T> MightExistAndWritableText.loadOrSaveJson(
         forceRecreate = forceRecreate
     )
 
+@OptIn(InternalSerializationApi::class)
 fun <T: Any> MightExistAndWritableText.loadOrSaveJson(
     cls: KClass<T>,
     forceRecreate: Boolean = false,

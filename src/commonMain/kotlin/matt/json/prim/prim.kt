@@ -1,5 +1,6 @@
 package matt.json.prim
 
+import kotlinx.serialization.InternalSerializationApi
 import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.JsonArray
@@ -113,6 +114,7 @@ inline fun <reified T : Any> String.loadJson(
     ignoreUnknownKeys: Boolean = false
 ): T = json(ignoreUnknownKeys = ignoreUnknownKeys).decodeFromString(this)
 
+@OptIn(InternalSerializationApi::class)
 fun <T : Any> String.loadJson(
     cls: KClass<T>,
     ignoreUnknownKeys: Boolean = false

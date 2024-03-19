@@ -1,5 +1,6 @@
 package matt.json.j
 
+import kotlinx.serialization.ExperimentalSerializationApi
 import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.decodeFromStream
 import kotlinx.serialization.serializer
@@ -13,6 +14,7 @@ import matt.model.data.prop.ConvertedSuspendProperty
 import matt.model.obj.stream.Streamable
 import matt.model.obj.text.ReadableFile
 
+@OptIn(ExperimentalSerializationApi::class)
 inline fun <reified T> Json.decodeFromStreamable(f: Streamable) = decodeFromStream<T>(f.inputStream())
 
 /*
